@@ -1,0 +1,54 @@
+@{
+    var user = (UserModel?)ViewData["User"];
+}
+<header class="mdc-top-app-bar">
+    <div class="mdc-top-app-bar__row">
+        <div class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+            <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button sidebar-toggler">menu</button>
+            <span class="mdc-top-app-bar__title">Welcome @user.FirstName!</span>
+        </div>
+        <div class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end mdc-top-app-bar__section-right">
+            <div class="menu-button-container menu-profile d-none d-md-block">
+                <button class="mdc-button mdc-menu-button">
+                    <span class="d-flex align-items-center">
+                        <i class="mdi mdi-account-circle mr-1"></i>
+                        <span class="user-name">@user.Username</span>
+                        <i class="mdi mdi-menu-down ml-1"></i>
+                    </span>
+                </button>
+                <div class="mdc-menu mdc-menu-surface" tabindex="-1">
+                    <ul class="mdc-list" role="menu" aria-hidden="true" aria-orientation="vertical">
+                        <li class="mdc-list-item" role="menuitem"
+                            style="pointer-events:none;cursor:default;color:gray">
+                            <span class="mdc-list-item__text">@user.FirstName @user.LastName</span>
+                        </li>
+                        <li class="mdc-list-item" role="menuitem">
+                            <div class="item-thumbnail item-thumbnail-icon-only">
+                                <i class="mdi mdi-account-edit-outline text-primary"></i>
+                            </div>
+                            <div class="item-content d-flex align-items-start flex-column justify-content-center">
+                                <h6 class="item-subject font-weight-normal">Edit Profile</h6>
+                            </div>
+                        </li>
+                        <li class="mdc-list-item" role="menuitem">
+                            <div class="item-thumbnail item-thumbnail-icon-only">
+                                <i class="mdi mdi-settings-outline text-primary"></i>
+                            </div>
+                            <div class="item-content d-flex align-items-start flex-column justify-content-center">
+                                <h6 class="item-subject font-weight-normal">Change Password</h6>
+                            </div>
+                        </li>
+                        <li class="mdc-list-item" role="menuitem" onclick="_logout(this)">
+                            <div class="item-thumbnail item-thumbnail-icon-only">
+                                <i class="mdi mdi-logout-variant text-primary"></i>                      
+                            </div>
+                            <div class="item-content d-flex align-items-start flex-column justify-content-center">
+                                <h6 class="item-subject font-weight-bold text-primary">Logout</h6>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

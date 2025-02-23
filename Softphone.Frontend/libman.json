@@ -1,0 +1,17 @@
+{
+  "version": "3.0",
+    "libraries": [
+        {
+            "provider": "jsdelivr",
+            "library": "toastr@2.1.4",
+            "files": ["build/toastr.css", "build/toastr.min.css", "toastr.js", "toastr.min.js"],
+            "destination": "wwwroot/lib/toastr/"
+        },
+        {
+            "provider": "jsdelivr",
+            "library": "sweetalert2@11.17.2",
+            "files": ["dist/sweetalert2.all.js", "dist/sweetalert2.all.min.js"],
+            "destination": "wwwroot/lib/sweetalert2/"
+        }
+    ]
+}

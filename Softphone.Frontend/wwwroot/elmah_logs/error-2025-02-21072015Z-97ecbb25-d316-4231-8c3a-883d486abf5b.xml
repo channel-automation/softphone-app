@@ -1,0 +1,180 @@
+﻿<error errorId="97ecbb25-d316-4231-8c3a-883d486abf5b" application="Softphone.Frontend" host="DESKTOP-4GLKI2G" type="HTTP" message="NotFound" detail="# caller: @C:\Sources\ElmahCore\ElmahCore\ElmahCore\Internal$\CallerInfo.cs:9&#xD;&#xA;ElmahCore.HttpException: NotFound" user="developer" time="2025-02-21T07:20:15.5038142Z" statusCode="404">
+  <serverVariables>
+    <item name="TotalParsedHeaderSize">
+      <value string="1332" />
+    </item>
+    <item name="StreamId">
+      <value string="43" />
+    </item>
+    <item name="RequestBodyStarted">
+      <value string="False" />
+    </item>
+    <item name="EndStreamReceived">
+      <value string="True" />
+    </item>
+    <item name="ReceivedEmptyRequestBody">
+      <value string="True" />
+    </item>
+    <item name="CanReuse">
+      <value string="False" />
+    </item>
+    <item name="ConnectionIdFeature">
+      <value string="0HNAI8VP7HGMQ" />
+    </item>
+    <item name="HasStartedConsumingRequestBody">
+      <value string="False" />
+    </item>
+    <item name="MaxRequestBodySize">
+      <value string="30000000" />
+    </item>
+    <item name="MinRequestBodyDataRate">
+      <value string="Bytes per second: 240, Grace Period: 00:00:05" />
+    </item>
+    <item name="AllowSynchronousIO">
+      <value string="False" />
+    </item>
+    <item name="TraceIdentifier">
+      <value string="0HNAI8VP7HGMQ:0000002B" />
+    </item>
+    <item name="IsUpgradableRequest">
+      <value string="False" />
+    </item>
+    <item name="IsUpgraded">
+      <value string="False" />
+    </item>
+    <item name="IsExtendedConnectRequest">
+      <value string="False" />
+    </item>
+    <item name="IsExtendedConnectAccepted">
+      <value string="False" />
+    </item>
+    <item name="RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="RemotePort">
+      <value string="52025" />
+    </item>
+    <item name="LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="LocalPort">
+      <value string="7082" />
+    </item>
+    <item name="Scheme">
+      <value string="https" />
+    </item>
+    <item name="Method">
+      <value string="Get" />
+    </item>
+    <item name="MethodText">
+      <value string="GET" />
+    </item>
+    <item name="Path">
+      <value string="/pages/forms/basic-forms.html" />
+    </item>
+    <item name="QueryString">
+      <value string="" />
+    </item>
+    <item name="RawTarget">
+      <value string="/pages/forms/basic-forms.html" />
+    </item>
+    <item name="HttpVersion">
+      <value string="HTTP/2" />
+    </item>
+    <item name="Header_Accept">
+      <value string="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7" />
+    </item>
+    <item name="Header_Host">
+      <value string="localhost:7082" />
+    </item>
+    <item name="Header_User-Agent">
+      <value string="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0" />
+    </item>
+    <item name="Header_Accept-Encoding">
+      <value string="gzip, deflate, br, zstd" />
+    </item>
+    <item name="Header_Accept-Language">
+      <value string="en-US,en;q=0.9" />
+    </item>
+    <item name="Header_Cookie">
+      <value string=".AspNetCore.Antiforgery.9-rjy20STaM=CfDJ8CfZ4rVpZjpLvD6abNWxdupp2HaiZbWnrIWXoes2sycjz8sf2GUYMC95u2Uf3A_Pkc_f0VHkpoV_GOomX-FWKS0sevwci6lnPiC2qJT6F3JwuCZCH6cISeTDQxgtkRa3_EVOgftXxw-vsMYZQwO6lk4; .AspNetCore.Cookies=CfDJ8CfZ4rVpZjpLvD6abNWxdupeGGU7p_iCzOJn8I6dHoWrt9GdiFShGilg0D-4ZclGkKxobfY7k_kw58x41AJxilU17ThPoDMLCqNs1_fTsGOZj3NynVIHbgOeqRBhSy3XuVRIucednBHKXQ7p8ahkUWNWgrCwZWPYS_FnaKaq6_Svj_c9BHvT_29kRHYksIdoaX9wR_VrM5aEHqZ5uxO02xKFWcwzCSWbPSdeUTxNUoQXlAFYHZk4q5WypKROMqpH4RwOhn42LmipmCDVnIH5KNbGLFYh-bDW70A92POVa63Cbdst3UaCcy0qlw_fY6j1nGKMFxvOYUDCgz7WOayUzyIJIbtPNCowbyfix-DVaLyZsmrDrEaZFd9WI_zfC4hn5gGR66AeAHITQkPEqw8yiVU" />
+    </item>
+    <item name="Header_Referer">
+      <value string="https://localhost:7082/" />
+    </item>
+    <item name="Header_Upgrade-Insecure-Requests">
+      <value string="1" />
+    </item>
+    <item name="Header_sec-ch-ua">
+      <value string="&quot;Not(A:Brand&quot;;v=&quot;99&quot;, &quot;Microsoft Edge&quot;;v=&quot;133&quot;, &quot;Chromium&quot;;v=&quot;133&quot;" />
+    </item>
+    <item name="Header_sec-ch-ua-mobile">
+      <value string="?0" />
+    </item>
+    <item name="Header_sec-ch-ua-platform">
+      <value string="&quot;Windows&quot;" />
+    </item>
+    <item name="Header_sec-fetch-site">
+      <value string="same-origin" />
+    </item>
+    <item name="Header_sec-fetch-mode">
+      <value string="navigate" />
+    </item>
+    <item name="Header_sec-fetch-user">
+      <value string="?1" />
+    </item>
+    <item name="Header_sec-fetch-dest">
+      <value string="document" />
+    </item>
+    <item name="Header_priority">
+      <value string="u=0, i" />
+    </item>
+    <item name="RequestTrailersAvailable">
+      <value string="True" />
+    </item>
+    <item name="StatusCode">
+      <value string="404" />
+    </item>
+    <item name="HasResponseStarted">
+      <value string="False" />
+    </item>
+    <item name="HasFlushedHeaders">
+      <value string="False" />
+    </item>
+    <item name="HasResponseCompleted">
+      <value string="False" />
+    </item>
+    <item name="IsWebTransportRequest">
+      <value string="False" />
+    </item>
+    <item name="Items_Items___RequestUnhandled">
+      <value string="True" />
+    </item>
+    <item name="Connection_Id">
+      <value string="0HNAI8VP7HGMQ" />
+    </item>
+    <item name="Connection_RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_RemotePort">
+      <value string="52025" />
+    </item>
+    <item name="Connection_LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_LocalPort">
+      <value string="7082" />
+    </item>
+    <item name="HttpStatusCode">
+      <value string="404" />
+    </item>
+  </serverVariables>
+  <cookies>
+    <item name=".AspNetCore.Antiforgery.9-rjy20STaM">
+      <value string="CfDJ8CfZ4rVpZjpLvD6abNWxdupp2HaiZbWnrIWXoes2sycjz8sf2GUYMC95u2Uf3A_Pkc_f0VHkpoV_GOomX-FWKS0sevwci6lnPiC2qJT6F3JwuCZCH6cISeTDQxgtkRa3_EVOgftXxw-vsMYZQwO6lk4" />
+    </item>
+    <item name=".AspNetCore.Cookies">
+      <value string="CfDJ8CfZ4rVpZjpLvD6abNWxdupeGGU7p_iCzOJn8I6dHoWrt9GdiFShGilg0D-4ZclGkKxobfY7k_kw58x41AJxilU17ThPoDMLCqNs1_fTsGOZj3NynVIHbgOeqRBhSy3XuVRIucednBHKXQ7p8ahkUWNWgrCwZWPYS_FnaKaq6_Svj_c9BHvT_29kRHYksIdoaX9wR_VrM5aEHqZ5uxO02xKFWcwzCSWbPSdeUTxNUoQXlAFYHZk4q5WypKROMqpH4RwOhn42LmipmCDVnIH5KNbGLFYh-bDW70A92POVa63Cbdst3UaCcy0qlw_fY6j1nGKMFxvOYUDCgz7WOayUzyIJIbtPNCowbyfix-DVaLyZsmrDrEaZFd9WI_zfC4hn5gGR66AeAHITQkPEqw8yiVU" />
+    </item>
+  </cookies>
+</error>

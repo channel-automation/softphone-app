@@ -1,0 +1,191 @@
+﻿<error errorId="e8b8c12f-5d84-4ab3-b558-d6fdf734efd3" application="Softphone.Frontend" host="DESKTOP-4GLKI2G" type="HTTP" message="BadRequest" detail="# caller: @C:\Sources\ElmahCore\ElmahCore\ElmahCore\Internal$\CallerInfo.cs:9&#xD;&#xA;ElmahCore.HttpException: BadRequest" time="2025-02-21T02:17:31.9193015Z" statusCode="400">
+  <serverVariables>
+    <item name="TotalParsedHeaderSize">
+      <value string="668" />
+    </item>
+    <item name="StreamId">
+      <value string="19" />
+    </item>
+    <item name="InputRemaining">
+      <value string="0" />
+    </item>
+    <item name="RequestBodyStarted">
+      <value string="True" />
+    </item>
+    <item name="EndStreamReceived">
+      <value string="True" />
+    </item>
+    <item name="ReceivedEmptyRequestBody">
+      <value string="False" />
+    </item>
+    <item name="CanReuse">
+      <value string="False" />
+    </item>
+    <item name="ConnectionIdFeature">
+      <value string="0HNAI3NBA2MEC" />
+    </item>
+    <item name="HasStartedConsumingRequestBody">
+      <value string="True" />
+    </item>
+    <item name="MaxRequestBodySize">
+      <value string="30000000" />
+    </item>
+    <item name="MinRequestBodyDataRate">
+      <value string="Bytes per second: 240, Grace Period: 00:00:05" />
+    </item>
+    <item name="AllowSynchronousIO">
+      <value string="False" />
+    </item>
+    <item name="TraceIdentifier">
+      <value string="0HNAI3NBA2MEC:00000013" />
+    </item>
+    <item name="IsUpgradableRequest">
+      <value string="False" />
+    </item>
+    <item name="IsUpgraded">
+      <value string="False" />
+    </item>
+    <item name="IsExtendedConnectRequest">
+      <value string="False" />
+    </item>
+    <item name="IsExtendedConnectAccepted">
+      <value string="False" />
+    </item>
+    <item name="RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="RemotePort">
+      <value string="64957" />
+    </item>
+    <item name="LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="LocalPort">
+      <value string="7082" />
+    </item>
+    <item name="Scheme">
+      <value string="https" />
+    </item>
+    <item name="Method">
+      <value string="Post" />
+    </item>
+    <item name="MethodText">
+      <value string="POST" />
+    </item>
+    <item name="Path">
+      <value string="/Login" />
+    </item>
+    <item name="QueryString">
+      <value string="?handler=LoginSubmit" />
+    </item>
+    <item name="RawTarget">
+      <value string="/Login?handler=LoginSubmit" />
+    </item>
+    <item name="HttpVersion">
+      <value string="HTTP/2" />
+    </item>
+    <item name="Header_Accept">
+      <value string="*/*" />
+    </item>
+    <item name="Header_Host">
+      <value string="localhost:7082" />
+    </item>
+    <item name="Header_User-Agent">
+      <value string="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0" />
+    </item>
+    <item name="Header_Accept-Encoding">
+      <value string="gzip, deflate, br, zstd" />
+    </item>
+    <item name="Header_Accept-Language">
+      <value string="en-US,en;q=0.9" />
+    </item>
+    <item name="Header_Content-Type">
+      <value string="application/x-www-form-urlencoded; charset=UTF-8" />
+    </item>
+    <item name="Header_Origin">
+      <value string="https://localhost:7082" />
+    </item>
+    <item name="Header_Referer">
+      <value string="https://localhost:7082/Login?ReturnUrl=%2F" />
+    </item>
+    <item name="Header_Content-Length">
+      <value string="32" />
+    </item>
+    <item name="Header_sec-ch-ua-platform">
+      <value string="&quot;Windows&quot;" />
+    </item>
+    <item name="Header_X-Requested-With">
+      <value string="XMLHttpRequest" />
+    </item>
+    <item name="Header_sec-ch-ua">
+      <value string="&quot;Not(A:Brand&quot;;v=&quot;99&quot;, &quot;Microsoft Edge&quot;;v=&quot;133&quot;, &quot;Chromium&quot;;v=&quot;133&quot;" />
+    </item>
+    <item name="Header_sec-ch-ua-mobile">
+      <value string="?0" />
+    </item>
+    <item name="Header_sec-fetch-site">
+      <value string="same-origin" />
+    </item>
+    <item name="Header_sec-fetch-mode">
+      <value string="cors" />
+    </item>
+    <item name="Header_sec-fetch-dest">
+      <value string="empty" />
+    </item>
+    <item name="Header_priority">
+      <value string="u=1, i" />
+    </item>
+    <item name="RequestTrailersAvailable">
+      <value string="True" />
+    </item>
+    <item name="StatusCode">
+      <value string="400" />
+    </item>
+    <item name="HasResponseStarted">
+      <value string="False" />
+    </item>
+    <item name="HasFlushedHeaders">
+      <value string="False" />
+    </item>
+    <item name="HasResponseCompleted">
+      <value string="False" />
+    </item>
+    <item name="IsWebTransportRequest">
+      <value string="False" />
+    </item>
+    <item name="Connection_Id">
+      <value string="0HNAI3NBA2MEC" />
+    </item>
+    <item name="Connection_RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_RemotePort">
+      <value string="64957" />
+    </item>
+    <item name="Connection_LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_LocalPort">
+      <value string="7082" />
+    </item>
+    <item name="HttpStatusCode">
+      <value string="400" />
+    </item>
+  </serverVariables>
+  <queryString>
+    <item name="handler">
+      <value string="LoginSubmit" />
+    </item>
+  </queryString>
+  <form>
+    <item name="Username">
+      <value string="sdsds" />
+    </item>
+    <item name="Password">
+      <value string="sdsdsdsd" />
+    </item>
+    <item name="$request-body">
+      <value string="Username=sdsds&amp;Password=sdsdsdsd" />
+    </item>
+  </form>
+</error>

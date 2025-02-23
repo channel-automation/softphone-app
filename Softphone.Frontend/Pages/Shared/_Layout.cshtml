@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Softphone</title>
+    <link href="~/images/favicon.png" rel="shortcut icon" />
+	<link href="~/vendors/mdi/css/materialdesignicons.min.css" rel="stylesheet" />
+	<link href="~/vendors/css/vendor.bundle.base.css" rel="stylesheet" />
+	<link href="~/css/demo/style.css" rel="stylesheet" />
+	<link href="~/lib/toastr/build/toastr.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="body-wrapper">
+        @{ await Html.RenderPartialAsync("SidebarPartial"); }
+        <div class="main-wrapper mdc-drawer-app-content">
+            @{ await Html.RenderPartialAsync("NavbarPartial"); }
+            <div class="page-wrapper mdc-toolbar-fixed-adjust">
+                <main class="content-wrapper">
+                    <div class="mdc-layout-grid">
+                        <div class="mdc-layout-grid__inner">
+                            <div class="mdc-layout-grid__cell 
+                                mdc-layout-grid__cell--span-3-desktop 
+                                mdc-layout-grid__cell--span-6-tablet 
+                                mdc-layout-grid__cell--span-12-phone">
+                                <div class="mdc-card">
+                                    <small class="text-primary mb-3"><b>To:</b></small>
+                                    <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--with-leading-icon mb-3">
+                                        <i class="material-icons mdc-text-field__icon">add</i>
+                                        <input class="mdc-text-field__input" />
+                                        <div class="mdc-notched-outline">
+                                            <div class="mdc-notched-outline__leading"></div>
+                                            <div class="mdc-notched-outline__notch">
+                                                <label for="text-field-hero-input" class="mdc-floating-label">Phone</label>
+                                            </div>
+                                            <div class="mdc-notched-outline__trailing"></div>
+                                        </div>
+                                    </div>
+                                    <small class="text-primary mb-3"><b>From:</b></small>
+                                    <div class="mdc-text-field mdc-text-field--outlined">
+                                        <input class="mdc-text-field__input" value="Armando Belino" disabled />
+                                        <div class="mdc-notched-outline">
+                                            <div class="mdc-notched-outline__leading"></div>
+                                            <div class="mdc-notched-outline__notch">
+                                                <label for="text-field-hero-input" class="mdc-floating-label">Agent</label>
+                                            </div>
+                                            <div class="mdc-notched-outline__trailing"></div>
+                                        </div>
+                                    </div>
+                                    <small class="mt-1 text-primary">+1970-022-6226</small>
+                                    <button class="mdc-button mdc-button--raised mt-4">
+                                        <i class="material-icons mdc-button__icon">phone</i>
+                                        Place Call
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mdc-layout-grid__cell 
+                                mdc-layout-grid__cell--span-9-desktop 
+                                mdc-layout-grid__cell--span-12-tablet">
+                                @RenderBody()
+                            </div>
+                        </div>
+                    </div>
+                </main>
+                @{ await Html.RenderPartialAsync("FooterPartial"); }
+            </div>
+        </div>
+    </div>
+	<script src="~/vendors/js/vendor.bundle.base.js"></script>
+    <script src="~/vendors/chartjs/chart.min.js"></script>
+    <script src="~/vendors/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js"></script>
+    <script src="~/vendors/jvectormap/jquery-jvectormap.min.js"></script>
+	<script src="~/js/material.js"></script>
+	<script src="~/js/misc.js"></script>
+	<script src="~/js/dashboard.js"></script>
+	<script src="~/js/spinner.js"></script>
+	<script src="~/lib/toastr/toastr.min.js"></script>
+	<script src="~/lib/sweetalert2/dist/sweetalert2.all.min.js"></script>
+
+    <script>
+        $(this).ajaxError(function (e, xhr) {
+            // Ajax Data Error
+            // if (xhr.status == 418) {
+            //     let title = "<h5><i class='fas fa-exclamation-circle'></i> Data Error</h5>";
+            //     bootModal(title, xhr.responseText);
+            // }
+            // Ajax Unauthorized Access Handler
+            // if (xhr.status == 403) {
+            //     let title = "<h5><i class='fas fa-ban'></i> Access Denied</h5>";
+            //     let message = "You don't have enough permission.";
+            //     bootModal(title, message);
+            // }
+            // Internal Server Error
+            if (xhr.status == 500) {
+                alert("Internal server error!");
+            }
+        });
+
+        function _logout(btn) {
+            Swal.fire({
+              text: "Are you sure to logout?",
+              icon: "question",
+              showCancelButton: true,
+              confirmButtonText: "Yes",
+              cancelButtonText: "No",
+              width: '320px',
+              heightAuto: false,
+            }).then((result) => {
+              if (result.isConfirmed) {
+                 startRedirectSpinner(btn);
+                 location.href = "@Url.Page("Index")?handler=Logout";
+              }
+            });
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

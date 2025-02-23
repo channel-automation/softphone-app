@@ -1,0 +1,159 @@
+﻿<error errorId="50ec10e2-251f-4fa8-8f7e-966778df34dd" application="Softphone.Frontend" host="DESKTOP-4GLKI2G" type="HTTP" message="NotFound" detail="# caller: @C:\Sources\ElmahCore\ElmahCore\ElmahCore\Internal$\CallerInfo.cs:9&#xD;&#xA;ElmahCore.HttpException: NotFound" user="developer" time="2025-02-21T06:13:25.7850113Z" statusCode="404">
+  <serverVariables>
+    <item name="TotalParsedHeaderSize">
+      <value string="1038" />
+    </item>
+    <item name="StreamId">
+      <value string="21" />
+    </item>
+    <item name="RequestBodyStarted">
+      <value string="False" />
+    </item>
+    <item name="EndStreamReceived">
+      <value string="True" />
+    </item>
+    <item name="ReceivedEmptyRequestBody">
+      <value string="True" />
+    </item>
+    <item name="CanReuse">
+      <value string="False" />
+    </item>
+    <item name="ConnectionIdFeature">
+      <value string="0HNAI7R7PHVJ5" />
+    </item>
+    <item name="HasStartedConsumingRequestBody">
+      <value string="False" />
+    </item>
+    <item name="MaxRequestBodySize">
+      <value string="30000000" />
+    </item>
+    <item name="MinRequestBodyDataRate">
+      <value string="Bytes per second: 240, Grace Period: 00:00:05" />
+    </item>
+    <item name="AllowSynchronousIO">
+      <value string="False" />
+    </item>
+    <item name="TraceIdentifier">
+      <value string="0HNAI7R7PHVJ5:00000015" />
+    </item>
+    <item name="IsUpgradableRequest">
+      <value string="False" />
+    </item>
+    <item name="IsUpgraded">
+      <value string="False" />
+    </item>
+    <item name="IsExtendedConnectRequest">
+      <value string="False" />
+    </item>
+    <item name="IsExtendedConnectAccepted">
+      <value string="False" />
+    </item>
+    <item name="RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="RemotePort">
+      <value string="51442" />
+    </item>
+    <item name="LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="LocalPort">
+      <value string="7082" />
+    </item>
+    <item name="Scheme">
+      <value string="https" />
+    </item>
+    <item name="Method">
+      <value string="Get" />
+    </item>
+    <item name="MethodText">
+      <value string="GET" />
+    </item>
+    <item name="Path">
+      <value string="/sm/af0065d4aac85e5a5997fd40f32d1abbf1835a501452c048fdcef751069cbb58.map" />
+    </item>
+    <item name="QueryString">
+      <value string="" />
+    </item>
+    <item name="RawTarget">
+      <value string="/sm/af0065d4aac85e5a5997fd40f32d1abbf1835a501452c048fdcef751069cbb58.map" />
+    </item>
+    <item name="HttpVersion">
+      <value string="HTTP/2" />
+    </item>
+    <item name="Header_Host">
+      <value string="localhost:7082" />
+    </item>
+    <item name="Header_User-Agent">
+      <value string="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0" />
+    </item>
+    <item name="Header_Accept-Encoding">
+      <value string="gzip, deflate, br, zstd" />
+    </item>
+    <item name="Header_Accept-Language">
+      <value string="en-US,en;q=0.9" />
+    </item>
+    <item name="Header_Cookie">
+      <value string=".AspNetCore.Antiforgery.9-rjy20STaM=CfDJ8CfZ4rVpZjpLvD6abNWxdupWy51VSj0nBw5ED1ckr1iumhLkJy7CxrBYqg8aj5h5Z0aN_erV4xRlGTJok9uVbCG-oSDHXMrvvGCWAFuX-baCbIteAnUVkBvl4edVCu2wogXlWpyRL_8ECW67yR-tqsY; .AspNetCore.Cookies=CfDJ8CfZ4rVpZjpLvD6abNWxduo0jzo-uBDX40IxDCpc1meFii38w-AZxjy0FoXDT_IX3KQuezit0ylXbTJWTVd0Id51gtFu6cPEL_ng4Ls9A06we4u1TexY1TC8Ml4xRGR2YjLKIdFmjyzzGpCTWV_vmLcDmsmXGk5dGkzlsB3Yh-M1Jm0WNT_kFOwFHEhiK0ZwbBlTmUMVjGaWRF6llVlP5_uEYP7-4pFT8fDdtF-e8aAU5Gh60M5VaZ1vW_opjkRFyPA7l2BTBUi8Dmp_Bn9N4MTq6Txv7yIxmuaxOvoGw7Ty9dLz1bGQ1eFuaLerZc1f7cOBHiN9ZzyPKJBZSrskR9m9Cngi9byXryl7lr9O-49y5I4LS8PJMExoBrSVEBewTqE6je7gUbNcgf9PqEqU2Eo" />
+    </item>
+    <item name="Header_sec-fetch-site">
+      <value string="same-origin" />
+    </item>
+    <item name="Header_sec-fetch-mode">
+      <value string="no-cors" />
+    </item>
+    <item name="Header_sec-fetch-dest">
+      <value string="empty" />
+    </item>
+    <item name="Header_priority">
+      <value string="u=4, i" />
+    </item>
+    <item name="RequestTrailersAvailable">
+      <value string="True" />
+    </item>
+    <item name="StatusCode">
+      <value string="404" />
+    </item>
+    <item name="HasResponseStarted">
+      <value string="False" />
+    </item>
+    <item name="HasFlushedHeaders">
+      <value string="False" />
+    </item>
+    <item name="HasResponseCompleted">
+      <value string="False" />
+    </item>
+    <item name="IsWebTransportRequest">
+      <value string="False" />
+    </item>
+    <item name="Items_Items___RequestUnhandled">
+      <value string="True" />
+    </item>
+    <item name="Connection_Id">
+      <value string="0HNAI7R7PHVJ5" />
+    </item>
+    <item name="Connection_RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_RemotePort">
+      <value string="51442" />
+    </item>
+    <item name="Connection_LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_LocalPort">
+      <value string="7082" />
+    </item>
+    <item name="HttpStatusCode">
+      <value string="404" />
+    </item>
+  </serverVariables>
+  <cookies>
+    <item name=".AspNetCore.Antiforgery.9-rjy20STaM">
+      <value string="CfDJ8CfZ4rVpZjpLvD6abNWxdupWy51VSj0nBw5ED1ckr1iumhLkJy7CxrBYqg8aj5h5Z0aN_erV4xRlGTJok9uVbCG-oSDHXMrvvGCWAFuX-baCbIteAnUVkBvl4edVCu2wogXlWpyRL_8ECW67yR-tqsY" />
+    </item>
+    <item name=".AspNetCore.Cookies">
+      <value string="CfDJ8CfZ4rVpZjpLvD6abNWxduo0jzo-uBDX40IxDCpc1meFii38w-AZxjy0FoXDT_IX3KQuezit0ylXbTJWTVd0Id51gtFu6cPEL_ng4Ls9A06we4u1TexY1TC8Ml4xRGR2YjLKIdFmjyzzGpCTWV_vmLcDmsmXGk5dGkzlsB3Yh-M1Jm0WNT_kFOwFHEhiK0ZwbBlTmUMVjGaWRF6llVlP5_uEYP7-4pFT8fDdtF-e8aAU5Gh60M5VaZ1vW_opjkRFyPA7l2BTBUi8Dmp_Bn9N4MTq6Txv7yIxmuaxOvoGw7Ty9dLz1bGQ1eFuaLerZc1f7cOBHiN9ZzyPKJBZSrskR9m9Cngi9byXryl7lr9O-49y5I4LS8PJMExoBrSVEBewTqE6je7gUbNcgf9PqEqU2Eo" />
+    </item>
+  </cookies>
+</error>

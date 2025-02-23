@@ -1,0 +1,156 @@
+﻿<error errorId="815567e8-6480-4ca4-b025-6001775bda22" application="Softphone.Frontend" host="DESKTOP-4GLKI2G" type="HTTP" message="NotFound" detail="# caller: @C:\Sources\ElmahCore\ElmahCore\ElmahCore\Internal$\CallerInfo.cs:9&#xD;&#xA;ElmahCore.HttpException: NotFound" time="2025-02-21T01:23:27.5199383Z" statusCode="404">
+  <serverVariables>
+    <item name="TotalParsedHeaderSize">
+      <value string="573" />
+    </item>
+    <item name="StreamId">
+      <value string="41" />
+    </item>
+    <item name="RequestBodyStarted">
+      <value string="False" />
+    </item>
+    <item name="EndStreamReceived">
+      <value string="True" />
+    </item>
+    <item name="ReceivedEmptyRequestBody">
+      <value string="True" />
+    </item>
+    <item name="CanReuse">
+      <value string="False" />
+    </item>
+    <item name="ConnectionIdFeature">
+      <value string="0HNAI2O5JCB74" />
+    </item>
+    <item name="HasStartedConsumingRequestBody">
+      <value string="False" />
+    </item>
+    <item name="MaxRequestBodySize">
+      <value string="30000000" />
+    </item>
+    <item name="MinRequestBodyDataRate">
+      <value string="Bytes per second: 240, Grace Period: 00:00:05" />
+    </item>
+    <item name="AllowSynchronousIO">
+      <value string="False" />
+    </item>
+    <item name="TraceIdentifier">
+      <value string="0HNAI2O5JCB74:00000029" />
+    </item>
+    <item name="IsUpgradableRequest">
+      <value string="False" />
+    </item>
+    <item name="IsUpgraded">
+      <value string="False" />
+    </item>
+    <item name="IsExtendedConnectRequest">
+      <value string="False" />
+    </item>
+    <item name="IsExtendedConnectAccepted">
+      <value string="False" />
+    </item>
+    <item name="RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="RemotePort">
+      <value string="63677" />
+    </item>
+    <item name="LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="LocalPort">
+      <value string="7082" />
+    </item>
+    <item name="Scheme">
+      <value string="https" />
+    </item>
+    <item name="Method">
+      <value string="Get" />
+    </item>
+    <item name="MethodText">
+      <value string="GET" />
+    </item>
+    <item name="Path">
+      <value string="/vendors/mdi/css/materialdesignicons.css.map" />
+    </item>
+    <item name="QueryString">
+      <value string="" />
+    </item>
+    <item name="RawTarget">
+      <value string="/vendors/mdi/css/materialdesignicons.css.map" />
+    </item>
+    <item name="HttpVersion">
+      <value string="HTTP/2" />
+    </item>
+    <item name="Header_Host">
+      <value string="localhost:7082" />
+    </item>
+    <item name="Header_User-Agent">
+      <value string="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0" />
+    </item>
+    <item name="Header_Accept-Encoding">
+      <value string="gzip, deflate, br, zstd" />
+    </item>
+    <item name="Header_Accept-Language">
+      <value string="en-US,en;q=0.9" />
+    </item>
+    <item name="Header_Cookie">
+      <value string=".AspNetCore.Antiforgery.9-rjy20STaM=CfDJ8CfZ4rVpZjpLvD6abNWxduqbwghA2miDwLaza42jgM1So2bVef5l6zSh98mJkaGjWpg-1wcy54DxhyVXZZ1lx1Ufu-uDBbDv5jB-naNRwavT3Ved30ioF7nmaP9cECU8TsJLkj8ncQ-iJjoMrRDr1ww" />
+    </item>
+    <item name="Header_sec-fetch-site">
+      <value string="same-origin" />
+    </item>
+    <item name="Header_sec-fetch-mode">
+      <value string="no-cors" />
+    </item>
+    <item name="Header_sec-fetch-dest">
+      <value string="empty" />
+    </item>
+    <item name="Header_priority">
+      <value string="u=4, i" />
+    </item>
+    <item name="RequestTrailersAvailable">
+      <value string="True" />
+    </item>
+    <item name="StatusCode">
+      <value string="404" />
+    </item>
+    <item name="HasResponseStarted">
+      <value string="False" />
+    </item>
+    <item name="HasFlushedHeaders">
+      <value string="False" />
+    </item>
+    <item name="HasResponseCompleted">
+      <value string="False" />
+    </item>
+    <item name="IsWebTransportRequest">
+      <value string="False" />
+    </item>
+    <item name="Items_Items___RequestUnhandled">
+      <value string="True" />
+    </item>
+    <item name="Connection_Id">
+      <value string="0HNAI2O5JCB74" />
+    </item>
+    <item name="Connection_RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_RemotePort">
+      <value string="63677" />
+    </item>
+    <item name="Connection_LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_LocalPort">
+      <value string="7082" />
+    </item>
+    <item name="HttpStatusCode">
+      <value string="404" />
+    </item>
+  </serverVariables>
+  <cookies>
+    <item name=".AspNetCore.Antiforgery.9-rjy20STaM">
+      <value string="CfDJ8CfZ4rVpZjpLvD6abNWxduqbwghA2miDwLaza42jgM1So2bVef5l6zSh98mJkaGjWpg-1wcy54DxhyVXZZ1lx1Ufu-uDBbDv5jB-naNRwavT3Ved30ioF7nmaP9cECU8TsJLkj8ncQ-iJjoMrRDr1ww" />
+    </item>
+  </cookies>
+</error>
