@@ -6,5 +6,6 @@ namespace Softphone.Frontend.Services
     {
         Task<long> Create(WorkspaceModel model, string username);
         Task<WorkspaceModel?> FindById(long id);
+        Task Update(WorkspaceModel model, string username);
     }
 }

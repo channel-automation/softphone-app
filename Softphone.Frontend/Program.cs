@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Softphone.Frontend.Services;
 using Supabase;
+using Newtonsoft.Json;
 
 // Add services to the container.
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ if (builder.Environment.IsDevelopment())
     builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 }
 
+builder.Services.AddControllers().AddNewtonsoftJson(o => { o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore; });
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(o => o.LoginPath = new PathString("/Login"));
 builder.Services.AddRazorPages();
 builder.Services.AddMvc(o => o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));

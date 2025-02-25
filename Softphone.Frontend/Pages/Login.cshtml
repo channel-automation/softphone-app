@@ -62,14 +62,12 @@
             //validation
             let inUsername = $("form").find("[name=Username]");
             let inPassword = $("form").find("[name=Password]");
-            if (inUsername.val() == "")
-            {
+            if (inUsername.val() == "") {
                 inUsername.focus();
                 toastr.error("Username is required.", "Error");
                 return false;
             }
-            if (inPassword.val() == "")
-            {
+            if (inPassword.val() == "") {
                 inPassword.focus();
                 toastr.error("Password is required.", "Error");
                 return false;

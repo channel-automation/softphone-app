@@ -1,16 +1,74 @@
 {
-  "version": "3.0",
+    "version": "3.0",
     "libraries": [
+        {
+            "provider": "cdnjs",
+            "library": "jvectormap@2.0.5",
+            "files": [
+                "jquery-jvectormap.css",
+                "jquery-jvectormap.min.css",
+                "jquery-jvectormap.min.js"
+            ],
+            "destination": "wwwroot/lib/jvectormap/"
+        },
+        {
+            "provider": "jsdelivr",
+            "library": "bootstrap-material-design@4.1.3",
+            "files": [
+                "dist/css/bootstrap-material-design.css",
+                "dist/css/bootstrap-material-design.min.css",
+                "dist/js/bootstrap-material-design.js",
+                "dist/js/bootstrap-material-design.min.js"
+            ],
+            "destination": "wwwroot/lib/bootstrap-material-design/"
+        },
+        {
+            "provider": "jsdelivr",
+            "library": "datatables.net@2.2.2",
+            "files": [
+                "js/dataTables.js",
+                "js/dataTables.min.js"
+            ],
+            "destination": "wwwroot/lib/datatables.net/"
+        },
+        {
+            "provider": "jsdelivr",
+            "library": "datatables.net-bs4@2.2.2",
+            "files": [
+                "js/dataTables.bootstrap4.js",
+                "js/dataTables.bootstrap4.min.js",
+                "css/dataTables.bootstrap4.css",
+                "css/dataTables.bootstrap4.min.css"
+            ],
+            "destination": "wwwroot/lib/datatables.net-bs4/"
+        },
+        {
+            "provider": "cdnjs",
+            "library": "moment.js@1.7.2",
+            "files": [
+                "moment.js",
+                "moment.min.js"
+            ],
+            "destination": "wwwroot/lib/moment/"
+        },
         {
             "provider": "jsdelivr",
             "library": "toastr@2.1.4",
-            "files": ["build/toastr.css", "build/toastr.min.css", "toastr.js", "toastr.min.js"],
+            "files": [
+                "build/toastr.css",
+                "build/toastr.min.css",
+                "toastr.js",
+                "toastr.min.js"
+            ],
             "destination": "wwwroot/lib/toastr/"
         },
         {
             "provider": "jsdelivr",
             "library": "sweetalert2@11.17.2",
-            "files": ["dist/sweetalert2.all.js", "dist/sweetalert2.all.min.js"],
+            "files": [
+                "dist/sweetalert2.all.js",
+                "dist/sweetalert2.all.min.js"
+            ],
             "destination": "wwwroot/lib/sweetalert2/"
         }
     ]

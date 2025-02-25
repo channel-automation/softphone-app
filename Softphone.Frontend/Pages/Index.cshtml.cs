@@ -21,6 +21,12 @@ public class IndexModel : PageModel
         ViewData["User"] = await _userService.FindByUsername(User.Identity.Name);
     }
 
+    public async Task<IActionResult> OnGetUserInfo()
+    {
+        var user = await _userService.FindByUsername(User.Identity.Name);
+        return new JsonResult(new { user.FirstName, user.LastName });
+    }
+
     public async Task<IActionResult> OnGetLogout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

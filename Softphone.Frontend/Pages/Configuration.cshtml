@@ -1,9 +1,108 @@
 ﻿@page
 @model Softphone.Frontend.Pages.ConfigurationModel
-<div class="mdc-layout-grid">
-	<div class="mdc-layout-grid__inner">
-		<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
 
+<div class="mdc-card">
+    <span class="card-title pb-3">Configurations</span>
+	<div class="mdc-layout-grid__inner">
+		<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+            <form onsubmit="return false;">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(w => w.Workspace.Id)
+                <small class="text-primary"><b>Twilio:</b></small>
+				<div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
+                    <input class="mdc-text-field__input" asp-for="Workspace.TwilioAccountSID" />
+                    <div class="mdc-notched-outline">
+                        <div class="mdc-notched-outline__leading"></div>
+                        <div class="mdc-notched-outline__notch">
+                            <label for="text-field-hero-input" class="mdc-floating-label">Account SID</label>
+                        </div>
+                        <div class="mdc-notched-outline__trailing"></div>
+                    </div>
+                </div>
+                <small class="text-primary"><b>Twilio:</b></small>
+                <div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
+                    <input class="mdc-text-field__input" asp-for="Workspace.TwilioAuthToken" />
+                    <div class="mdc-notched-outline">
+                        <div class="mdc-notched-outline__leading"></div>
+                        <div class="mdc-notched-outline__notch">
+                            <label for="text-field-hero-input" class="mdc-floating-label">Auth Token</label>
+                        </div>
+                        <div class="mdc-notched-outline__trailing"></div>
+                    </div>
+                </div>
+                <small class="text-primary"><b>Channel Automation:</b></small>
+                <div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
+                    <input class="mdc-text-field__input" asp-for="Workspace.ChannelAutomationAPIKey" />
+                    <div class="mdc-notched-outline">
+                        <div class="mdc-notched-outline__leading"></div>
+                        <div class="mdc-notched-outline__notch">
+                            <label for="text-field-hero-input" class="mdc-floating-label">API Key</label>
+                        </div>
+                        <div class="mdc-notched-outline__trailing"></div>
+                    </div>
+                </div>
+            </form>
+            <button class="mdc-button mdc-button--raised mt-3 mr-2" onclick="_edit(this)" id="btnEdit">
+                <i class="material-icons mdc-button__icon">edit</i> Edit
+            </button>
+            <button class="mdc-button mdc-button--raised mt-3 mr-2 filled-button--dark" onclick="_save(this)" id="btnSave">
+                <i class="material-icons mdc-button__icon">save</i> Save
+            </button>
 		</div>
 	</div>
 </div>
+
+@section Scripts
+{
+    <script>
+        $(function () {
+            formFieldDisabled(true);
+            $("#btnSave").hide();
+        });
+
+        function _edit(btn) {
+            formFieldDisabled(false);
+            $("[name='Workspace.TwilioAccountSID']").focus();
+            $("#btnSave").show();
+            $(btn).hide();
+        }
+
+        function formFieldDisabled(val) {
+            $("[name='Workspace.TwilioAccountSID']").prop("disabled", val)
+            $("[name='Workspace.TwilioAuthToken']").prop("disabled", val)
+            $("[name='Workspace.ChannelAutomationAPIKey']").prop("disabled", val)
+        }
+
+        function _save(btn) {
+            //validation
+            let inSID = $("[name='Workspace.TwilioAccountSID']")
+            let inToken = $("[name='Workspace.TwilioAuthToken']")
+            let inKey = $("[name='Workspace.ChannelAutomationAPIKey']")
+            if (inSID.val() == "") {
+                inSID.focus();
+                toastr.error("Twilio Account SID is required.", "Error");
+                return false;
+            }
+            if (inToken.val() == "") {
+                inToken.focus();
+                toastr.error("Twilio Auth Token is required.", "Error");
+                return false;
+            }
+            if (inKey.val() == "") {
+                inKey.focus();
+                toastr.error("Channel Automation API Key is required.", "Error");
+                return false;
+            }
+            startAjaxSpinner(btn);
+            $.post("@Url.Page("Configuration")", $("form").serialize(), function (response) {
+                if (response == "") {
+                    toastr.success("Information has been saved.", "Success");
+                    formFieldDisabled(true);
+                    $("#btnEdit").show();
+                    $("#btnSave").hide();
+                }
+                else toastr.error(response, "Error");
+            });
+        }
+    </script>
+}

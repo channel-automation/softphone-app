@@ -1,0 +1,101 @@
+﻿@page
+@model Softphone.Frontend.Pages.AgentListModel
+
+<div class="mdc-layout-grid__inner">
+    <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+        <div class="mdc-card">
+            <span class="card-title pb-3">Agent <span class="card-sub-title">Search</span></span>
+            <form onsubmit="return false;" id="frmList">
+                @Html.AntiForgeryToken()
+                <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--with-leading-icon">
+                    <i class="material-icons mdc-text-field__icon">search</i>
+                    <input class="mdc-text-field__input" name="Search" />
+                    <div class="mdc-notched-outline">
+                        <div class="mdc-notched-outline__leading"></div>
+                        <div class="mdc-notched-outline__notch">
+                            <label for="text-field-hero-input" class="mdc-floating-label">Search name or username</label>
+                        </div>
+                        <div class="mdc-notched-outline__trailing"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+        <div class="mdc-card">
+            <div class="card-title pb-3">
+                Agent <span class="card-sub-title">List</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered mb-2" id="tblList" style="width:100%">
+                    <thead class="thead-light"></thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        $(function () {
+            let form = $("#frmList");
+            $("#tblList").DataTable({
+                processing: true,
+                serverSide: true,
+                searching: false,
+                lengthChange: false,
+                ajax: {
+                    url: "@Url.Page("AgentList")?handler=Search", type: "post", datatype: "json",
+                    data: function (e) {
+                        e.workspaceId = @ViewData["WorkspaceId"];
+                        e.search = form.find("[name=Search]").val();
+                        e.__RequestVerificationToken = form.find("[name=__RequestVerificationToken]").val();
+                    }
+                },
+                columns: [
+                    { data: "firstName", title: "First Name" },
+                    { data: "lastName", title: "Last Name" },
+                    { data: "username", title: "Username" },
+                    { data: "twilioNumbers", title: "Twilio Numbers", render: numberRender },
+                    { data: "createdAt", title: "Date Added", render: dateTimeRender },
+                    { data: "id", title:  addButtonRender(), orderable: false, render: actionRender }
+                ],
+                pageLength: 10,
+                order: [[0, "asc"]], //Sorted by First Name
+                language: { emptyTable: "No data found." },
+            });
+
+            form.find("[name=Search]").keyup(function () {
+                $("#tblList").DataTable().draw();
+            });
+        });
+
+        function addButtonRender() {
+            let htm = "";
+            htm += "<button class='mdc-button mdc-button--raised p-3' onclick='_edit(this, 0)'> ";
+            htm += "    <i class='material-icons mdc-button__icon'>add_circle</i> Add ";
+            htm += "</button> ";
+            return htm;
+        }
+
+        function numberRender(d) {
+            return d.replaceAll(",", "<br />");
+        }
+
+        function dateTimeRender(d) {
+            let sDate = moment(d).format("MMM DD, YYYY");
+            let sTime = moment(d).format("h:mm:ss A");
+            return  `${sDate}<br />${sTime}`;
+        }
+
+        function actionRender(d) {
+            let htm = "";
+            htm += "<button class='mdc-button mdc-button--raised p-3' onclick='_edit(this, " + d + ")'> ";
+            htm += "    <i class='material-icons mdc-button__icon'>edit</i> Edit ";
+            htm += "</button> ";
+            return htm;
+        }
+
+    </script>
+}

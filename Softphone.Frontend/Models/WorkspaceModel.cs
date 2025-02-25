@@ -29,5 +29,8 @@ namespace Softphone.Frontend.Models
 
         [Column("twilio_auth_token")]
         public string TwilioAuthToken { get; set; }
+
+        [Column("channel_automation_api_key")]
+        public string ChannelAutomationAPIKey { get; set; }
     }
 }

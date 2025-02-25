@@ -41,8 +41,5 @@ namespace Softphone.Frontend.Models
 
         [Column("is_active")]
         public bool IsActive { get; set; }
-
-        [Column("twilio_number")]
-        public string TwilioNumber { get; set; }
     }
 }

@@ -6,10 +6,14 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Softphone</title>
     <link href="~/images/favicon.png" rel="shortcut icon" />
-	<link href="~/vendors/mdi/css/materialdesignicons.min.css" rel="stylesheet" />
+    <link href="~/vendors/mdi/css/materialdesignicons.min.css" rel="stylesheet" />
 	<link href="~/vendors/css/vendor.bundle.base.css" rel="stylesheet" />
+
+	<link href="~/lib/bootstrap-material-design/dist/css/bootstrap-material-design.min.css" rel="stylesheet" />
+	<link href="~/lib/datatables.net-bs4/css/datatables.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/lib/toastr/build/toastr.min.css" rel="stylesheet" />
+
 	<link href="~/css/demo/style.css" rel="stylesheet" />
-	<link href="~/lib/toastr/build/toastr.min.css" rel="stylesheet" />
 </head>
 <body>
     <div class="body-wrapper">
@@ -70,15 +74,31 @@
 	<script src="~/vendors/js/vendor.bundle.base.js"></script>
     <script src="~/vendors/chartjs/chart.min.js"></script>
     <script src="~/vendors/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js"></script>
-    <script src="~/vendors/jvectormap/jquery-jvectormap.min.js"></script>
+
+	<script src="~/lib/jvectormap/jquery-jvectormap.min.js"></script>
+	<script src="~/lib/bootstrap-material-design/dist/js/bootstrap-material-design.min.js"></script>
+	<script src="~/lib/datatables.net/js/datatables.min.js"></script>
+	<script src="~/lib/datatables.net-bs4/js/datatables.bootstrap4.min.js"></script>
+	<script src="~/lib/moment/moment.min.js"></script>
+    <script src="~/lib/sweetalert2/dist/sweetalert2.all.min.js"></script>
+    <script src="~/lib/toastr/toastr.min.js"></script>
+
 	<script src="~/js/material.js"></script>
 	<script src="~/js/misc.js"></script>
 	<script src="~/js/dashboard.js"></script>
 	<script src="~/js/spinner.js"></script>
-	<script src="~/lib/toastr/toastr.min.js"></script>
-	<script src="~/lib/sweetalert2/dist/sweetalert2.all.min.js"></script>
-
     <script>
+        $(function (){
+            userInfoWelcome();
+        });
+
+        function userInfoWelcome() {
+            $.get("@Url.Page("Index")?handler=UserInfo", function (response) {
+                $("#lblNavWelcome").text(`Welcome ${response.firstName}!`);
+                $("#lblNavFullname").text(`${response.firstName} ${response.lastName}`);
+            });
+        }
+
         $(this).ajaxError(function (e, xhr) {
             // Ajax Data Error
             // if (xhr.status == 418) {

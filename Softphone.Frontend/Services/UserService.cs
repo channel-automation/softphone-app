@@ -1,4 +1,5 @@
-﻿using Softphone.Frontend.Models;
+﻿using Softphone.Frontend.Helpers;
+using Softphone.Frontend.Models;
 using Supabase;
 using static Supabase.Postgrest.Constants;
 
@@ -36,11 +37,32 @@ namespace Softphone.Frontend.Services
 
         public async Task<UserModel?> FindById(long id)
         {
-            var response = await _client.From<UserModel>()
-                .Where(w => w.Id == id)
+            var response = await _client.From<UserModel>().Where(w => w.Id == id).Get();
+            return response.Models.FirstOrDefault();
+        }
+
+        public async Task<Paging<AgentModel>> PagingAgents(int skip, int take, string sort, string sortdir, string search)
+        {
+            var paged = new Paging<AgentModel>();
+
+            var response = await _client.From<AgentModel>()
+                .Filter(w => w.FirstName, Operator.Like, $"%{search.ToLower()}%")
+                .Filter(w => w.LastName, Operator.Like, $"%{search.ToLower()}%")
+                .Filter(w => w.Username, Operator.Like, $"%{search.ToLower()}%")
                 .Get();
 
-            return response.Models.FirstOrDefault();
+            paged.RecordsTotal = response.Models.Count;
+
+            var response2 = await _client.From<AgentModel>()
+                .Filter(w => w.FirstName, Operator.Like, $"%{search.ToLower()}%")
+                .Filter(w => w.LastName, Operator.Like, $"%{search.ToLower()}%")
+                .Filter(w => w.Username, Operator.Like, $"%{search.ToLower()}%")
+                //.Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
+                .Range(skip, take)
+                .Get();
+
+            paged.Data = response2.Models.ToList();
+            return paged;
         }
     }
 }
