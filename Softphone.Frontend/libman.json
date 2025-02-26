@@ -3,6 +3,24 @@
     "libraries": [
         {
             "provider": "cdnjs",
+            "library": "Chart.js@2.9.4",
+            "files": [
+                "Chart.js",
+                "Chart.min.js"
+            ],
+            "destination": "wwwroot/lib/chart.js/"
+        },
+        {
+            "provider": "cdnjs",
+            "library": "chartjs-plugin-datalabels@1.0.0",
+            "files": [
+                "chartjs-plugin-datalabels.js",
+                "chartjs-plugin-datalabels.min.js"
+            ],
+            "destination": "wwwroot/lib/chartjs-plugin-datalabels/"
+        },
+        {
+            "provider": "cdnjs",
             "library": "jvectormap@2.0.5",
             "files": [
                 "jquery-jvectormap.css",
@@ -70,6 +88,15 @@
                 "dist/sweetalert2.all.min.js"
             ],
             "destination": "wwwroot/lib/sweetalert2/"
+        },
+        {
+            "provider": "jsdelivr",
+            "library": "bootbox@6.0.0",
+            "files": [
+                "bootbox.js",
+                "bootbox.min.js"
+            ],
+            "destination": "wwwroot/lib/bootbox/"
         }
     ]
 }

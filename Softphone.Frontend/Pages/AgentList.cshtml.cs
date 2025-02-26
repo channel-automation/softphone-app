@@ -29,5 +29,10 @@ namespace Softphone.Frontend.Pages
             var result = await _userService.PagingAgents(start, length, sort, sortdir, search ?? string.Empty);
             return new JsonResult(new { draw, recordsFiltered = result.RecordsTotal, result.RecordsTotal, result.Data });
         }
+
+        public async Task<IActionResult> OnGetEditAgent() 
+        {
+            return Partial("Partial/EditAgent");
+        }
     }
 }
