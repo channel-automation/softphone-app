@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Softphone.Frontend.Services;
 using Softphone.Frontend.Models;
+using System.Reflection.Metadata;
+using System.Reflection;
 
 namespace Softphone.Frontend.Controllers;
 
@@ -19,6 +21,17 @@ public class AgentListController : Controller
 
     public async Task<IActionResult> Index()
     {
+        // Get the method info
+        //MethodInfo methodInfo = typeof(MyClass).GetMethod("MyMethod");
+
+        //// Check if the method has the custom attribute
+        //if (methodInfo != null && methodInfo.GetCustomAttribute(typeof(MyCustomAttribute)) is MyCustomAttribute attribute)
+        //{
+        //    // Get the attribute value
+        //    Console.WriteLine($"Method: {methodInfo.Name}");
+        //    Console.WriteLine($"Attribute Description: {attribute.Description}");
+        //}
+
         var user = await _userService.FindByUsername(User.Identity.Name);
         ViewBag.WorkspaceId = user.WorkspaceId;
         return View();
