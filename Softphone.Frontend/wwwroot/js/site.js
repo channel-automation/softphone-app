@@ -1,4 +1,5 @@
-﻿
+﻿"use strict"
+
 //Custom bootbox form modal implementation
 function bootModal(title, message, size) {
     let box = bootbox.dialog({
@@ -33,5 +34,20 @@ function _bootboxScrollFix(box) {
     box.on('hidden.bs.modal', function () {
         if ($('.modal:visible').length) //check if any modal is open
             $('body').addClass('modal-open');//add class to body
+    });
+}
+
+
+//This function is to use for re-init material ui components inside an ajax loaded modal dialog
+function reinitMaterialComponents(dialog) {
+    // Ripple for buttons
+    let buttons_ = dialog.find(".mdc-button");
+    buttons_.each(function () {
+        mdc.ripple.MDCRipple.attachTo(this);
+    });
+    // Focus for textfields
+    let textfields_ = dialog.find(".mdc-text-field");
+    textfields_.each(function () {
+        mdc.textField.MDCTextField.attachTo(this);
     });
 }

@@ -5,53 +5,56 @@
         <form onsubmit="return false;">
             @Html.AntiForgeryToken()
             @Html.HiddenFor(w => w.Id)
-            <div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
+            <small class="text-primary font-weight-bold">First Name</small>
+            <div class="mdc-text-field mdc-text-field--outlined mt-1 mb-3">
                 <input class="mdc-text-field__input" asp-for="FirstName" />
                 <div class="mdc-notched-outline">
                     <div class="mdc-notched-outline__leading"></div>
-                    <div class="mdc-notched-outline__notch">
-                        <label for="text-field-hero-input" class="mdc-floating-label">First Name</label>
-                    </div>
                     <div class="mdc-notched-outline__trailing"></div>
                 </div>
             </div>
-            <div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
+            <small class="text-primary font-weight-bold">Last Name</small>
+            <div class="mdc-text-field mdc-text-field--outlined mt-1 mb-3">
                 <input class="mdc-text-field__input" asp-for="LastName" />
                 <div class="mdc-notched-outline">
                     <div class="mdc-notched-outline__leading"></div>
-                    <div class="mdc-notched-outline__notch">
-                        <label for="text-field-hero-input" class="mdc-floating-label">Last Name</label>
-                    </div>
                     <div class="mdc-notched-outline__trailing"></div>
                 </div>
             </div>
-            <div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
+            <small class="text-primary font-weight-bold">Username</small>
+            <div class="mdc-text-field mdc-text-field--outlined mt-1 mb-3">
                 <input class="mdc-text-field__input" asp-for="Username" />
                 <div class="mdc-notched-outline">
                     <div class="mdc-notched-outline__leading"></div>
-                    <div class="mdc-notched-outline__notch">
-                        <label for="text-field-hero-input" class="mdc-floating-label">Username</label>
-                    </div>
                     <div class="mdc-notched-outline__trailing"></div>
                 </div>
             </div>
-           @*  <div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
-                <input class="mdc-text-field__input" asp-for="Username" />
+            <small class="text-primary font-weight-bold">Twilio Numbers</small>
+            <div class="mdc-text-field mdc-text-field--outlined mt-1 mb-3">
+                <input class="mdc-text-field__input" />
                 <div class="mdc-notched-outline">
                     <div class="mdc-notched-outline__leading"></div>
-                    <div class="mdc-notched-outline__notch">
-                        <label for="text-field-hero-input" class="mdc-floating-label">Username</label>
-                    </div>
                     <div class="mdc-notched-outline__trailing"></div>
                 </div>
-            </div> *@
+            </div>
         </form>
-        <hr />
-        <button class="mdc-button mdc-button--raised mt-3 mr-2 filled-button--dark" onclick="_save(this)">
-            <i class="material-icons mdc-button__icon">save</i> Save
-        </button>
-        <button class="mdc-button mdc-button--raised mt-3 mr-2 filled-button--secondary" onclick="_cancel(this)">
-            <i class="material-icons mdc-button__icon">cancel</i> Cancel
-        </button>
+        <div class="text-center">
+            <button class="mdc-button mdc-button--raised mt-3 mr-2 filled-button--dark" onclick="_save(this)">
+                <i class="material-icons mdc-button__icon">save</i> Save
+            </button>
+            <button class="mdc-button mdc-button--raised mt-3 mr-2 filled-button--secondary" onclick="_cancel(this)">
+                <i class="material-icons mdc-button__icon">cancel</i> Cancel
+            </button>
+        </div>
     </div>
 </div>
+
+<script>
+    $(function() {
+        reinitMaterialComponents(editDialog);
+    });
+
+    function _save() {
+        editDialog.find("[name=FirstName]").focus();
+    }
+</script>

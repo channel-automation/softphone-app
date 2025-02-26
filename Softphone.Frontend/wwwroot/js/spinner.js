@@ -1,4 +1,6 @@
-﻿const _aMap1 = new Map(); //To hold btn html info before ajax call
+﻿"use strict"
+
+const _aMap1 = new Map(); //To hold btn html info before ajax call
 const _aMap2 = new Map(); //To hold btn html info during ajax call
 const _aMap3 = new Map(); //To hold btn html info in redirect
 let _toSend = false;

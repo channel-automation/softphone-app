@@ -7,36 +7,27 @@
             <form onsubmit="return false;">
                 @Html.AntiForgeryToken()
                 @Html.HiddenFor(w => w.Id)
-                <small class="text-primary"><b>Twilio:</b></small>
+                <small class="text-primary font-weight-bold">Twilio Account SID</small>
                 <div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
                     <input class="mdc-text-field__input" asp-for="TwilioAccountSID" />
                     <div class="mdc-notched-outline">
                         <div class="mdc-notched-outline__leading"></div>
-                        <div class="mdc-notched-outline__notch">
-                            <label for="text-field-hero-input" class="mdc-floating-label">Account SID</label>
-                        </div>
                         <div class="mdc-notched-outline__trailing"></div>
                     </div>
                 </div>
-                <small class="text-primary"><b>Twilio:</b></small>
+                <small class="text-primary font-weight-bold">Twilio Auth Token</small>
                 <div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
                     <input class="mdc-text-field__input" asp-for="TwilioAuthToken" />
                     <div class="mdc-notched-outline">
                         <div class="mdc-notched-outline__leading"></div>
-                        <div class="mdc-notched-outline__notch">
-                            <label for="text-field-hero-input" class="mdc-floating-label">Auth Token</label>
-                        </div>
                         <div class="mdc-notched-outline__trailing"></div>
                     </div>
                 </div>
-                <small class="text-primary"><b>Channel Automation:</b></small>
+                <small class="text-primary font-weight-bold">Channel Automation API Key</small>
                 <div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
                     <input class="mdc-text-field__input" asp-for="ChannelAutomationAPIKey" />
                     <div class="mdc-notched-outline">
                         <div class="mdc-notched-outline__leading"></div>
-                        <div class="mdc-notched-outline__notch">
-                            <label for="text-field-hero-input" class="mdc-floating-label">API Key</label>
-                        </div>
                         <div class="mdc-notched-outline__trailing"></div>
                     </div>
                 </div>

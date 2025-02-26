@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Supabase.Postgrest.Attributes;
+﻿using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
 namespace Softphone.Frontend.Models
@@ -8,21 +7,18 @@ namespace Softphone.Frontend.Models
     public class AgentBO : BaseModel
     {
         [PrimaryKey("id")]
-        public long Id { get; set; }
+        public long id { get; set; }
 
         [Column("created_at")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime created_at { get; set; }
 
-        [Column("first_name")]
-        public string FirstName { get; set; }
+        //[Column("full_name")]
+        public string full_name { get; set; }
 
-        [Column("last_name")]
-        public string LastName { get; set; }
+        //[Column("username")]
+        public string username { get; set; }
 
-        [Column("username")]
-        public string Username { get; set; }
-
-        [Column("twilio_numbers")]
-        public string TwilioNumbers { get; set; }
+        //[Column("twilio_numbers")]
+        public string twilio_numbers { get; set; }
     }
 }

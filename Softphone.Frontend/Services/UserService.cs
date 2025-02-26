@@ -1,6 +1,8 @@
-﻿using Softphone.Frontend.Helpers;
+﻿using System.Reflection.Metadata;
+using System.Reflection;
 using Softphone.Frontend.Models;
 using Supabase;
+using Supabase.Postgrest.Interfaces;
 using static Supabase.Postgrest.Constants;
 
 namespace Softphone.Frontend.Services
@@ -29,7 +31,7 @@ namespace Softphone.Frontend.Services
         public async Task<UserBO?> FindByUsername(string username)
         {
             var response = await _client.From<UserBO>()
-                .Filter(w => w.Username, Operator.Like, $"%{username.ToLower()}%")
+                .Filter(w => w.Username, Operator.ILike, $"{username}")
                 .Get();
 
             return response.Models.FirstOrDefault();
@@ -45,19 +47,18 @@ namespace Softphone.Frontend.Services
         {
             var paged = new Paging<AgentBO>();
 
+            var filter1 = new Supabase.Postgrest.QueryFilter("full_name", Operator.ILike, $"%{search}%");
+            var filter2 = new Supabase.Postgrest.QueryFilter("username", Operator.ILike, $"%{search}%");
+
             var response = await _client.From<AgentBO>()
-                .Filter(w => w.FirstName, Operator.Like, $"%{search.ToLower()}%")
-                .Filter(w => w.LastName, Operator.Like, $"%{search.ToLower()}%")
-                .Filter(w => w.Username, Operator.Like, $"%{search.ToLower()}%")
+                .Or(new List<IPostgrestQueryFilter> { filter1, filter2 })
                 .Get();
 
             paged.RecordsTotal = response.Models.Count;
 
             var response2 = await _client.From<AgentBO>()
-                .Filter(w => w.FirstName, Operator.Like, $"%{search.ToLower()}%")
-                .Filter(w => w.LastName, Operator.Like, $"%{search.ToLower()}%")
-                .Filter(w => w.Username, Operator.Like, $"%{search.ToLower()}%")
-                //.Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
+                .Or(new List<IPostgrestQueryFilter> { filter1, filter2 })
+                .Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
                 .Range(skip, take)
                 .Get();
 
