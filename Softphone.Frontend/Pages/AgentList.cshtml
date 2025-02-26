@@ -102,11 +102,11 @@
         }
 
         function _edit(btn, id) {
-            //editDialog = bootModal("Add User", "<h1><button class='btn btn-primary'>Me</button></h1>");
             startAjaxSpinner(btn)
-            let url = "@Url.Page("AgentList")?handler=EditAgent";
+            let url = "@Url.Page("AgentList")?handler=EditAgent&id=" + id;
             $.get(url, function (response) {
-                editDialog = bootModal("Edit User", response);
+                let title = id == 0 ? "Add" : "Edit";
+                editDialog = bootModal(`${title} User`, response);
             });
         }
 

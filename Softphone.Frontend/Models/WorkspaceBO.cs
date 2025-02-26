@@ -4,7 +4,7 @@ using Supabase.Postgrest.Models;
 namespace Softphone.Frontend.Models
 {
     [Table("workspace")]
-    public class WorkspaceModel : BaseModel
+    public class WorkspaceBO : BaseModel
     {
         [PrimaryKey("id")]
         public long Id { get; set; }

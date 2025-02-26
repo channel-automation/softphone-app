@@ -12,24 +12,24 @@ namespace Softphone.Frontend.Services
             _client = client;
         }
 
-        public async Task<long> Create(WorkspaceModel model, string username)
+        public async Task<long> Create(WorkspaceBO model, string username)
         {
             model.CreatedBy = username;
             model.CreatedAt = DateTime.Now;
             model.ModifiedBy = username;
             model.ModifiedAt = DateTime.Now;
 
-            var response = await _client.From<WorkspaceModel>().Insert(model);
+            var response = await _client.From<WorkspaceBO>().Insert(model);
             var newModel = response.Models.FirstOrDefault();
             return newModel == null ? 0 : newModel.Id;
         }
 
-        public async Task Update(WorkspaceModel model, string username)
+        public async Task Update(WorkspaceBO model, string username)
         {
             model.ModifiedBy = username;
             model.ModifiedAt = DateTime.Now;
 
-            var response = await _client.From<WorkspaceModel>()
+            var response = await _client.From<WorkspaceBO>()
                 .Where(w => w.Id == model.Id)
                 .Set(w => w.ModifiedBy, model.ModifiedBy)
                 .Set(w => w.ModifiedAt, model.ModifiedAt)
@@ -39,9 +39,9 @@ namespace Softphone.Frontend.Services
                 .Update();
         }
 
-        public async Task<WorkspaceModel?> FindById(long id)
+        public async Task<WorkspaceBO?> FindById(long id)
         {
-            var response = await _client.From<WorkspaceModel>().Where(w => w.Id == id).Get();
+            var response = await _client.From<WorkspaceBO>().Where(w => w.Id == id).Get();
             return response.Models.FirstOrDefault();
         }
     }

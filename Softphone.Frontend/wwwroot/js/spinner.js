@@ -38,9 +38,8 @@ function __spinInvoke(key, btn, _Map) {
     _Map.set(key, { btn: btn, htm: $(btn).html(), onc: $(btn).attr("onclick") });
     if (btn.nodeName === "BUTTON") $(btn).prop("disabled", true);
     $(btn).attr("onclick", null);
-    $(btn).find(".fa").first().remove();
-    $(btn).find(".fas").first().remove();
-    $(btn).find(".far").first().remove();
+    $(btn).find(".material-icons").first().remove();
+    $(btn).find(".mdc-button__icon").first().remove();
     $(btn).prepend("<i class='mdi mdi-loading mdi-spin mr-2'></i>");
 }
 

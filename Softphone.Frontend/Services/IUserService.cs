@@ -4,9 +4,9 @@ namespace Softphone.Frontend.Services
 {
     public interface IUserService
     {
-        Task<long> Create(UserModel model, string username);
-        Task<UserModel?> FindByUsername(string username);
-        Task<UserModel?> FindById(long id);
-        Task<Paging<AgentModel>> PagingAgents(int skip, int take, string sort, string sortdir, string search);
+        Task<long> Create(UserBO model, string username);
+        Task<UserBO?> FindByUsername(string username);
+        Task<UserBO?> FindById(long id);
+        Task<Paging<AgentBO>> PagingAgents(int skip, int take, string sort, string sortdir, string search);
     }
 }

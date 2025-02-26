@@ -14,38 +14,38 @@ namespace Softphone.Frontend.Services
             _client = client;
         }
 
-        public async Task<long> Create(UserModel model, string username)
+        public async Task<long> Create(UserBO model, string username)
         {
             model.CreatedAt = DateTime.Now;
             model.CreatedBy = username;
             model.ModifiedAt = DateTime.Now;
             model.ModifiedBy = username;
 
-            var response = await _client.From<UserModel>().Insert(model);
+            var response = await _client.From<UserBO>().Insert(model);
             var newModel = response.Models.FirstOrDefault();
             return newModel == null ? 0 : newModel.Id;
         }
 
-        public async Task<UserModel?> FindByUsername(string username)
+        public async Task<UserBO?> FindByUsername(string username)
         {
-            var response = await _client.From<UserModel>()
+            var response = await _client.From<UserBO>()
                 .Filter(w => w.Username, Operator.Like, $"%{username.ToLower()}%")
                 .Get();
 
             return response.Models.FirstOrDefault();
         }
 
-        public async Task<UserModel?> FindById(long id)
+        public async Task<UserBO?> FindById(long id)
         {
-            var response = await _client.From<UserModel>().Where(w => w.Id == id).Get();
+            var response = await _client.From<UserBO>().Where(w => w.Id == id).Get();
             return response.Models.FirstOrDefault();
         }
 
-        public async Task<Paging<AgentModel>> PagingAgents(int skip, int take, string sort, string sortdir, string search)
+        public async Task<Paging<AgentBO>> PagingAgents(int skip, int take, string sort, string sortdir, string search)
         {
-            var paged = new Paging<AgentModel>();
+            var paged = new Paging<AgentBO>();
 
-            var response = await _client.From<AgentModel>()
+            var response = await _client.From<AgentBO>()
                 .Filter(w => w.FirstName, Operator.Like, $"%{search.ToLower()}%")
                 .Filter(w => w.LastName, Operator.Like, $"%{search.ToLower()}%")
                 .Filter(w => w.Username, Operator.Like, $"%{search.ToLower()}%")
@@ -53,7 +53,7 @@ namespace Softphone.Frontend.Services
 
             paged.RecordsTotal = response.Models.Count;
 
-            var response2 = await _client.From<AgentModel>()
+            var response2 = await _client.From<AgentBO>()
                 .Filter(w => w.FirstName, Operator.Like, $"%{search.ToLower()}%")
                 .Filter(w => w.LastName, Operator.Like, $"%{search.ToLower()}%")
                 .Filter(w => w.Username, Operator.Like, $"%{search.ToLower()}%")

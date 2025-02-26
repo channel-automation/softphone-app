@@ -11,7 +11,7 @@ namespace Softphone.Frontend.Pages
         private IWorkspaceService _workspaceService;
 
         [BindProperty]
-        public WorkspaceModel? Workspace { get; set; }
+        public WorkspaceBO? Workspace { get; set; }
 
         public ConfigurationModel(IUserService userService, IWorkspaceService workspaceService)
         {

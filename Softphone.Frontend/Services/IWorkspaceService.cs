@@ -4,8 +4,8 @@ namespace Softphone.Frontend.Services
 {
     public interface IWorkspaceService
     {
-        Task<long> Create(WorkspaceModel model, string username);
-        Task<WorkspaceModel?> FindById(long id);
-        Task Update(WorkspaceModel model, string username);
+        Task<long> Create(WorkspaceBO model, string username);
+        Task<WorkspaceBO?> FindById(long id);
+        Task Update(WorkspaceBO model, string username);
     }
 }

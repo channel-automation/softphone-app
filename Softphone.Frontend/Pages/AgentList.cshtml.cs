@@ -30,7 +30,7 @@ namespace Softphone.Frontend.Pages
             return new JsonResult(new { draw, recordsFiltered = result.RecordsTotal, result.RecordsTotal, result.Data });
         }
 
-        public async Task<IActionResult> OnGetEditAgent() 
+        public async Task<IActionResult> OnGetEditAgent(int id) 
         {
             return Partial("Partial/EditAgent");
         }
