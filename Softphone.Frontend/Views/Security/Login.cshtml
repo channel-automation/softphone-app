@@ -1,6 +1,4 @@
-﻿@page
-@model LoginModel
-@{
+﻿@{
     Layout = "_Layout2";
 }
 
@@ -73,8 +71,8 @@
                 return false;
             }
             startAjaxSpinner(btn);
-            $.post("@Url.Page("Login")", $("form").serialize(), function (response) {
-                if (response == "") location.href = "@Url.Page("Index")";
+            $.post("@Url.Action("LoginSubmit")", $("form").serialize(), function (response) {
+                if (response == "") location.href = "@Url.Action("Index", "Home")";
                 else toastr.error(response, "Error");
             });
         }

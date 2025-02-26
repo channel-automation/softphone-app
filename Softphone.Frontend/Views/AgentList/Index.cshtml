@@ -1,6 +1,4 @@
-﻿@page
-@model Softphone.Frontend.Pages.AgentListModel
-
+﻿
 <div class="mdc-layout-grid__inner">
     <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
         <div class="mdc-card">
@@ -46,9 +44,9 @@
                 searching: false,
                 lengthChange: false,
                 ajax: {
-                    url: "@Url.Page("AgentList")?handler=Search", type: "post", datatype: "json",
+                    url: "@Url.Action("Search")", type: "post", datatype: "json",
                     data: function (e) {
-                        e.workspaceId = @ViewData["WorkspaceId"];
+                        e.workspaceId = @ViewBag.WorkspaceId;
                         e.search = form.find("[name=Search]").val();
                         e.__RequestVerificationToken = form.find("[name=__RequestVerificationToken]").val();
                     }
@@ -73,8 +71,8 @@
 
         function addButtonRender() {
             let htm = "";
-            htm += "<button class='mdc-button mdc-button--raised p-3' onclick='_edit(this, 0)'> ";
-            htm += "    <i class='material-icons mdc-button__icon'>add_circle</i> Add ";
+            htm += "<button class='mdc-button mdc-button--raised icon-button p-3' onclick='_edit(this, 0)'> ";
+            htm += "    <i class='material-icons mdc-button__icon'>add_circle</i>";
             htm += "</button> ";
             return htm;
         }
@@ -91,22 +89,21 @@
 
         function actionRender(d) {
             let htm = "";
-            htm += "<button class='mdc-button mdc-button--raised p-3 mb-2' onclick='_edit(this, " + d + ")'> ";
-            htm += "    <i class='material-icons mdc-button__icon'>edit</i> Edit ";
+            htm += "<button class='mdc-button mdc-button--raised icon-button p-3 mr-2' title='Edit' onclick='_edit(this, " + d + ")'> ";
+            htm += "    <i class='material-icons mdc-button__icon'>edit</i>";
             htm += "</button> ";
-            htm += "<br />";
-            htm += "<button class='mdc-button mdc-button--raised p-3' onclick='_delete(this, " + d + ")'> ";
-            htm += "    <i class='material-icons mdc-button__icon'>delete</i> Delete ";
+            htm += "<button class='mdc-button mdc-button--raised icon-button p-3' title='Delete' onclick='_delete(this, " + d + ")'> ";
+            htm += "    <i class='material-icons mdc-button__icon'>delete</i>";
             htm += "</button> ";
             return htm;
         }
 
         function _edit(btn, id) {
             startAjaxSpinner(btn)
-            let url = "@Url.Page("AgentList")?handler=EditAgent&id=" + id;
+            let url = "@Url.Action("Edit")/" + id;
             $.get(url, function (response) {
                 let title = id == 0 ? "Add" : "Edit";
-                editDialog = bootModal(`${title} User`, response);
+                editDialog = bootModal(`<h4>${title} Agent</h4>`, response);
             });
         }
 

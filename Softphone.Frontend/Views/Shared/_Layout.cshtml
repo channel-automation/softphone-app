@@ -95,7 +95,7 @@
         });
 
         function userInfoWelcome() {
-            $.get("@Url.Page("Index")?handler=UserInfo", function (response) {
+            $.get("@Url.Action("UserInfo", "Home")", function (response) {
                 $("#lblNavWelcome").text(`Welcome ${response.firstName}!`);
                 $("#lblNavFullname").text(`${response.firstName} ${response.lastName}`);
             });
@@ -131,7 +131,7 @@
             }).then((result) => {
               if (result.isConfirmed) {
                  startRedirectSpinner(btn);
-                 location.href = "@Url.Page("Index")?handler=Logout";
+                 location.href = "@Url.Action("Logout", "Security")";
               }
             });
         }

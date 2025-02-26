@@ -1,16 +1,15 @@
-﻿@page
-@model Softphone.Frontend.Pages.ConfigurationModel
+﻿@model Softphone.Frontend.Models.WorkspaceBO
 
 <div class="mdc-card">
     <span class="card-title pb-3">Configurations</span>
-	<div class="mdc-layout-grid__inner">
-		<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+    <div class="mdc-layout-grid__inner">
+        <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
             <form onsubmit="return false;">
                 @Html.AntiForgeryToken()
-                @Html.HiddenFor(w => w.Workspace.Id)
+                @Html.HiddenFor(w => w.Id)
                 <small class="text-primary"><b>Twilio:</b></small>
-				<div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
-                    <input class="mdc-text-field__input" asp-for="Workspace.TwilioAccountSID" />
+                <div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
+                    <input class="mdc-text-field__input" asp-for="TwilioAccountSID" />
                     <div class="mdc-notched-outline">
                         <div class="mdc-notched-outline__leading"></div>
                         <div class="mdc-notched-outline__notch">
@@ -21,7 +20,7 @@
                 </div>
                 <small class="text-primary"><b>Twilio:</b></small>
                 <div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
-                    <input class="mdc-text-field__input" asp-for="Workspace.TwilioAuthToken" />
+                    <input class="mdc-text-field__input" asp-for="TwilioAuthToken" />
                     <div class="mdc-notched-outline">
                         <div class="mdc-notched-outline__leading"></div>
                         <div class="mdc-notched-outline__notch">
@@ -32,7 +31,7 @@
                 </div>
                 <small class="text-primary"><b>Channel Automation:</b></small>
                 <div class="mdc-text-field mdc-text-field--outlined mt-3 mb-3">
-                    <input class="mdc-text-field__input" asp-for="Workspace.ChannelAutomationAPIKey" />
+                    <input class="mdc-text-field__input" asp-for="ChannelAutomationAPIKey" />
                     <div class="mdc-notched-outline">
                         <div class="mdc-notched-outline__leading"></div>
                         <div class="mdc-notched-outline__notch">
@@ -48,8 +47,8 @@
             <button class="mdc-button mdc-button--raised mt-3 mr-2 filled-button--dark" onclick="_save(this)" id="btnSave">
                 <i class="material-icons mdc-button__icon">save</i> Save
             </button>
-		</div>
-	</div>
+        </div>
+    </div>
 </div>
 
 @section Scripts
@@ -62,22 +61,22 @@
 
         function _edit(btn) {
             formFieldDisabled(false);
-            $("[name='Workspace.TwilioAccountSID']").focus();
+            $("[name='TwilioAccountSID']").focus();
             $("#btnSave").show();
             $(btn).hide();
         }
 
         function formFieldDisabled(val) {
-            $("[name='Workspace.TwilioAccountSID']").prop("disabled", val)
-            $("[name='Workspace.TwilioAuthToken']").prop("disabled", val)
-            $("[name='Workspace.ChannelAutomationAPIKey']").prop("disabled", val)
+            $("[name='TwilioAccountSID']").prop("disabled", val)
+            $("[name='TwilioAuthToken']").prop("disabled", val)
+            $("[name='ChannelAutomationAPIKey']").prop("disabled", val)
         }
 
         function _save(btn) {
             //validation
-            let inSID = $("[name='Workspace.TwilioAccountSID']")
-            let inToken = $("[name='Workspace.TwilioAuthToken']")
-            let inKey = $("[name='Workspace.ChannelAutomationAPIKey']")
+            let inSID = $("[name='TwilioAccountSID']")
+            let inToken = $("[name='TwilioAuthToken']")
+            let inKey = $("[name='ChannelAutomationAPIKey']")
             if (inSID.val() == "") {
                 inSID.focus();
                 toastr.error("Twilio Account SID is required.", "Error");
@@ -94,7 +93,7 @@
                 return false;
             }
             startAjaxSpinner(btn);
-            $.post("@Url.Page("Configuration")", $("form").serialize(), function (response) {
+            $.post("@Url.Action("Save")", $("form").serialize(), function (response) {
                 if (response == "") {
                     toastr.success("Information has been saved.", "Success");
                     formFieldDisabled(true);
