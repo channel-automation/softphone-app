@@ -48,6 +48,7 @@
 	<script src="~/lib/datatables-bs4/js/datatables.bootstrap4.min.js"></script>
 	<script src="~/lib/moment/moment.min.js"></script>
 	<script src="~/lib/numeral/numeral.min.js"></script>
+	<script src="~/lib/inputmask/jquery.inputmask.min.js"></script>
 	<script src="~/lib/chart/chart.bundle.min.js"></script>
 	<script src="~/lib/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js"></script>
 	<script src="~/lib/admin-lte/js/adminlte.min.js"></script>
@@ -58,6 +59,7 @@
     <script>
         $(function (){
             userInfoWelcome();
+            initializeFormControls($("#frmDialer"));
         });
 
         function userInfoWelcome() {

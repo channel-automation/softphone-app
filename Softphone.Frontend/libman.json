@@ -118,6 +118,12 @@
         },
         {
             "provider": "cdnjs",
+            "library": "jquery.inputmask@5.0.9",
+            "files": [ "jquery.inputmask.js", "jquery.inputmask.min.js" ],
+            "destination": "wwwroot/lib/inputmask/"
+        },
+        {
+            "provider": "cdnjs",
             "library": "numeral.js@2.0.6",
             "files": [ "numeral.min.js" ],
             "destination": "wwwroot/lib/numeral/"

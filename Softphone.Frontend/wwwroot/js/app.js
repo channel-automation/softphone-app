@@ -19,26 +19,27 @@ function initializeFormControls(parent) {
         dropdownParent: $(".bootbox").last(),
         placeholder: "Select value",
     });
+    //Select2 Twilio Numbers
+    $(parent).find('.select2-twilio').select2({
+        ajax: { url: baseUrl + '/Configuration/TwilioRemote' },
+        placeholder: "Select twillio number",
+        templateResult: function (data) {
+            if (data.loading) return data.text;
+            let htm = "<div class='row'><div class='col-12'>";
+            htm += data.text + "<br />";
+            htm += "<span class='badge bg-light p-1 mr-1 mb-1'>" + data.agent + "</span>";
+            htm += "</div></div>"
+            return $(htm);
+        }
+    });
+    //Input Mask US Phone
+    $(parent).find('.inputmask-usphone').inputmask("(999) 999-9999")
+
     //Select2 Category
     //$(parent).find('.select2-category-modal').select2({
     //    dropdownParent: $(".bootbox").last(),
     //    ajax: { url: baseUrl + '/Inventory/Category/Remote' },
     //    placeholder: "Select category"
-    //});
-    //Select2 Material
-    //$(parent).find('.select2-material-modal').select2({
-    //    dropdownParent: $(".bootbox").last(),
-    //    ajax: { url: baseUrl + '/Inventory/Material/Remote' },
-    //    placeholder: "Select material",
-    //    templateResult: function (data) {
-    //        if (data.loading) return data.text;
-    //        let htm = "<div class='row'><div class='col-12'>";
-    //        htm += data.text + "<br />";
-    //        htm += "<span class='badge bg-light p-1 mr-1 mb-1'>" + data.unit + "</span>";
-    //        htm += "<span class='badge bg-light p-1 mr-1 mb-1'>" + data.category + "</span>";
-    //        htm += "</div></div>"
-    //        return $(htm);
-    //    }
     //});
 }
 
