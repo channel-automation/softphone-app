@@ -23,7 +23,7 @@ public class SecurityController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> LoginSubmit(string username, string password, bool remember)
+    public async Task<IActionResult> Login(string username, string password, bool remember)
     {
         var user = await _userService.FindByUsername(username);
         string error = string.Empty;
@@ -50,7 +50,13 @@ public class SecurityController : Controller
     }
 
     [Authorize]
-    public async Task<IActionResult> Logout()
+    public IActionResult Logout()
+    {
+        return PartialView();
+    }
+
+    [Authorize]
+    public async Task<IActionResult> LogoutYes()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");

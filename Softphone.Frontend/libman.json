@@ -3,100 +3,136 @@
     "libraries": [
         {
             "provider": "cdnjs",
-            "library": "Chart.js@2.9.4",
+            "library": "jquery@3.7.1",
+            "files": [ "jquery.js", "jquery.min.js" ],
+            "destination": "wwwroot/lib/jquery/"
+        },
+        {
+            "provider": "cdnjs",
+            "library": "bootstrap@4.6.2",
+            "files": [ "js/bootstrap.bundle.js", "js/bootstrap.bundle.min.js" ],
+            "destination": "wwwroot/lib/bootstrap/"
+        },
+        {
+            "provider": "cdnjs",
+            "library": "popper.js@1.16.1",
+            "files": [ "popper.js", "popper.min.js" ],
+            "destination": "wwwroot/lib/popper/"
+        },
+        {
+            "provider": "cdnjs",
+            "library": "font-awesome@6.7.2",
             "files": [
-                "Chart.js",
-                "Chart.min.js"
+                "css/all.css",
+                "css/all.min.css",
+                "webfonts/fa-brands-400.ttf",
+                "webfonts/fa-brands-400.woff2",
+                "webfonts/fa-regular-400.ttf",
+                "webfonts/fa-regular-400.woff2",
+                "webfonts/fa-solid-900.ttf",
+                "webfonts/fa-solid-900.woff2",
+                "webfonts/fa-v4compatibility.ttf",
+                "webfonts/fa-v4compatibility.woff2"
             ],
-            "destination": "wwwroot/lib/chart.js/"
+            "destination": "wwwroot/lib/font-awesome/"
+        },
+        {
+            "provider": "cdnjs",
+            "library": "bootbox.js@6.0.0",
+            "files": [ "bootbox.js", "bootbox.min.js" ],
+            "destination": "wwwroot/lib/bootbox/"
+        },
+        {
+            "provider": "cdnjs",
+            "library": "toastr.js@2.1.4",
+            "files": [ "toastr.css", "toastr.min.css", "toastr.min.js" ],
+            "destination": "wwwroot/lib/toastr/"
+        },
+        {
+            "provider": "cdnjs",
+            "library": "iCheck@1.0.3",
+            "files": [
+                "icheck.js",
+                "icheck.min.js",
+                "skins/all.css",
+                "skins/all.min.css",
+                "skins/square/aero@2x.png",
+                "skins/square/blue@2x.png",
+                "skins/square/green@2x.png",
+                "skins/square/grey@2x.png",
+                "skins/square/orange@2x.png",
+                "skins/square/pink@2x.png",
+                "skins/square/purple@2x.png",
+                "skins/square/red@2x.png",
+                "skins/square/square@2x.png",
+                "skins/square/yellow@2x.png"
+            ],
+            "destination": "wwwroot/lib/iCheck/"
+        },
+        {
+            "provider": "cdnjs",
+            "library": "select2@4.0.13",
+            "files": [ "css/select2.css", "css/select2.min.css", "js/select2.full.js", "js/select2.full.min.js" ],
+            "destination": "wwwroot/lib/select2/"
+        },
+        {
+            "provider": "jsdelivr",
+            "library": "select2-bootstrap4-theme@1.0.0",
+            "files": [ "dist/select2-bootstrap4.css", "dist/select2-bootstrap4.min.css" ],
+            "destination": "wwwroot/lib/select2-bootstrap4-theme/"
+        },
+        {
+            "provider": "cdnjs",
+            "library": "Chart.js@2.9.4",
+            "files": [ "Chart.css", "Chart.min.css", "Chart.bundle.js", "Chart.bundle.min.js" ],
+            "destination": "wwwroot/lib/chart/"
         },
         {
             "provider": "cdnjs",
             "library": "chartjs-plugin-datalabels@1.0.0",
-            "files": [
-                "chartjs-plugin-datalabels.js",
-                "chartjs-plugin-datalabels.min.js"
-            ],
+            "files": [ "chartjs-plugin-datalabels.js", "chartjs-plugin-datalabels.min.js" ],
             "destination": "wwwroot/lib/chartjs-plugin-datalabels/"
-        },
-        {
-            "provider": "cdnjs",
-            "library": "jvectormap@2.0.5",
-            "files": [
-                "jquery-jvectormap.css",
-                "jquery-jvectormap.min.css",
-                "jquery-jvectormap.min.js"
-            ],
-            "destination": "wwwroot/lib/jvectormap/"
-        },
-        {
-            "provider": "jsdelivr",
-            "library": "bootstrap-material-design@4.1.3",
-            "files": [
-                "dist/css/bootstrap-material-design.css",
-                "dist/css/bootstrap-material-design.min.css",
-                "dist/js/bootstrap-material-design.js",
-                "dist/js/bootstrap-material-design.min.js"
-            ],
-            "destination": "wwwroot/lib/bootstrap-material-design/"
         },
         {
             "provider": "jsdelivr",
             "library": "datatables.net@2.2.2",
-            "files": [
-                "js/dataTables.js",
-                "js/dataTables.min.js"
-            ],
-            "destination": "wwwroot/lib/datatables.net/"
+            "files": [ "js/dataTables.js", "js/dataTables.min.js" ],
+            "destination": "wwwroot/lib/datatables/"
         },
         {
             "provider": "jsdelivr",
             "library": "datatables.net-bs4@2.2.2",
             "files": [
-                "js/dataTables.bootstrap4.js",
-                "js/dataTables.bootstrap4.min.js",
                 "css/dataTables.bootstrap4.css",
-                "css/dataTables.bootstrap4.min.css"
+                "css/dataTables.bootstrap4.min.css",
+                "js/dataTables.bootstrap4.js",
+                "js/dataTables.bootstrap4.min.js"
             ],
-            "destination": "wwwroot/lib/datatables.net-bs4/"
+            "destination": "wwwroot/lib/datatables-bs4/"
         },
         {
             "provider": "cdnjs",
             "library": "moment.js@1.7.2",
-            "files": [
-                "moment.js",
-                "moment.min.js"
-            ],
+            "files": [ "moment.js", "moment.min.js" ],
             "destination": "wwwroot/lib/moment/"
         },
         {
-            "provider": "jsdelivr",
-            "library": "toastr@2.1.4",
-            "files": [
-                "build/toastr.css",
-                "build/toastr.min.css",
-                "toastr.js",
-                "toastr.min.js"
-            ],
-            "destination": "wwwroot/lib/toastr/"
+            "provider": "cdnjs",
+            "library": "numeral.js@2.0.6",
+            "files": [ "numeral.min.js" ],
+            "destination": "wwwroot/lib/numeral/"
         },
         {
             "provider": "jsdelivr",
             "library": "sweetalert2@11.17.2",
-            "files": [
-                "dist/sweetalert2.all.js",
-                "dist/sweetalert2.all.min.js"
-            ],
+            "files": [ "dist/sweetalert2.all.js", "dist/sweetalert2.all.min.js" ],
             "destination": "wwwroot/lib/sweetalert2/"
         },
         {
-            "provider": "jsdelivr",
-            "library": "bootbox@6.0.0",
-            "files": [
-                "bootbox.js",
-                "bootbox.min.js"
-            ],
-            "destination": "wwwroot/lib/bootbox/"
+            "provider": "cdnjs",
+            "library": "admin-lte@3.2.0",
+            "files": [ "css/adminlte.css", "css/adminlte.min.css", "js/adminlte.js", "js/adminlte.min.js" ],
+            "destination": "wwwroot/lib/admin-lte/"
         }
     ]
 }

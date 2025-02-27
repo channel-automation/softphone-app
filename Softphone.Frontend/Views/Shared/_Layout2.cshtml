@@ -4,36 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Softphone</title>
-    <link href="~/images/favicon.png" rel="shortcut icon" />
-    <link href="~/vendors/mdi/css/materialdesignicons.min.css" rel="stylesheet" />
-    <link href="~/vendors/css/vendor.bundle.base.css" rel="stylesheet" />
-    <link href="~/lib/toastr/build/toastr.min.css" rel="stylesheet" />
-    <link href="~/css/style.css" rel="stylesheet" />
+    <title>@ViewBag.Title | Softphone</title>
+    <link href="~/favicon.png" rel="shortcut icon" />
+    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="~/lib/toastr/toastr.min.css" rel="stylesheet" />
+    <link href="~/lib/icheck/skins/all.min.css" rel="stylesheet" />
+    <link href="~/lib/admin-lte/css/adminlte.min.css" rel="stylesheet" />
 </head>
-<body>
-    <div class="body-wrapper">
-        <div class="main-wrapper">
-            <div class="page-wrapper full-page-wrapper d-flex align-items-center justify-content-center">
-                @RenderBody()
-            </div>
-        </div>
+<body class="hold-transition login-page bg-gradient-navy">
+    <div class="login-box">
+        @RenderBody()
     </div>
 
-    <script src="~/vendors/js/vendor.bundle.base.js"></script>
-    <script src="~/lib/toastr/toastr.min.js"></script>
-    <script src="~/js/material.js"></script>
+	<script src="~/lib/jquery/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="~/lib/icheck/icheck.min.js"></script>
+	<script src="~/lib/toastr/toastr.min.js"></script>
+	<script src="~/lib/admin-lte/js/adminlte.min.js"></script>
 	<script src="~/js/spinner.js"></script>
 
     <script>
-        $(this).ajaxError(function (e, xhr) {
-            // Internal Server Error
-            if (xhr.status == 500) {
-                alert("Internal server error!");
-            }
+        $(function () {
+            $('.icheck').iCheck({
+                checkboxClass: 'icheckbox_square-purple',
+                radioClass: 'iradio_square-purple'
+            });
         });
     </script>
 
-    @await RenderSectionAsync("Scripts", required: false)
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

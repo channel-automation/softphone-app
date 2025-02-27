@@ -4,91 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Softphone</title>
-    <link href="~/images/favicon.png" rel="shortcut icon" />
-    <link href="~/vendors/mdi/css/materialdesignicons.min.css" rel="stylesheet" />
-	<link href="~/vendors/css/vendor.bundle.base.css" rel="stylesheet" />
-
-	<link href="~/lib/bootstrap-material-design/dist/css/bootstrap-material-design.min.css" rel="stylesheet" />
-	<link href="~/lib/datatables.net-bs4/css/datatables.bootstrap4.min.css" rel="stylesheet" />
-    <link href="~/lib/toastr/build/toastr.min.css" rel="stylesheet" />
-
-	<link href="~/css/style.css" rel="stylesheet" />
+    <title>@ViewBag.Title | Softphone</title>
+	<link href="~/favicon.png" rel="shortcut icon" />
+	<link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+	<link href="~/lib/toastr/toastr.min.css" rel="stylesheet" />
+	<link href="~/lib/icheck/skins/all.min.css" rel="stylesheet" />
+	<link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+	<link href="~/lib/select2-bootstrap4-theme/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+	<link href="~/lib/datatables-bs4/css/datatables.bootstrap4.min.css" rel="stylesheet" />
+	<link href="~/lib/chart/chart.min.css" rel="stylesheet" />
+	<link href="~/lib/admin-lte/css/adminlte.min.css" rel="stylesheet" />
 </head>
-<body>
-    <div class="body-wrapper">
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
+    <div class="wrapper">
+        <!-- Navbar -->
+        @{ await Html.RenderPartialAsync("NavbarPartial"); }
+        
+        <!-- Main Sidebar Container -->
         @{ await Html.RenderPartialAsync("SidebarPartial"); }
-        <div class="main-wrapper mdc-drawer-app-content">
-            @{ await Html.RenderPartialAsync("NavbarPartial"); }
-            <div class="page-wrapper mdc-toolbar-fixed-adjust">
-                <main class="content-wrapper">
-                    <div class="mdc-layout-grid">
-                        <div class="mdc-layout-grid__inner">
-                            <div class="mdc-layout-grid__cell 
-                                mdc-layout-grid__cell--span-3-desktop 
-                                mdc-layout-grid__cell--span-6-tablet 
-                                mdc-layout-grid__cell--span-12-phone">
-                                <div class="mdc-card">
-                                    <small class="text-primary mb-3"><b>To:</b></small>
-                                    <div class="mdc-text-field mdc-text-field--outlined mdc-text-field--with-leading-icon mb-3">
-                                        <i class="material-icons mdc-text-field__icon">add</i>
-                                        <input class="mdc-text-field__input" />
-                                        <div class="mdc-notched-outline">
-                                            <div class="mdc-notched-outline__leading"></div>
-                                            <div class="mdc-notched-outline__notch">
-                                                <label for="text-field-hero-input" class="mdc-floating-label">Phone No.</label>
-                                            </div>
-                                            <div class="mdc-notched-outline__trailing"></div>
-                                        </div>
-                                    </div>
-                                    <small class="text-primary mb-3"><b>From:</b></small>
-                                    <div class="mdc-text-field mdc-text-field--outlined">
-                                        <input class="mdc-text-field__input" value="Armando Belino" disabled />
-                                        <div class="mdc-notched-outline">
-                                            <div class="mdc-notched-outline__leading"></div>
-                                            <div class="mdc-notched-outline__notch">
-                                                <label for="text-field-hero-input" class="mdc-floating-label">Agent Name</label>
-                                            </div>
-                                            <div class="mdc-notched-outline__trailing"></div>
-                                        </div>
-                                    </div>
-                                    <small class="mt-1 text-primary">+1970-022-6226</small>
-                                    <button class="mdc-button mdc-button--raised mt-4">
-                                        <i class="material-icons mdc-button__icon">phone</i>
-                                        Place Call
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="mdc-layout-grid__cell 
-                                mdc-layout-grid__cell--span-9-desktop 
-                                mdc-layout-grid__cell--span-12-tablet">
-                                @RenderBody()
-                            </div>
-                        </div>
-                    </div>
-                </main>
-                @{ await Html.RenderPartialAsync("FooterPartial"); }
+        
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <div class="container-fluid p-3">
+                <div class="row">
+                    <div class="col-lg-3 col-md-4">@{ await Html.RenderPartialAsync("DialerPartial"); }</div>
+                    <div class="col-lg-9 col-md-8">@RenderBody()</div>
+                </div>
             </div>
         </div>
+
+        <!-- Footer -->
+        @{ await Html.RenderPartialAsync("FooterPartial"); }
     </div>
-	<script src="~/vendors/js/vendor.bundle.base.js"></script>
 
-	<script src="~/lib/chart.js/chart.min.js"></script>
-	<script src="~/lib/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js"></script>
-	<script src="~/lib/jvectormap/jquery-jvectormap.min.js"></script>
-	<script src="~/lib/bootstrap-material-design/dist/js/bootstrap-material-design.min.js"></script>
-	<script src="~/lib/datatables.net/js/datatables.min.js"></script>
-	<script src="~/lib/datatables.net-bs4/js/datatables.bootstrap4.min.js"></script>
+	<script src="~/lib/jquery/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="~/lib/popper/popper.min.js"></script>
+	<script src="~/lib/bootbox/bootbox.min.js"></script>
+	<script src="~/lib/toastr/toastr.min.js"></script>
+	<script src="~/lib/icheck/icheck.min.js"></script>
+	<script src="~/lib/select2/js/select2.full.min.js"></script>
+	<script src="~/lib/datatables/js/datatables.min.js"></script>
+	<script src="~/lib/datatables-bs4/js/datatables.bootstrap4.min.js"></script>
 	<script src="~/lib/moment/moment.min.js"></script>
-    <script src="~/lib/toastr/toastr.min.js"></script>
-    <script src="~/lib/sweetalert2/dist/sweetalert2.all.min.js"></script>
-    <script src="~/lib/bootbox/bootbox.min.js"></script>
-
-	<script src="~/js/material.js"></script>
-	<script src="~/js/misc.js"></script>
-	<script src="~/js/dashboard.js"></script>
+	<script src="~/lib/numeral/numeral.min.js"></script>
+	<script src="~/lib/chart/chart.bundle.min.js"></script>
+	<script src="~/lib/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js"></script>
+	<script src="~/lib/admin-lte/js/adminlte.min.js"></script>
+	<script src="~/js/app.js"></script>
 	<script src="~/js/spinner.js"></script>
-	<script src="~/js/site.js"></script>
+	<script src="~/js/dashboard.js"></script>
+
     <script>
         $(function (){
             userInfoWelcome();
@@ -96,8 +62,8 @@
 
         function userInfoWelcome() {
             $.get("@Url.Action("UserInfo", "Home")", function (response) {
-                $("#lblNavWelcome").text(`Welcome ${response.firstName}!`);
-                $("#lblNavFullname").text(`${response.firstName} ${response.lastName}`);
+                $("#lblLoggedFirst").text(`${response.firstName}`);
+                $("#lblLoggedFull").text(`${response.firstName} ${response.lastName}`);
             });
         }
 
@@ -119,20 +85,9 @@
             }
         });
 
-        function _logout(btn) {
-            Swal.fire({
-              text: "Are you sure to logout?",
-              icon: "question",
-              showCancelButton: true,
-              confirmButtonText: "Yes",
-              cancelButtonText: "No",
-              width: '320px',
-              heightAuto: false,
-            }).then((result) => {
-              if (result.isConfirmed) {
-                 startRedirectSpinner(btn);
-                 location.href = "@Url.Action("Logout", "Security")";
-              }
+        function logout(btn) {
+            $.get("@Url.Action("Logout", "Security", new { @area = "" })", function (response) {
+                logoutDialog = bootModal("Softphone", response, "small");
             });
         }
     </script>

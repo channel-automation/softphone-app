@@ -1,80 +1,81 @@
 ﻿@{
+    ViewBag.Title = "Login";
     Layout = "_Layout2";
 }
 
-<main class="auth-page">
-    <div class="mdc-layout-grid">
-        <div class="mdc-layout-grid__inner">
-            <div class="stretch-card mdc-layout-grid__cell--span-4-desktop mdc-layout-grid__cell--span-1-tablet"></div>
-            <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-4-desktop mdc-layout-grid__cell--span-6-tablet">
-                <div class="mdc-card">
-                    <form onsubmit="return false;">
-                        @Html.AntiForgeryToken()
-                        <div class="mdc-layout-grid">
-                            <div class="mdc-layout-grid__inner">
-                                <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
-                                    <div class="mdc-text-field w-100">
-                                        <input type="text" name="Username" class="mdc-text-field__input" />
-                                        <div class="mdc-line-ripple"></div>
-                                        <label class="mdc-floating-label">Username</label>
-                                    </div>
-                                </div>
-                                <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
-                                    <div class="mdc-text-field w-100">
-                                        <input type="password" name="Password" class="mdc-text-field__input" />
-                                        <div class="mdc-line-ripple"></div>
-                                        <label class="mdc-floating-label">Password</label>
-                                    </div>
-                                </div>
-                                <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-6-desktop">
-                                    <div class="mdc-form-field">
-                                        <div class="mdc-checkbox">
-                                            <input type="checkbox" name="Remember" class="mdc-checkbox__native-control" id="checkbox-1" />
-                                            <div class="mdc-checkbox__background">
-                                                <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
-                                                    <path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59" />
-                                                </svg>
-                                                <div class="mdc-checkbox__mixedmark"></div>
-                                            </div>
-                                        </div>
-                                        <label for="checkbox-1">Remember</label>
-                                    </div>
-                                </div>
-                                <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
-                                    <button class="mdc-button mdc-button--raised w-100" onclick="submitLogin(this)">Login</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="stretch-card mdc-layout-grid__cell--span-4-desktop mdc-layout-grid__cell--span-1-tablet"></div>
+<div class="card card-red">
+    <div class="card-header text-center bg-gradient-purple">
+        <img src="~/logo.png" class="img img-fluid img-round" style="height:130px" />
+        <div class="h3 m-1 font-weight-bold">SOFTPHONE<br />
+            <span class="h5 font-weight-light font-italic">Non-EDTS</span>
         </div>
     </div>
-</main>
+    <div class="card-body login-card-body bg-white">
+        <p class="login-box-msg">Enter your credentials below</p>
+        <form onsubmit="return false;">
+            @Html.AntiForgeryToken()
+            <div class="input-group mb-3 bg-light">
+                <input type="text" name="Username" class="form-control" placeholder="Username" autocomplete="off">
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-user"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="input-group mb-3 bg-light">
+                <input type="password" name="Password" class="form-control" placeholder="Password">
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-lock"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    @Html.CheckBox("Remember", new { @class = "icheck" })
+                    <label>Remember</label>
+                </div>
+                <div class="col-6">
+                    <button type="button" class="btn bg-gradient-purple btn-block" id="btnLogin" onclick="login()">Login</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 @section Scripts
 {
     <script>
-        function submitLogin(btn) {
-            //validation
-            let inUsername = $("form").find("[name=Username]");
-            let inPassword = $("form").find("[name=Password]");
-            if (inUsername.val() == "") {
-                inUsername.focus();
-                toastr.error("Username is required.", "Error");
+        $(function () {
+            $("[name=Username]").keyup(function (e) {
+                if (e.which == 13) login();
+            });
+
+            $("[name=Password]").keyup(function (e) {
+                if (e.which == 13) login();
+            });
+        });
+
+        function login() {
+            if ($("[name=Username]").val().trim() == "") {
+                toastr.error("Username is required.", "Error..");
                 return false;
             }
-            if (inPassword.val() == "") {
-                inPassword.focus();
-                toastr.error("Password is required.", "Error");
+            if ($("[name=Password]").val() == "") {
+                toastr.error("Password is required.", "Error..");
                 return false;
             }
-            startAjaxSpinner(btn);
-            $.post("@Url.Action("LoginSubmit")", $("form").serialize(), function (response) {
-                if (response == "") location.href = "@Url.Action("Index", "Home")";
-                else toastr.error(response, "Error");
+            startAjaxSpinner(document.getElementById("btnLogin"));
+            $.post("@Url.Action("Login")", $("form").first().serialize(), function (response) {
+                if (response != "") toastr.error(response, "Error..");
+                else location.href = "@Url.Action("Index", "Home")";
             });
         }
     </script>
 }
+
+
+
+
+
+

@@ -1,6 +1,4 @@
-﻿"use strict"
-
-const _aMap1 = new Map(); //To hold btn html info before ajax call
+﻿const _aMap1 = new Map(); //To hold btn html info before ajax call
 const _aMap2 = new Map(); //To hold btn html info during ajax call
 const _aMap3 = new Map(); //To hold btn html info in redirect
 let _toSend = false;
@@ -40,9 +38,10 @@ function __spinInvoke(key, btn, _Map) {
     _Map.set(key, { btn: btn, htm: $(btn).html(), onc: $(btn).attr("onclick") });
     if (btn.nodeName === "BUTTON") $(btn).prop("disabled", true);
     $(btn).attr("onclick", null);
-    $(btn).find(".material-icons").first().remove();
-    $(btn).find(".mdc-button__icon").first().remove();
-    $(btn).prepend("<i class='mdi mdi-loading mdi-spin mr-2'></i>");
+    $(btn).find(".fa").first().remove();
+    $(btn).find(".fas").first().remove();
+    $(btn).find(".far").first().remove();
+    $(btn).prepend("<i class='fa fa-spinner fa-spin'></i> ");
 }
 
 function __spinRevoke(key, _Map) {
@@ -51,8 +50,8 @@ function __spinRevoke(key, _Map) {
             if (v.btn.nodeName === "BUTTON") $(v.btn).prop("disabled", false);
             $(v.btn).html(v.htm);
             $(v.btn).attr("onclick", v.onc);
-            $(v.btn).find(".mdi-loading").remove();
-            $(v.btn).find(".mdi-spin").remove();
+            $(v.btn).find(".fa-spin").remove();
+            $(v.btn).find(".fa-spinner").remove();
             _Map.delete(k);
         }
     }

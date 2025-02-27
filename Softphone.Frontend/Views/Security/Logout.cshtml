@@ -1,0 +1,17 @@
+﻿<strong>Are you sure to logout?</strong>
+<hr />
+<div class="text-center">
+    <button class="btn btn-default mr-2" onclick="_no()">No</button>
+    <button class="btn bg-gradient-purple" onclick="_yes(this)">Yes</button>
+</div>
+
+<script>
+    function _no() {
+        logoutDialog.modal("hide");
+    }
+
+    function _yes(btn) {
+        startRedirectSpinner(btn);
+        location.href = "@Url.Action("LogoutYes")";
+    }
+</script>

@@ -1,93 +1,80 @@
-﻿
-<div class="mdc-layout-grid__inner">
-    <div class="mdc-layout-grid__cell stretch-card 
-        mdc-layout-grid__cell--span-3-desktop 
-        mdc-layout-grid__cell--span-16-tablet 
-        mdc-layout-grid__cell--span-12-phone">
-        <div class="mdc-card info-card info-card--info">
-            <div class="card-inner">
-                <h5 class="card-sub-title">Total Calls</h5>
-                <h5 class="card-title pb-2 mb-1 border-bottom">725</h5>
-                <p class="tx-12 text-success">48% increased</p>
-                <div class="card-icon-wrapper">
-                    <i class="material-icons">phone</i>
+﻿@{
+    ViewBag.Title = "Home";
+}
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-gradient-info">
+            <div class="inner">
+                <p>Total Calls</p>
+                <h2>785</h2>
+            </div>
+            <div class="icon">
+                <i class="fas fa-phone"></i>
+            </div>
+            <span class="small-box-footer text-sm">+48% increased <i class="fas fa-arrow-up-wide-short"></i></span>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-gradient-purple">
+            <div class="inner">
+                <p>Average Duration</p>
+                <h2>395</h2>
+            </div>
+            <div class="icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <span class="small-box-footer text-sm">-18% decreased <i class="fas fa-arrow-down-wide-short"></i></span>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-gradient-success">
+            <div class="inner">
+                <p>Success Rate</p>
+                <h2>78</h2>
+            </div>
+            <div class="icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <span class="small-box-footer text-sm">+58% increased <i class="fas fa-arrow-up-wide-short"></i></span>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-gradient-warning">
+            <div class="inner">
+                <p>Consumer Rating</p>
+                <h2>6.5</h2>
+            </div>
+            <div class="icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <span class="small-box-footer text-sm">+18% increased <i class="fas fa-arrow-up-wide-short"></i></span>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card card-navy card-outline">
+            <div class="card-header">
+                <div class="card-title">
+                    Call Status Distribution
+                    <br /><small>Current status breakdown</small>
                 </div>
+            </div>
+            <div class="card-body">
+                <canvas id="call-status-distribution" height="350"></canvas>
             </div>
         </div>
     </div>
-    <div class="mdc-layout-grid__cell stretch-card
-        mdc-layout-grid__cell--span-3-desktop
-        mdc-layout-grid__cell--span-16-tablet
-        mdc-layout-grid__cell--span-12-phone">
-		<div class="mdc-card info-card info-card--danger">
-            <div class="card-inner">
-                <h5 class="card-sub-title">Average Duration</h5>
-                <h5 class="card-title pb-2 mb-1 border-bottom">325</h5>
-                <p class="tx-12 text-danger">-48% decreased</p>
-                <div class="card-icon-wrapper">
-                    <i class="material-icons">schedule</i>
+    <div class="col-lg-8">
+        <div class="card card-navy card-outline">
+            <div class="card-header">
+                <div class="card-title">
+                    Weekly Call Metrics
+                    <br /><small>(+43%) than last week</small>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="mdc-layout-grid__cell stretch-card
-        mdc-layout-grid__cell--span-3-desktop
-        mdc-layout-grid__cell--span-16-tablet
-        mdc-layout-grid__cell--span-12-phone">
-        <div class="mdc-card info-card info-card--success">
-            <div class="card-inner">
-                <h5 class="card-sub-title">Success Rate</h5>
-                <h5 class="card-title pb-2 mb-1 border-bottom">85</h5>
-                <p class="tx-12 text-success">48% increased</p>
-                <div class="card-icon-wrapper">
-                    <i class="material-icons">check_circle</i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="mdc-layout-grid__cell stretch-card
-        mdc-layout-grid__cell--span-3-desktop
-        mdc-layout-grid__cell--span-16-tablet
-        mdc-layout-grid__cell--span-12-phone">
-        <div class="mdc-card info-card info-card--warning">
-            <div class="card-inner">
-                <h5 class="card-sub-title">Consumer Rating</h5>
-                <h5 class="card-title pb-2 mb-1 border-bottom">4.8</h5>
-                <p class="tx-12 text-success">48% increased</p>
-                <div class="card-icon-wrapper">
-                    <i class="material-icons">star</i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="mdc-layout-grid__cell stretch-card 
-        mdc-layout-grid__cell--span-5
-        mdc-layout-grid__cell--span-12-phone">
-        <div class="mdc-card">
-            <div class="d-flex d-lg-block d-xl-flex justify-content-between">
-                <div>
-                    <h6 class="card-title">Call Status Distribution</h6>
-                    <h6 class="card-sub-title">Current status breakdown</h6>
-                </div>
-                <div id="sales-legend" class="d-flex flex-wrap"></div>
-            </div>
-            <div class="chart-container mt-4">
-                <canvas id="call-status-distribution" height="300"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="mdc-layout-grid__cell stretch-card
-        mdc-layout-grid__cell--span-7
-        mdc-layout-grid__cell--span-12-phone">
-        <div class="mdc-card">
-            <div class="d-flex d-lg-block d-xl-flex justify-content-between">
-                <div>
-                    <h6 class="card-title">Weekly Call Metrics</h6>
-                    <h6 class="card-sub-title">(+43%) than last week</h6>
-                </div>
-            </div>
-            <div class="chart-container mt-4">
-                <canvas id="weekly-call-metrics" height="300"></canvas>
+            <div class="card-body">
+                <canvas id="weekly-call-metrics" height="160"></canvas>
             </div>
         </div>
     </div>

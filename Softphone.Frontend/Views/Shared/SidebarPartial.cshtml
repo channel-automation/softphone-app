@@ -1,4 +1,45 @@
-<aside class="mdc-drawer mdc-drawer--dismissible mdc-drawer--open">
+@{
+    string controller = (string)ViewContext.RouteData.Values["controller"];
+}
+
+<aside class="main-sidebar sidebar-dark-dark bg-navy elevation-3">
+    <a asp-area="" asp-controller="Home" asp-action="Index" class="brand-link pb-2 pt-2 bg-purple">
+        <img src="~/logo.png" class="img-rounded" style="height:40px" />
+        <span class="brand-text font-weight-bold">SOFTPHONE</span>
+    </a>
+    <div class="sidebar">
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <li class="nav-item">
+                    <a asp-area="" asp-controller="Home" asp-action="Index" onclick="startRedirectSpinner(this)"
+                       class="nav-link bg-@(controller == "Home" ? "purple" : "light")">
+                        <i class="nav-icon fa fa-home"></i><p>Home</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="" asp-controller="Configuration" asp-action="Index" onclick="startRedirectSpinner(this)"
+                       class="nav-link bg-@(controller == "Configuration" ? "purple" : "light")">
+                        <i class="nav-icon fas fa-cog"></i><p>Configuration</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="" asp-controller="AgentList" asp-action="Index" onclick="startRedirectSpinner(this)"
+                       class="nav-link bg-@(controller == "AgentList" ? "purple" : "light")">
+                        <i class="nav-icon fas fa-users"></i><p>Agent List</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-area="" asp-controller="LiveChat" asp-action="Index" onclick="startRedirectSpinner(this)"
+                       class="nav-link bg-@(controller == "LiveChat" ? "purple" : "light")">
+                        <i class="nav-icon fas fa-comment-dots"></i><p>Live Chat</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</aside>
+
+@* <aside class="mdc-drawer mdc-drawer--dismissible mdc-drawer--open">
       <div class="mdc-drawer__header">
         <span class="mdc-typography--headline1" style="color:white">Softphone</span>
       </div>
@@ -37,4 +78,4 @@
             <a href="javascript:;" onclick="_logout(this)">Logout</a>
         </div>
       </div>
-    </aside>
+    </aside> *@
