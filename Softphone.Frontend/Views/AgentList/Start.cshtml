@@ -35,16 +35,16 @@
             ajax: {
                 url: "@Url.Action("Search")", type: "post", datatype: "json",
                 data: function (e) {
-                    e.workspaceId = @ViewBag.WorkspaceId;
+                    e.workspaceId = globalWorkspaceId;
                     e.search = form.find("[name=Search]").val();
                     e.__RequestVerificationToken = form.find("[name=__RequestVerificationToken]").val();
                 }
             },
             columns: [
-                    { data: "full_name", title: "Name" },
+                    { data: "fullName", title: "Name" },
                     { data: "username", title: "Username" },
-                    { data: "twilio_numbers", title: "Twilio Numbers", render: numberRender },
-                    { data: "created_at", title: "Date Added", render: dateTimeRender },
+                    { data: "twilioNumbers", title: "Twilio Numbers", render: numberRender },
+                    { data: "createdAt", title: "Date Added", render: dateTimeRender },
                     { data: "id", orderable: false, render: actionRender }
             ],
             pageLength: 10,

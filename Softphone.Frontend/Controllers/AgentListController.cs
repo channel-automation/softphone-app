@@ -9,15 +9,13 @@ namespace Softphone.Frontend.Controllers;
 public class AgentListController : Controller
 {
     private IUserService _userService;
-    private IWorkspaceService _workspaceService;
 
-    public AgentListController(IUserService userService, IWorkspaceService workspaceService)
+    public AgentListController(IUserService userService)
     {
         _userService = userService;
-        _workspaceService = workspaceService;
     }
 
-    public async Task<IActionResult> Start()
+    public IActionResult Start()
     {
         // Get the method info
         //MethodInfo methodInfo = typeof(MyClass).GetMethod("MyMethod");
@@ -30,18 +28,16 @@ public class AgentListController : Controller
         //    Console.WriteLine($"Attribute Description: {attribute.Description}");
         //}
 
-        var user = await _userService.FindByUsername(User.Identity.Name);
-        ViewBag.WorkspaceId = user.WorkspaceId;
         return PartialView();
     }
 
     [HttpPost]
-    public async Task<IActionResult> Search(int draw, int start, int length, string search)
+    public async Task<IActionResult> Search(int draw, int start, int length, string search, long workspaceId)
     {
         string sort = Request.Form["columns[" + Request.Form["order[0][column]"] + "][data]"];
         string sortdir = Request.Form["order[0][dir]"];
 
-        var result = await _userService.PagingAgents(start, length, sort, sortdir, search ?? string.Empty);
+        var result = await _userService.PagingAgent(start, length, sort, sortdir, search ?? string.Empty, workspaceId);
         return Json(new { draw, recordsFiltered = result.RecordsTotal, result.RecordsTotal, result.Data });
     }
 
@@ -49,5 +45,20 @@ public class AgentListController : Controller
     {
         var user = await _userService.FindById(id) ?? new UserBO();
         return PartialView(user);
+    }
+
+    public async Task<IActionResult> RemoteAgentPhone(int? page, string term, long workspaceId)
+    {
+        int size = 10;
+        int skip = ((page ?? 1) - 1) * size;
+
+        var paged = await _userService.RemoteAgentPhone(skip, size, term ?? string.Empty, workspaceId);
+
+        var results = new List<object>();
+        foreach (var phone in paged.Data)
+            results.Add(new { id = phone.TwilioNumber, text = phone.FullName });
+
+        var pagination = new { more = skip < paged.RecordsTotal };
+        return Json(new { results, pagination });
     }
 }

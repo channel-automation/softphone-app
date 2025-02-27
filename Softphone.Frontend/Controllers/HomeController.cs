@@ -16,12 +16,14 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
+        var user = await _userService.FindByUsername(User.Identity.Name);
+        ViewBag.User = user;
         return View();
     }
 
-    public async Task<IActionResult> UserInfo()
-    {
-        var user = await _userService.FindByUsername(User.Identity.Name);
-        return Json(new { user.FirstName, user.LastName });
-    }
+    //public async Task<IActionResult> UserInfo()
+    //{
+    //    var user = await _userService.FindByUsername(User.Identity.Name);
+    //    return Json(new { user.FirstName, user.LastName, user.WorkspaceId });
+    //}
 }

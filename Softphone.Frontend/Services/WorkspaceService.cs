@@ -44,5 +44,14 @@ namespace Softphone.Frontend.Services
             var response = await _client.From<WorkspaceBO>().Where(w => w.Id == id).Get();
             return response.Models.FirstOrDefault();
         }
+
+        public async Task<IList<WorkspaceTwilioNumberBO>> GetTwilioNumbers(long id)
+        {
+            var response = await _client.From<WorkspaceTwilioNumberBO>()
+                .Where(w => w.WorkspaceId == id)
+                .Get();
+
+            return response.Models.ToList();
+        }
     }
 }

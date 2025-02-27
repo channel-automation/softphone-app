@@ -2,7 +2,8 @@
 toastr.options = { "positionClass": "toast-bottom-right" };
 
 //Globally declared repeatedly used values.
-var baseUrl = location.protocol + "//" + location.host;
+var baseUrl = location.protocol + "//" + location.host
+var globalWorkspaceId = 0;
 
 //This function is to initialized form control js widget's configs
 function initializeFormControls(parent) {
@@ -19,10 +20,10 @@ function initializeFormControls(parent) {
         dropdownParent: $(".bootbox").last(),
         placeholder: "Select value",
     });
-    //Select2 Agent with Numbers
+    //Select2 Agent Phone
     $(parent).find('.select2-agentphone').select2({
-        ajax: { url: baseUrl + '/Configuration/RemoteAgentPhoneNo' },
-        placeholder: "Select agent",
+        ajax: { url: baseUrl + '/AgentList/RemoteAgentPhone?workspaceId=' + globalWorkspaceId },
+        placeholder: "Select agent phone no.",
         templateResult: function (data) {
             if (data.loading) return data.text;
             let htm = "<div class='row'><div class='col-12'>";

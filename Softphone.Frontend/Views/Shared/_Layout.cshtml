@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var _user = (UserBO)ViewBag.User;
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -54,21 +58,15 @@
 	<script src="~/js/dashboard.js"></script>
 	<script src="~/js/calling.js"></script>
     <script>
+        globalWorkspaceId = @_user.WorkspaceId;
+
         $(function (){
             let dialer = $("#frmDialer");
             initializeFormControls(dialer);
             dialer.find("[name=FromPhoneNo]").on("change", function () {
                 $("#lblSelectedAgentPhone").text($(this).val());
             });
-            userInfoWelcome();
         });
-
-        function userInfoWelcome() {
-            $.get("@Url.Action("UserInfo", "Home")", function (response) {
-                $("#lblLoggedFirst").text(`${response.firstName}`);
-                $("#lblLoggedFull").text(`${response.firstName} ${response.lastName}`);
-            });
-        }
 
         $(this).ajaxError(function (e, xhr) {
             // Ajax Data Error

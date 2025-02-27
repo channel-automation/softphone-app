@@ -7,5 +7,6 @@ namespace Softphone.Frontend.Services
         Task<long> Create(WorkspaceBO model, string username);
         Task<WorkspaceBO?> FindById(long id);
         Task Update(WorkspaceBO model, string username);
+        Task<IList<WorkspaceTwilioNumberBO>> GetTwilioNumbers(long id);
     }
 }
