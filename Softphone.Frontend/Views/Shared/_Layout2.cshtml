@@ -11,7 +11,7 @@
     <link href="~/lib/icheck/skins/all.min.css" rel="stylesheet" />
     <link href="~/lib/admin-lte/css/adminlte.min.css" rel="stylesheet" />
 </head>
-<body class="hold-transition login-page bg-gradient-navy">
+<body class="hold-transition login-page bg-navy">
     <div class="login-box">
         @RenderBody()
     </div>
@@ -24,6 +24,7 @@
 	<script src="~/js/spinner.js"></script>
 
     <script>
+        toastr.options = { "positionClass": "toast-bottom-right" };
         $(function () {
             $('.icheck').iCheck({
                 checkboxClass: 'icheckbox_square-purple',

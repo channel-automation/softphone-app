@@ -1,4 +1,7 @@
-﻿//Globally declared repeatedly used values.
+﻿//Globally set Toast JS options
+toastr.options = { "positionClass": "toast-bottom-right" };
+
+//Globally declared repeatedly used values.
 var baseUrl = location.protocol + "//" + location.host;
 
 //This function is to initialized form control js widget's configs
@@ -82,28 +85,4 @@ function errorMessages(errors) {
         toastr.error(v, "Error..");
     });
     return errors.length > 0;
-}
-
-//This function is to set the message and back to list after a success delete event
-function successBack(toUrl, message) {
-    toUrl = baseUrl + toUrl;
-    localStorage.removeItem(toUrl);
-    localStorage.setItem(toUrl, message);
-    location.href = toUrl;
-}
-
-//This function is to set the message and redirect the page after a success submit event
-function successRedirect(message, url) {
-    localStorage.removeItem(url);
-    localStorage.setItem(url, message);
-    location.href = url;
-}
-
-//This function is to display the message stored before the navigation
-function successMessage() {
-    let message = localStorage.getItem(location.href);
-    if (message != null) {
-        toastr.success(message, "Success!");
-        localStorage.removeItem(location.href);
-    }
 }

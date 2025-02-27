@@ -11,25 +11,25 @@
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                 <li class="nav-item">
-                    <a asp-area="" asp-controller="Home" asp-action="Index" onclick="startRedirectSpinner(this)"
+                    <a asp-controller="Home" asp-action="Index" onclick="startRedirectSpinner(this)"
                        class="nav-link bg-@(controller == "Home" ? "purple" : "light")">
                         <i class="nav-icon fa fa-home"></i><p>Home</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a asp-area="" asp-controller="Configuration" asp-action="Index" onclick="startRedirectSpinner(this)"
+                    <a href="#" onclick="openConfiguration(this)"
                        class="nav-link bg-@(controller == "Configuration" ? "purple" : "light")">
                         <i class="nav-icon fas fa-cog"></i><p>Configuration</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a asp-area="" asp-controller="AgentList" asp-action="Index" onclick="startRedirectSpinner(this)"
+                    <a href="#" onclick="openAgentList(this)"
                        class="nav-link bg-@(controller == "AgentList" ? "purple" : "light")">
                         <i class="nav-icon fas fa-users"></i><p>Agent List</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a asp-area="" asp-controller="LiveChat" asp-action="Index" onclick="startRedirectSpinner(this)"
+                    <a asp-controller="LiveChat" asp-action="Index" onclick="startRedirectSpinner(this)"
                        class="nav-link bg-@(controller == "LiveChat" ? "purple" : "light")">
                         <i class="nav-icon fas fa-comment-dots"></i><p>Live Chat</p>
                     </a>

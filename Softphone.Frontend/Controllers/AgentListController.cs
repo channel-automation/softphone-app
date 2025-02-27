@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Softphone.Frontend.Services;
 using Softphone.Frontend.Models;
-using System.Reflection.Metadata;
-using System.Reflection;
+using Softphone.Frontend.Services;
 
 namespace Softphone.Frontend.Controllers;
 
@@ -19,7 +17,7 @@ public class AgentListController : Controller
         _workspaceService = workspaceService;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Start()
     {
         // Get the method info
         //MethodInfo methodInfo = typeof(MyClass).GetMethod("MyMethod");
@@ -34,7 +32,7 @@ public class AgentListController : Controller
 
         var user = await _userService.FindByUsername(User.Identity.Name);
         ViewBag.WorkspaceId = user.WorkspaceId;
-        return View();
+        return PartialView();
     }
 
     [HttpPost]
@@ -49,7 +47,7 @@ public class AgentListController : Controller
 
     public async Task<IActionResult> Edit(int id)
     {
-        var user = await _userService.FindById(id);
+        var user = await _userService.FindById(id) ?? new UserBO();
         return PartialView(user);
     }
 }

@@ -85,7 +85,22 @@
             }
         });
 
+        function openConfiguration(btn) {
+            startAjaxSpinner(btn);
+            $.get("@Url.Action("Start", "Configuration")", function (response) {
+                configurationDialog = bootModal("Configuration", response);
+            });
+        }
+
+        function openAgentList(btn) {
+            startAjaxSpinner(btn);
+            $.get("@Url.Action("Start", "AgentList")", function (response) {
+                agentListDialog = bootModal("Agent List", response, "extra-large");
+            });
+        }
+
         function logout(btn) {
+            startAjaxSpinner(btn);
             $.get("@Url.Action("Logout", "Security", new { @area = "" })", function (response) {
                 logoutDialog = bootModal("Softphone", response, "small");
             });

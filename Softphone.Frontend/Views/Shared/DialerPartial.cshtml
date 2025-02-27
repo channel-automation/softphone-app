@@ -5,7 +5,7 @@
 	<div class="card-body">
         <form onsubmit="return false;" id="frmDialer">
             @Html.AntiForgeryToken()
-            <label>To:</label>
+            <label class="text-purple">To:</label>
             <div class="input-group mb-2 bg-light">
                 <input type="text" name="PhoneNo" class="form-control" placeholder="Phone No.">
                 <div class="input-group-append">
@@ -14,7 +14,7 @@
                     </div>
                 </div>
             </div>
-            <label>From:</label>
+            <label class="text-purple">From:</label>
             <div class="input-group mb-2 bg-light">
                 <input type="password" name="Password" class="form-control" placeholder="Password">
                 <div class="input-group-append">

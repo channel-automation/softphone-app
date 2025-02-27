@@ -17,19 +17,19 @@ public class ConfigurationController : Controller
         _workspaceService = workspaceService;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Start()
     {
         var user = await _userService.FindByUsername(User.Identity.Name);
         var workspace = await _workspaceService.FindById(user.WorkspaceId);
 
-        return View(workspace);
+        return PartialView(workspace);
     }
 
     [HttpPost]
     public async Task<IActionResult> Save(WorkspaceBO workspace)
     {
-        string error = string.Empty;
+        var errors = new List<string>();
         await _workspaceService.Update(workspace, User.Identity.Name);
-        return Json(error);
+        return Json(errors);
     }
 }
