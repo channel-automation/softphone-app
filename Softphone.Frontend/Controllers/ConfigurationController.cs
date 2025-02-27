@@ -35,7 +35,7 @@ public class ConfigurationController : Controller
     }
 
 
-    public IActionResult TwilioRemote(int? page, string term)
+    public IActionResult RemoteAgentPhoneNo(int? page, string term)
     {
         int size = 10;
         int skip = ((page ?? 1) - 1) * size;
@@ -51,7 +51,7 @@ public class ConfigurationController : Controller
         var results = new List<object>();
 
         for (;total <= 5; total++)
-        results.Add(new { id = $"+1919800116{total}", text = $"+1919800116{total}", agent = $"Mr. Agent # {total}" });
+        results.Add(new { id = $"+1919800116{total}", text = $"Mr. Agent # {total}" });
 
         var pagination = new { more = skip < total };
         return Json(new { results, pagination });

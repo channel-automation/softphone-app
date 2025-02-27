@@ -19,15 +19,15 @@ function initializeFormControls(parent) {
         dropdownParent: $(".bootbox").last(),
         placeholder: "Select value",
     });
-    //Select2 Twilio Numbers
-    $(parent).find('.select2-twilio').select2({
-        ajax: { url: baseUrl + '/Configuration/TwilioRemote' },
-        placeholder: "Select twillio number",
+    //Select2 Agent with Numbers
+    $(parent).find('.select2-agentphone').select2({
+        ajax: { url: baseUrl + '/Configuration/RemoteAgentPhoneNo' },
+        placeholder: "Select agent",
         templateResult: function (data) {
             if (data.loading) return data.text;
             let htm = "<div class='row'><div class='col-12'>";
             htm += data.text + "<br />";
-            htm += "<span class='badge bg-light p-1 mr-1 mb-1'>" + data.agent + "</span>";
+            htm += "<span class='badge bg-light p-1 mr-1 mb-1'>" + data.id + "</span>";
             htm += "</div></div>"
             return $(htm);
         }

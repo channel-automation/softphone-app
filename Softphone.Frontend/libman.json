@@ -128,17 +128,23 @@
             "files": [ "numeral.min.js" ],
             "destination": "wwwroot/lib/numeral/"
         },
-        {
-            "provider": "jsdelivr",
-            "library": "sweetalert2@11.17.2",
-            "files": [ "dist/sweetalert2.all.js", "dist/sweetalert2.all.min.js" ],
-            "destination": "wwwroot/lib/sweetalert2/"
-        },
+        //{
+        //    "provider": "jsdelivr",
+        //    "library": "sweetalert2@11.17.2",
+        //    "files": [ "dist/sweetalert2.all.js", "dist/sweetalert2.all.min.js" ],
+        //    "destination": "wwwroot/lib/sweetalert2/"
+        //},
         {
             "provider": "cdnjs",
             "library": "admin-lte@3.2.0",
             "files": [ "css/adminlte.css", "css/adminlte.min.css", "js/adminlte.js", "js/adminlte.min.js" ],
             "destination": "wwwroot/lib/admin-lte/"
+        },
+        {
+            "provider": "unpkg",
+            "library": "@twilio/voice-sdk@2.12.3",
+            "files": [ "dist/twilio.js", "dist/twilio.min.js" ],
+            "destination": "wwwroot/lib/twilio-voice-sdk"
         }
     ]
 }
