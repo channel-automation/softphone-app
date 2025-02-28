@@ -1,0 +1,32 @@
+[build]
+builder = "nixpacks"
+buildCommand = "dotnet restore && dotnet build --configuration Release"
+
+[deploy]
+startCommand = "dotnet Softphone.Frontend.dll"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 5
+
+[phases.setup]
+nixPkgs = ["dotnet-sdk_9"]
+
+[[services]]
+internal_port = 8080
+protocol = "http"
+auto_start = true
+
+  [services.concurrency]
+  type = "connections"
+  hard_limit = 100
+  soft_limit = 80
+
+  [[services.ports]]
+  port = 80
+  handlers = ["http"]
+  force_https = true
+
+  [[services.ports]]
+  port = 443
+  handlers = ["tls", "http"] 

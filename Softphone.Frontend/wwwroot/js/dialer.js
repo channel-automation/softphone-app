@@ -2,12 +2,21 @@
     "use strict"
     let device = null;
     let expiry = new Date();
+    let backendUrl = 'http://localhost:8000'; // Default for local development
 
     let dialer_form;
     let call_button;
     let end_button;
 
     $(() => {
+        // Check if we're in a development environment
+        if (window.location.hostname === 'localhost') {
+            backendUrl = 'http://localhost:8000';
+        } else {
+            // For production, use the deployed backend URL
+            backendUrl = 'https://softphone-backend.up.railway.app';
+        }
+
         dialer_form = $("#frmDialer");
         initializeFormControls(dialer_form);
         call_button = $("#btnPlaceCall");
@@ -39,7 +48,7 @@
 
     function getAccessToken() {
         $.ajax({
-            url: "https://webhook.call-app.channelautomation.com/api/token",
+            url: `${backendUrl}/api/token`,
             type: "get", dataType: "json",
             success: (response) => {
                 if (device === null) setupDevice(response.token);

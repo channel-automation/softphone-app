@@ -1,25 +1,56 @@
 ﻿<div class="card card-purple elevation-2">
 	<div class="card-header">
         <h3 class="card-title">Dialer</h3>
+        <div class="card-tools">
+            <span id="callStatus" class="badge bg-info">Initializing...</span>
+        </div>
 	</div>
 	<div class="card-body p-4">
         <form onsubmit="return false;" id="frmDialer">
+            @Html.AntiForgeryToken()
             <label class="text-purple"><i class="fas fa-fax"></i> To:</label>
             <div class="input-group mb-3 bg-light">
                 <div class="input-group-prepend"><div class="input-group-text">+1</div></div>
-                <input class="form-control inputmask-usphone" placeholder="Enter phone no.">
+                <input type="text" name="ToPhoneNo" class="form-control inputmask-usphone" placeholder="Enter phone no.">
             </div>
             <label class="text-purple"><i class="fas fa-user-tie"></i> From:</label>
-            <select class="form-control select2-agentphone" style="width:100%"></select>
-            <small class="text-purple"></small>
+            <select name="FromPhoneNo" class="form-control select2-agentphone" style="width:100%"></select>
+            <small class="text-purple" id="lblSelectedAgentPhone"></small>
         </form>
+        
+        <!-- Call Controls (hidden by default) -->
+        <div id="callControls" style="display:none;">
+            <div class="btn-group btn-group-lg w-100 mb-2">
+                <button id="muteCall" class="btn btn-outline-secondary">
+                    <i class="fas fa-microphone"></i> Mute
+                </button>
+                <button id="hangupCall" class="btn btn-danger">
+                    <i class="fas fa-phone-slash"></i> Hang Up
+                </button>
+            </div>
+        </div>
+        
+        <!-- Incoming Call UI (hidden by default) -->
+        <div id="incomingCallUI" style="display:none;">
+            <div class="alert alert-info">
+                <i class="fas fa-phone-volume fa-pulse"></i> Incoming call...
+            </div>
+            <div class="btn-group btn-group-lg w-100">
+                <button id="acceptCall" class="btn btn-success">
+                    <i class="fas fa-phone"></i> Accept
+                </button>
+                <button id="rejectCall" class="btn btn-danger">
+                    <i class="fas fa-phone-slash"></i> Reject
+                </button>
+            </div>
+        </div>
 	</div>
     <div class="card-footer">
-        <button type="button" class="btn bg-gradient-purple btn-block" id="btnPlaceCall">
+        <button type="button" id="placeCall" class="btn bg-gradient-purple btn-block">
             <i class="fas fa-phone"></i> Place Call
-        </button>
-        <button type="button" class="btn bg-gradient-red btn-block" id="btnEndCall" style="display:none">
-            <i class="fas fa-phone-slash"></i> End Call
         </button>
     </div>
 </div>
+
+<!-- Add Twilio Voice SDK -->
+<script src="https://sdk.twilio.com/js/client/releases/1.14.0/twilio.js"></script>
