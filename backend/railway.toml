@@ -1,0 +1,32 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm install"
+
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 5
+
+[phases.setup]
+nixPkgs = ["nodejs"]
+
+[[services]]
+internal_port = 8000
+protocol = "http"
+auto_start = true
+
+  [services.concurrency]
+  type = "connections"
+  hard_limit = 100
+  soft_limit = 80
+
+  [[services.ports]]
+  port = 80
+  handlers = ["http"]
+  force_https = true
+
+  [[services.ports]]
+  port = 443
+  handlers = ["tls", "http"] 
