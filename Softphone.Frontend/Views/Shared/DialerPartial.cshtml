@@ -4,20 +4,22 @@
 	</div>
 	<div class="card-body p-4">
         <form onsubmit="return false;" id="frmDialer">
-            @Html.AntiForgeryToken()
             <label class="text-purple"><i class="fas fa-fax"></i> To:</label>
             <div class="input-group mb-3 bg-light">
                 <div class="input-group-prepend"><div class="input-group-text">+1</div></div>
-                <input type="text" name="ToPhoneNo" class="form-control inputmask-usphone" placeholder="Enter phone no.">
+                <input class="form-control inputmask-usphone" placeholder="Enter phone no.">
             </div>
             <label class="text-purple"><i class="fas fa-user-tie"></i> From:</label>
-            <select name="FromPhoneNo" class="form-control select2-agentphone" style="width:100%"></select>
-            <small class="text-purple" id="lblSelectedAgentPhone"></small>
+            <select class="form-control select2-agentphone" style="width:100%"></select>
+            <small class="text-purple"></small>
         </form>
 	</div>
     <div class="card-footer">
-        <button type="button" class="btn bg-gradient-purple btn-block" onclick="placeCall()">
+        <button type="button" class="btn bg-gradient-purple btn-block" id="btnPlaceCall">
             <i class="fas fa-phone"></i> Place Call
+        </button>
+        <button type="button" class="btn bg-gradient-red btn-block" id="btnEndCall" style="display:none">
+            <i class="fas fa-phone-slash"></i> End Call
         </button>
     </div>
 </div>

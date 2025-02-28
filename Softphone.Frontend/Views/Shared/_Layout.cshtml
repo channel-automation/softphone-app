@@ -56,17 +56,9 @@
 	<script src="~/js/app.js"></script>
 	<script src="~/js/spinner.js"></script>
 	<script src="~/js/dashboard.js"></script>
-	<script src="~/js/calling.js"></script>
+	<script src="~/js/dialer.js"></script>
     <script>
         globalWorkspaceId = @_user.WorkspaceId;
-
-        $(function (){
-            let dialer = $("#frmDialer");
-            initializeFormControls(dialer);
-            dialer.find("[name=FromPhoneNo]").on("change", function () {
-                $("#lblSelectedAgentPhone").text($(this).val());
-            });
-        });
 
         $(this).ajaxError(function (e, xhr) {
             // Ajax Data Error
