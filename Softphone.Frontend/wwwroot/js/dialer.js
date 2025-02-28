@@ -1,7 +1,6 @@
 ﻿(function ($) {
     "use strict"
-    const Device = Twilio.Device;
-    let token = "";
+    let device = null;
     let expiry = new Date();
 
     let dialer_form;
@@ -42,70 +41,42 @@
         $.ajax({
             url: "https://webhook.call-app.channelautomation.com/api/token",
             type: "get", dataType: "json",
-            success: callConnect(),
+            success: (response) => {
+                if (device === null) setupDevice(response.token);
+                else device.updateToken(response.token);
+                expiry = new Date(response.expires);
+                callConnect()
+            },
             error: () => {
                 toastr.error("Failed to communicate backend service.", "Error!");
             }
         });
     }
 
+    function setupDevice(token) {
+        device = new Twilio.Device(token);
+        device.on("connect", () => {
+            toastr.success("Call connected.", "Dialer");
+        });
+        device.on("disconnect", () => {
+            toastr.warning("Call disconnected.", "Dialer");
+        });
+        device.on("error", (error) => {
+            toastr.error(`Call Error: ${error}`, "Dialer");
+        });
+    }
+
     function callConnect() {
         let to = dialer_form.find("input").inputmask("unmaskedvalue");
         let from = dialer_form.find("select").val();
+
+        toastr.info("Connecting call..", "Dialer");
+        device.connect();
     }
 
     function callDisconnect() {
-
+        device.disconnectAll();
         resetDialer();
     }
 
 })(jQuery);
-
-
-
-
-
-
-
-function placeCall(btn) {
-    let expiry = new Date("2025-02-28T01:39:42.207Z");
-    let now = new Date();
-    alert(now > expiry ? "Expired!" : "Not Expired!");
-
-
-    return false;
-
-    //startAjaxSpinner(btn);
-    //$.ajax({
-    //    url: "https://webhook.call-app.channelautomation.com/api/token",
-    //    type: "get",
-    //    dataType: "json",
-    //    success: function (response) {
-    //        const token = response.token;
-    //        const device = new Device(token);
-
-    //        toastr.info("Connecting call..", "Dialer");
-    //        device.connect();
-
-    //        //document.getElementById('hangup-button').addEventListener('click', () => {
-    //        //    device.disconnectAll();
-    //        //});
-
-    //        device.on("connect", () => {
-    //            toastr.success("Call connected.", "Dialer");
-    //        });
-
-    //        device.on("disconnect", () => {
-    //            toastr.warning("Call disconnected.", "Dialer");
-    //        });
-
-    //        device.on("error", (error) => {
-    //            toastr.error(`Call Error: ${error}`, "Dialer");
-    //        });
-    //    },
-    //    error: function (ex) {
-    //        alert(`Error: ${JSON.stringify(ex)}`);
-    //    }
-    //});
-
-}
