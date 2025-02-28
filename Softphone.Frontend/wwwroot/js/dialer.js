@@ -8,6 +8,7 @@
     let end_button;
 
     $(() => {
+        requestAudioPermission();
         getAccessToken();
 
         dialer_form = $("#frmDialer");
@@ -23,6 +24,19 @@
         end_button.on("click", callDisconnect);
     });
 
+    async function requestAudioPermission() {
+        try {
+            // Request audio access from the user
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            console.log('Audio permission granted');
+            // Stop the audio stream after permission is granted to release resources
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+        } catch (error) {
+            console.error('Audio permission denied or error occurred:', error);
+        }
+    }
+
     function resetDialer() {
         let input = dialer_form.find("input");
         let select = dialer_form.find("select");
@@ -35,15 +49,17 @@
         end_button.hide();
     }
 
-    function getAccessToken(funcCall) {
+    function getAccessToken() {
         $.ajax({
             url: "https://webhook.call-app.channelautomation.com/api/token",
             type: "get", dataType: "json",
-            success: (response) => {
-                if (!device) setupDevice(response.token);
-                else device.updateToken(response.token);
-                expiry = new Date(response.expires);
-                if (funcCall) funcCall();
+            success: (res) => {
+                if (!device) setupDevice(res.token);
+                else device.updateToken(res.token);
+                expiry = new Date(res.expires);
+                const interval = expiry - Date.now() - 60000; //-> 1 Minute before expiration
+                setTimeout(getAccessToken, interval);
+                console.log(`Token updated at ${moment(Date.now()).format("MMM D, YYYY h:mm:ss A")}`);
             },
             error: () => {
                 toastr.error("Failed to communicate backend service.", "Error!");
@@ -54,58 +70,63 @@
     function setupDevice(token) {
         device = new Twilio.Device(token, {
             closeProtection: true,
-            edge: ["ashburn", "sydney", "dublin", "frankfurt"]
-        });
-
-        // Listen for the "connect" event
-        device.on("connect", () => {
-            toastr.success("Device connected.", "Dialer");
-        });
-        // Listen for the "disconnect" event
-        device.on("disconnect", () => {
-            toastr.info("Device disconnected.", "Dialer");
-        });
-        // Listen for the "error" event
-        device.on("error", (error) => {
-            toastr.error(`Device Error: ${error}`, "Dialer");
+            edge: ['ashburn', 'sydney', 'dublin', 'frankfurt']
         });
 
         // Listen for the "ready" event (Device is ready to handle calls)
         device.on("ready", () => {
             toastr.info("Device is ready to receive calls.", "Dialer");
+            console.log("Device is ready to receive calls.");
+        });
+
+        // Listen for the "connect" event
+        device.on("connect", () => {
+            toastr.success("Device connected.", "Dialer");
+            console.log("Device connected.");
+        });
+
+        // Listen for the "disconnect" event
+        device.on("disconnect", () => {
+            toastr.info("Device disconnected.", "Dialer");
+            console.log("Device disconnected.");
+        });
+
+        // Listen for the "error" event
+        device.on("error", (error) => {
+            toastr.error(`Device Error: ${error}`, "Dialer");
+            console.log(`Device Error: ${error}`);
         });
 
         // Listen for incoming calls
-        device.on("incoming", (conn) => {
+        device.on("incoming", call => {
             toastr.warning("Incoming call received!", "Dialer");
+            console.log("Incoming call received!");
+
             // Handle incoming call (e.g., answer or reject)
             const isAccept = confirm("You have an incoming call. Do you want to answer?");
             if (isAccept) {
-                conn.accept(); // Accept the call
+                call.accept(); // Accept the call
                 toastr.success("Call accepted.", "Dialer");
+                console.log("Call accepted.");
             } else {
-                conn.reject(); // Reject the call
+                call.reject(); // Reject the call
                 toastr.success("Call rejected.", "Dialer");
+                console.log("Call rejected.");
             }
+
             // Set up event listeners for the connection
-            conn.on("disconnect", () => {
+            call.on("disconnect", () => {
                 toastr.info("Call disconnected.", "Dialer");
+                console.log("Call disconnected.");
             });
-            conn.on("error", (error) => {
+            call.on("error", (error) => {
                 toastr.error(`Error during the call: ${error}`, "Dialer");
+                console.log(`Error during the call: ${error}`);
             });
         });
     }
 
     function callConnect() {
-        if (new Date() > expiry) {
-            startAjaxSpinner(call_button[0]);
-            getAccessToken(callConnectContinue);
-        } 
-        else callConnectContinue();
-    }
-
-    function callConnectContinue() {
         let input = dialer_form.find("input");
         let select = dialer_form.find("select");
         input.prop("disabled", true);
@@ -114,7 +135,10 @@
         end_button.show();
         let to = `+1${input.inputmask("unmaskedvalue")}`;
         let from = select.val();
-        toastr.info("Connecting call..", "Dialer");
+
+        toastr.info("Connecting..", "Dialer");
+        console.log("Connecting..");
+
         let params = { To: to, From: from };
         device.connect({ params });
     }
@@ -123,5 +147,4 @@
         device.disconnectAll();
         resetDialer();
     }
-
 })(jQuery);

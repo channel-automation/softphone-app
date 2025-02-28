@@ -8,23 +8,23 @@ var globalWorkspaceId = 0;
 //This function is to initialized form control js widget's configs
 function initializeFormControls(parent) {
     //icheck
-    $(parent).find('.icheck').iCheck({
-        checkboxClass: 'icheckbox_square-grey',
-        radioClass: 'iradio_square-grey'
+    $(parent).find(".icheck").iCheck({
+        checkboxClass: "icheckbox_square-purple",
+        radioClass: "iradio_square-purple"
     });
     //Select2
-    $(parent).find('.select2-common').select2({
-        placeholder: "Select value",
+    $(parent).find(".select2-common").select2({
+        placeholder: "Select Value",
     });
-    $(parent).find('.select2-common-modal').select2({
+    $(parent).find(".select2-common-modal").select2({
         dropdownParent: $(".bootbox").last(),
-        placeholder: "Select value",
+        placeholder: "Select Value",
     });
     //Select2 Agent Phone
-    $(parent).find('.select2-agentphone').select2({
-        ajax: { url: baseUrl + '/AgentList/RemoteAgentPhone?workspaceId=' + globalWorkspaceId },
-        placeholder: "Select agent phone no.",
-        templateResult: function (data) {
+    $(parent).find(".select2-agentphone").select2({
+        ajax: { url: baseUrl + "/AgentList/RemoteAgentPhone?workspaceId=" + globalWorkspaceId },
+        placeholder: "Select Agent",
+        templateResult: (data) => {
             if (data.loading) return data.text;
             let htm = "<div class='row'><div class='col-12'>";
             htm += data.text + "<br />";
@@ -34,14 +34,7 @@ function initializeFormControls(parent) {
         }
     });
     //Input Mask US Phone
-    $(parent).find('.inputmask-usphone').inputmask("(999) 999-9999")
-
-    //Select2 Category
-    //$(parent).find('.select2-category-modal').select2({
-    //    dropdownParent: $(".bootbox").last(),
-    //    ajax: { url: baseUrl + '/Inventory/Category/Remote' },
-    //    placeholder: "Select category"
-    //});
+    $(parent).find(".inputmask-usphone").inputmask("(999) 999-9999")
 }
 
 //Custom bootbox form modal implementation
@@ -75,9 +68,9 @@ function bootConfirm(message, callbackEvent) {
 
 //This function is to solve bootstrap multi-modal scroll issue. (Just use it here privately)
 function _bootboxScrollFix(box) {
-    box.on('hidden.bs.modal', function () {
-        if ($('.modal:visible').length) //check if any modal is open
-            $('body').addClass('modal-open');//add class to body
+    box.on("hidden.bs.modal", function () {
+        if ($(".modal:visible").length) //check if any modal is open
+            $("body").addClass("modal-open");//add class to body
     });
 }
 

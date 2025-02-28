@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Softphone.Frontend.Models;
 using Softphone.Frontend.Services;
 
 namespace Softphone.Frontend.Controllers;
@@ -17,13 +18,12 @@ public class HomeController : Controller
     public async Task<IActionResult> Index()
     {
         var user = await _userService.FindByUsername(User.Identity.Name);
-        ViewBag.User = user;
+        var paged = await _userService.RemoteAgentPhone(0, 1, string.Empty, user.WorkspaceId);
+        var selected = paged.Data.FirstOrDefault() ?? new AgentPhoneBO();
+
+        ViewBag.LoggedUser = user;
+        ViewBag.SelectedName = selected.FullName;
+        ViewBag.SelectedNumber = selected.TwilioNumber;
         return View();
     }
-
-    //public async Task<IActionResult> UserInfo()
-    //{
-    //    var user = await _userService.FindByUsername(User.Identity.Name);
-    //    return Json(new { user.FirstName, user.LastName, user.WorkspaceId });
-    //}
 }
