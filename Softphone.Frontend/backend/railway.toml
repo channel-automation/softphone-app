@@ -1,0 +1,28 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm install"
+
+[deploy]
+startCommand = "npm run server"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 5
+
+[deploy.envs]
+NODE_ENV = "production"
+PORT = "8000"
+ALLOWED_ORIGINS = "https://beta.call-app.channelautomation.com"
+WEBHOOK_BASE_URL = "https://webhook.call-app.channelautomation.com"  # Base URL for all webhooks
+
+# Twilio Configuration
+# Voice Webhook URL: https://webhook.call-app.channelautomation.com/api/voice
+# Status Callback URL: https://webhook.call-app.channelautomation.com/api/voice/status
+# TwiML App Request URL: https://webhook.call-app.channelautomation.com/api/voice/outbound
+
+TWILIO_ACCOUNT_SID = "" # Set this in Railway dashboard
+TWILIO_AUTH_TOKEN = "" # Set this in Railway dashboard
+TWILIO_TWIML_APP_SID = "" # Set this in Railway dashboard
+TWILIO_API_KEY = "" # Set this in Railway dashboard
+TWILIO_API_SECRET = "" # Set this in Railway dashboard
+TWILIO_PHONE_NUMBER = "" # Set this in Railway dashboard 
