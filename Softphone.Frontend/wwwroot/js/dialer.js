@@ -1,7 +1,7 @@
 ﻿(function ($) {
     "use strict"
-    let device = null;
-    let expiry = new Date();
+    let device;
+    let expiry;
 
     let dialer_form;
     let call_button;
@@ -40,7 +40,7 @@
             url: "https://webhook.call-app.channelautomation.com/api/token",
             type: "get", dataType: "json",
             success: (response) => {
-                if (device === null) setupDevice(response.token);
+                if (!device) setupDevice(response.token);
                 else device.updateToken(response.token);
                 expiry = new Date(response.expires);
                 if (funcCall) funcCall();
@@ -52,22 +52,27 @@
     }
 
     function setupDevice(token) {
-        device = new Twilio.Device(token);
 
-        // Listen for the 'connect' event
+        console.log(`Token: ${token}`);
+        device = new Twilio.Device(token, {
+            closeProtection: true,
+            edge: ["ashburn", "sydney", "dublin", "frankfurt"]
+        });
+
+        // Listen for the "connect" event
         device.on("connect", () => {
             toastr.success("Device connected.", "Dialer");
         });
-        // Listen for the 'disconnect' event
+        // Listen for the "disconnect" event
         device.on("disconnect", () => {
             toastr.info("Device disconnected.", "Dialer");
         });
-        // Listen for the 'error' event
+        // Listen for the "error" event
         device.on("error", (error) => {
             toastr.error(`Device Error: ${error}`, "Dialer");
         });
 
-        // Listen for the 'ready' event (Device is ready to handle calls)
+        // Listen for the "ready" event (Device is ready to handle calls)
         device.on("ready", () => {
             toastr.info("Device is ready to receive calls.", "Dialer");
         });
@@ -112,7 +117,8 @@
         let to = `+1${input.inputmask("unmaskedvalue")}`;
         let from = select.val();
         toastr.info("Connecting call..", "Dialer");
-        device.connect({ To: to, From: from });
+        let params = { To: to, From: from };
+        device.connect({ params });
     }
 
     function callDisconnect() {
