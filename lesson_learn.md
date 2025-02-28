@@ -217,3 +217,138 @@ When deploying to Railway, it's crucial to update URLs in multiple places:
 4. **Documentation**:
    - Document the deployment process
    - Include URLs, environment variables, and troubleshooting steps 
+
+## Handling ViewBag Data in ASP.NET Core MVC
+
+### Problem
+The application was throwing a NullReferenceException in NavbarPartial.cshtml because `_user` was null. This occurred because not all controllers were setting the `ViewBag.User` property consistently.
+
+### Solution
+1. Created a `BaseController` class that all controllers inherit from:
+   ```csharp
+   public class BaseController : Controller
+   {
+       private readonly IUserService _userService;
+
+       public BaseController(IUserService userService)
+       {
+           _userService = userService;
+       }
+
+       public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+       {
+           // Set the user in ViewBag if the user is authenticated
+           if (User?.Identity?.IsAuthenticated == true)
+           {
+               try
+               {
+                   var user = await _userService.FindByUsername(User.Identity.Name);
+                   ViewBag.User = user;
+               }
+               catch (Exception)
+               {
+                   // If there's an error getting the user, create a default one
+                   ViewBag.User = new UserBO
+                   {
+                       FirstName = "Guest",
+                       LastName = "User",
+                       Username = "guest"
+                   };
+               }
+           }
+           else
+           {
+               // Set a default user for non-authenticated requests
+               ViewBag.User = new UserBO
+               {
+                   FirstName = "Guest",
+                   LastName = "User",
+                   Username = "guest"
+               };
+           }
+
+           await base.OnActionExecutionAsync(context, next);
+       }
+   }
+   ```
+
+2. Updated all controllers to inherit from `BaseController` instead of `Controller`:
+   ```csharp
+   public class HomeController : BaseController
+   {
+       public HomeController(IUserService userService) : base(userService)
+       {
+           // ...
+       }
+   }
+   ```
+
+3. Modified the NavbarPartial.cshtml to handle the case when ViewBag.User is null:
+   ```csharp
+   @{
+       var _user = ViewBag.User as Softphone.Frontend.Models.UserBO ?? new Softphone.Frontend.Models.UserBO
+       {
+           FirstName = "Guest",
+           LastName = "User",
+           Username = "guest"
+       };
+   }
+   ```
+
+### Best Practices
+1. **Use a Base Controller**: Create a base controller for common functionality like setting ViewBag properties.
+2. **Defensive Programming**: Always check for null values in views and provide fallbacks.
+3. **Consistent Data Access**: Use a consistent approach to accessing user data across all controllers.
+4. **Error Handling**: Add try-catch blocks to handle exceptions when retrieving user data.
+5. **Default Values**: Provide default values for properties that might be null. 
+
+## CORS Configuration for Railway Deployment
+
+### Problem
+When deploying to Railway, the backend needs to be configured to allow cross-origin requests from specific origins, including local development environments.
+
+### Solution
+The backend server is configured to read allowed origins from the `ALLOWED_ORIGINS` environment variable. This variable should be set in the Railway dashboard for the backend service.
+
+1. In the Railway dashboard, navigate to your backend service
+2. Go to the "Variables" tab
+3. Add or update the `ALLOWED_ORIGINS` variable with a comma-separated list of allowed origins:
+   ```
+   ALLOWED_ORIGINS=http://localhost:5252,https://localhost:7245,https://your-frontend-url.up.railway.app
+   ```
+
+4. Make sure to include:
+   - Local development URLs (http://localhost:5252, https://localhost:7245)
+   - The deployed frontend URL (https://your-frontend-url.up.railway.app)
+   - Any other domains that need to access the backend
+
+### How It Works
+The backend server uses the following code to handle CORS:
+
+```javascript
+// Get allowed origins from environment variable or use defaults
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',') 
+  : ['http://localhost:5252', 'https://localhost:7245'];
+
+// Configure CORS with specific options
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+```
+
+This configuration:
+1. Reads the `ALLOWED_ORIGINS` environment variable
+2. Splits it by commas to create an array of allowed origins
+3. Falls back to default values if the environment variable is not set
+4. Configures the CORS middleware to allow requests only from these origins
+
+### Best Practices
+1. Always include your local development URLs in the allowed origins during development
+2. Update the allowed origins when deploying to production
+3. Use environment variables for configuration to avoid hardcoding values
+4. Be specific about which origins are allowed to enhance security
+5. Include proper error handling for CORS-related issues 
