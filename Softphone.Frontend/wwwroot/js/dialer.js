@@ -17,6 +17,8 @@
         end_button = $("#btnEndCall");
 
         dialer_form.find("input").on("keyup", resetDialer);
+        dialer_form.find("input").on("paste", resetDialer);
+        dialer_form.find("input").on("cut", resetDialer);
         dialer_form.find("select").on("change", resetDialer);
         resetDialer();
 
@@ -41,7 +43,7 @@
         let input = dialer_form.find("input");
         let select = dialer_form.find("select");
         let isValid = (input.inputmask("isComplete") && select.val() !== null);
-        dialer_form.find("small").text(select.val());
+        dialer_form.find("small").text(new Inputmask("(999) 999-9999").format(select.val().replaceAll("+1", "")));
         call_button.prop("disabled", !isValid);
         input.prop("disabled", false);
         select.prop("disabled", false);
@@ -73,54 +75,48 @@
             edge: ['ashburn', 'sydney', 'dublin', 'frankfurt']
         });
 
+        device.register();
+
         // Listen for the "ready" event (Device is ready to handle calls)
         device.on("ready", () => {
-            toastr.info("Device is ready to receive calls.", "Dialer");
             console.log("Device is ready to receive calls.");
         });
-
         // Listen for the "connect" event
         device.on("connect", () => {
-            toastr.success("Device connected.", "Dialer");
             console.log("Device connected.");
         });
-
         // Listen for the "disconnect" event
         device.on("disconnect", () => {
-            toastr.info("Device disconnected.", "Dialer");
             console.log("Device disconnected.");
         });
-
+        // Listen for the "offline" event
+        device.on("offline", () => {
+            console.log('Device is offline. WebSocket connection is closed.');
+        });
         // Listen for the "error" event
         device.on("error", (error) => {
-            toastr.error(`Device Error: ${error}`, "Dialer");
             console.log(`Device Error: ${error}`);
         });
 
         // Listen for incoming calls
         device.on("incoming", call => {
-            toastr.warning("Incoming call received!", "Dialer");
-            console.log("Incoming call received!");
+            console.log("Incoming call received.");
 
             // Handle incoming call (e.g., answer or reject)
             const isAccept = confirm("You have an incoming call. Do you want to answer?");
             if (isAccept) {
                 call.accept(); // Accept the call
-                toastr.success("Call accepted.", "Dialer");
                 console.log("Call accepted.");
             } else {
                 call.reject(); // Reject the call
-                toastr.success("Call rejected.", "Dialer");
                 console.log("Call rejected.");
             }
 
             // Set up event listeners for the connection
             call.on("disconnect", () => {
-                toastr.info("Call disconnected.", "Dialer");
                 console.log("Call disconnected.");
             });
             call.on("error", (error) => {
-                toastr.error(`Error during the call: ${error}`, "Dialer");
                 console.log(`Error during the call: ${error}`);
             });
         });

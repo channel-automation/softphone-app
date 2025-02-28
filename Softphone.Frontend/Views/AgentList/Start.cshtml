@@ -58,13 +58,19 @@
     });
 
     function numberRender(d) {
-        return d.replaceAll(",", "<br />");
+        let htm = "";
+        let arr = d.trim().split(",");
+
+        for (let i = 0; i < arr.length; i++) 
+            htm += (new Inputmask("(999) 999-9999").format(arr[i].replaceAll("+1", "")) + ",");
+
+        return htm.trim().replaceAll(",", "<br />");
     }
 
     function dateTimeRender(d) {
         let sDate = moment(d).format("MMM DD, YYYY");
         let sTime = moment(d).format("h:mm:ss A");
-        return  `${sDate}<br />${sTime}`;
+        return  `${sDate} ${sTime}`;
     }
 
     function actionRender(d) {

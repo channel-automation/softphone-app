@@ -28,7 +28,7 @@ function initializeFormControls(parent) {
             if (data.loading) return data.text;
             let htm = "<div class='row'><div class='col-12'>";
             htm += data.text + "<br />";
-            htm += "<span class='badge bg-light p-1 mr-1 mb-1'>" + data.id + "</span>";
+            htm += "<span class='badge bg-light p-1 mr-1 mb-1'>" + new Inputmask("(999) 999-9999").format(data.id.replaceAll("+1", "")) + "</span>";
             htm += "</div></div>"
             return $(htm);
         }
