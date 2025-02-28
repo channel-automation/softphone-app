@@ -67,11 +67,11 @@
     }
 
     function callConnect() {
-        let to = dialer_form.find("input").inputmask("unmaskedvalue");
+        let to = `+1${dialer_form.find("input").inputmask("unmaskedvalue")}`;
         let from = dialer_form.find("select").val();
 
         toastr.info("Connecting call..", "Dialer");
-        device.connect();
+        device.connect({ To: to, From: from });
     }
 
     function callDisconnect() {
