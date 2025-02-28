@@ -92,9 +92,16 @@
             });
         }
 
+        function changePassword(btn) {
+            startAjaxSpinner(btn);
+            $.get("@Url.Action("ChangePassword", "Security")", function (response) {
+                changePasswordDialog = bootModal("Change Password", response, "small");
+            });
+        }
+
         function logout(btn) {
             startAjaxSpinner(btn);
-            $.get("@Url.Action("Logout", "Security", new { @area = "" })", function (response) {
+            $.get("@Url.Action("Logout", "Security")", function (response) {
                 logoutDialog = bootModal("Softphone", response, "small");
             });
         }

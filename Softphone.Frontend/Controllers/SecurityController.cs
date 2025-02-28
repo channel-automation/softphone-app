@@ -28,7 +28,7 @@ public class SecurityController : Controller
         var user = await _userService.FindByUsername(username);
         string error = string.Empty;
 
-        if (user == null || !GlobalHelper.EncryptVerify(password, user.Password))
+        if (user == null || !EncryptHelper.Verify(password, user.Password))
             error = "Invalid Username or Password.";
 
         else if (!user.IsActive)
@@ -60,5 +60,26 @@ public class SecurityController : Controller
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
+    }
+
+    [Authorize]
+    public IActionResult ChangePassword()
+    {
+        return PartialView();
+    }
+
+    [Authorize]
+    [HttpPost]
+    public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword)
+    {
+        string error = string.Empty;
+        var user = await _userService.FindByUsername(User.Identity.Name);
+        if (EncryptHelper.Verify(currentPassword, user.Password))
+        {
+            user.Password = EncryptHelper.Hash(newPassword);
+            await _userService.Update(user, User.Identity.Name);
+        }
+        else error = "Incorrect Current Password.";
+        return Json(error);
     }
 }

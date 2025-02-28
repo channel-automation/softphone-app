@@ -13,7 +13,7 @@ namespace Softphone.Frontend.Services
             _client = client;
         }
 
-        public async Task<long> Create(UserBO model, string username)
+        public async Task Create(UserBO model, string username)
         {
             model.CreatedAt = DateTime.Now;
             model.CreatedBy = username;
@@ -22,7 +22,14 @@ namespace Softphone.Frontend.Services
 
             var response = await _client.From<UserBO>().Insert(model);
             var newModel = response.Models.FirstOrDefault();
-            return newModel == null ? 0 : newModel.Id;
+            model.Id = (newModel == null ? 0 : newModel.Id);
+        }
+
+        public async Task Update(UserBO model, string username)
+        {
+            model.ModifiedAt = DateTime.Now;
+            model.ModifiedBy = username;
+            await _client.From<UserBO>().Update(model);
         }
 
         public async Task<UserBO?> FindByUsername(string username)

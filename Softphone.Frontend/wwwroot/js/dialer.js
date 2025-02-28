@@ -52,8 +52,6 @@
     }
 
     function setupDevice(token) {
-
-        console.log(`Token: ${token}`);
         device = new Twilio.Device(token, {
             closeProtection: true,
             edge: ["ashburn", "sydney", "dublin", "frankfurt"]
