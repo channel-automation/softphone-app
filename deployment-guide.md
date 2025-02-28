@@ -65,8 +65,8 @@ git push -u origin main
 2. Go to the "Variables" tab
 3. Update the following variables:
    ```
-   WEBHOOK_BASE_URL=https://your-backend-url.up.railway.app
-   ALLOWED_ORIGINS=http://localhost:5252,https://localhost:7245,https://your-frontend-url.up.railway.app
+   WEBHOOK_BASE_URL=https://backend-production-a3eb.up.railway.app
+   ALLOWED_ORIGINS=http://localhost:5252,https://localhost:7245,https://backend-production-a3eb.up.railway.app
    ```
 
 ## Step 5: Deploy the Frontend to Railway
@@ -83,7 +83,7 @@ git push -u origin main
 1. In your local code, update the backend URL in `Softphone.Frontend/wwwroot/js/calling.js`:
    ```javascript
    // For production, use the deployed backend URL
-   backendUrl = 'https://your-backend-url.up.railway.app';
+   backendUrl = 'https://backend-production-a3eb.up.railway.app';
    ```
 
 2. Commit and push these changes:
@@ -100,12 +100,12 @@ git push -u origin main
 1. Log in to your Twilio account
 2. Go to the TwiML App configuration
 3. Update the Voice Request URL to point to your backend:
-   - Voice Request URL: `https://your-backend-url.up.railway.app/api/voice/outbound`
-   - Status Callback URL: `https://your-backend-url.up.railway.app/api/voice/status`
+   - Voice Request URL: `https://backend-production-a3eb.up.railway.app/api/voice/outbound`
+   - Status Callback URL: `https://backend-production-a3eb.up.railway.app/api/voice/status`
 
 4. For your Twilio phone number:
-   - Voice Request URL: `https://your-backend-url.up.railway.app/api/voice`
-   - Status Callback URL: `https://your-backend-url.up.railway.app/api/voice/status`
+   - Voice Request URL: `https://backend-production-a3eb.up.railway.app/api/voice`
+   - Status Callback URL: `https://backend-production-a3eb.up.railway.app/api/voice/status`
 
 ## Step 8: Test Your Deployed Application
 

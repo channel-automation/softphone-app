@@ -314,12 +314,12 @@ The backend server is configured to read allowed origins from the `ALLOWED_ORIGI
 2. Go to the "Variables" tab
 3. Add or update the `ALLOWED_ORIGINS` variable with a comma-separated list of allowed origins:
    ```
-   ALLOWED_ORIGINS=http://localhost:5252,https://localhost:7245,https://your-frontend-url.up.railway.app
+   ALLOWED_ORIGINS=http://localhost:5252,https://localhost:7245,https://backend-production-a3eb.up.railway.app
    ```
 
 4. Make sure to include:
    - Local development URLs (http://localhost:5252, https://localhost:7245)
-   - The deployed frontend URL (https://your-frontend-url.up.railway.app)
+   - The deployed frontend URL (https://backend-production-a3eb.up.railway.app)
    - Any other domains that need to access the backend
 
 ### How It Works

@@ -14,7 +14,7 @@
             backendUrl = 'http://localhost:8000';
         } else {
             // For production, use the deployed backend URL
-            backendUrl = 'https://softphone-backend.up.railway.app';
+            backendUrl = 'https://backend-production-a3eb.up.railway.app';
         }
 
         dialer_form = $("#frmDialer");
