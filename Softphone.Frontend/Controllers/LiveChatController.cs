@@ -5,19 +5,17 @@ using Softphone.Frontend.Services;
 namespace Softphone.Frontend.Controllers
 {
     [Authorize]
-    public class LiveChatController : Controller
+    public class LiveChatController : BaseController
     {
         private IUserService _userService;
 
-        public LiveChatController(IUserService userService)
+        public LiveChatController(IUserService userService) : base(userService)
         {
             _userService = userService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var user = await _userService.FindByUsername(User.Identity.Name);
-            ViewBag.User = user;
             return View();
         }
     }

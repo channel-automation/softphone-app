@@ -4,7 +4,7 @@ namespace Softphone.Frontend.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class HealthController : ControllerBase
+    public class HealthController : Controller
     {
         [HttpGet]
         [Route("/health")]

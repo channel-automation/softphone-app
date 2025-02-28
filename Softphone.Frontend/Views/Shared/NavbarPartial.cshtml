@@ -1,5 +1,10 @@
 @{
-    var _user = (UserBO)ViewBag.User;
+    var _user = ViewBag.User as Softphone.Frontend.Models.UserBO ?? new Softphone.Frontend.Models.UserBO
+    {
+        FirstName = "Guest",
+        LastName = "User",
+        Username = "guest"
+    };
 }
 
 <nav class="main-header navbar navbar-expand navbar-dark bg-navy">

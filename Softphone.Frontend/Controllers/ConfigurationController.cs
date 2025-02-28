@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace Softphone.Frontend.Controllers;
 
 [Authorize]
-public class ConfigurationController : Controller
+public class ConfigurationController : BaseController
 {
     private IUserService _userService;
     private IWorkspaceService _workspaceService;
 
-    public ConfigurationController(IUserService userService, IWorkspaceService workspaceService)
+    public ConfigurationController(IUserService userService, IWorkspaceService workspaceService) : base(userService)
     {
         _userService = userService;
         _workspaceService = workspaceService;

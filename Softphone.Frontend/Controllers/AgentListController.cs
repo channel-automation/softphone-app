@@ -6,11 +6,11 @@ using Softphone.Frontend.Services;
 namespace Softphone.Frontend.Controllers;
 
 [Authorize]
-public class AgentListController : Controller
+public class AgentListController : BaseController
 {
     private IUserService _userService;
 
-    public AgentListController(IUserService userService)
+    public AgentListController(IUserService userService) : base(userService)
     {
         _userService = userService;
     }

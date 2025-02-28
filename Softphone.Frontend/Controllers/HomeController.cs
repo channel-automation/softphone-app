@@ -5,25 +5,24 @@ using Softphone.Frontend.Services;
 namespace Softphone.Frontend.Controllers;
 
 [Authorize]
-public class HomeController : Controller
+public class HomeController : BaseController
 {
     private IUserService _userService;
 
-    public HomeController(IUserService userService)
+    public HomeController(IUserService userService) : base(userService)
     {
         _userService = userService;
     }
 
     public async Task<IActionResult> Index()
     {
-        var user = await _userService.FindByUsername(User.Identity.Name);
-        ViewBag.User = user;
         return View();
     }
 
-    //public async Task<IActionResult> UserInfo()
-    //{
-    //    var user = await _userService.FindByUsername(User.Identity.Name);
-    //    return Json(new { user.FirstName, user.LastName, user.WorkspaceId });
-    //}
+    [HttpGet]
+    public async Task<IActionResult> UserInfo()
+    {
+        var user = await _userService.FindByUsername(User.Identity.Name);
+        return Json(new { user.FirstName, user.LastName, user.WorkspaceId });
+    }
 }
