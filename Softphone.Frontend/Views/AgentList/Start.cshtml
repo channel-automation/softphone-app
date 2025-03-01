@@ -82,7 +82,7 @@
 
     function editAgent(btn, id) {
         startAjaxSpinner(btn)
-        $.get("@Url.Action("Edit")/" + id, (response) => {
+        $.get("@Url.Action("Edit")/" + id, function (response) {
             let title = id == 0 ? "Add" : "Edit";
             editAgentDialog = bootModal(`${title} Agent`, response);
         });

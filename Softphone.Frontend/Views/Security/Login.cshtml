@@ -66,7 +66,7 @@
                 return false;
             }
             startAjaxSpinner(document.getElementById("btnLogin"));
-            $.post("@Url.Action("Login")", $("form").first().serialize(), (response) => {
+            $.post("@Url.Action("Login")", $("form").first().serialize(), function (response) {
                 if (response != "") toastr.error(response, "Error..");
                 else location.href = "@Url.Action("Index", "Home")";
             });

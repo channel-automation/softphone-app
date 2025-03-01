@@ -8,13 +8,13 @@ function startAjaxSpinner(btn) {
     _toSend = true;
     let key = Date.now();
     __spinInvoke(key, btn, _aMap1);
-    setTimeout(() => {
+    setTimeout(function () {
         _toSend = false;
         __spinRevoke(key, _aMap1);
     }, 500);
 }
 
-$(this).ajaxSend((e, x, o) => {
+$(this).ajaxSend(function (e, x, o) {
     for (let [k, v] of _aMap1) {
         _toSend = false;
         _aMap2.set(o.url, v);
@@ -22,14 +22,14 @@ $(this).ajaxSend((e, x, o) => {
     }
 });
 
-$(this).ajaxComplete((e, x, o) => {
+$(this).ajaxComplete(function (e, x, o) {
     __spinRevoke(o.url, _aMap2);
 });
 
 function startRedirectSpinner(btn) {
     let key = Date.now();
     __spinInvoke(key, btn, _aMap3);
-    setTimeout(() => {
+    setTimeout(function () {
         __spinRevoke(key, _aMap3);
     }, 2500);
 }

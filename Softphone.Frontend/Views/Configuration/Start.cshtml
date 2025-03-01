@@ -57,7 +57,7 @@
         }
         //Server Processing
         startAjaxSpinner(btn);
-        $.post("@Url.Action("Save")", form.serialize(), (response) => {
+        $.post("@Url.Action("Save")", form.serialize(), function (response) {
             if (errorMessages(response)) return false;
             else {
                 configurationDialog.modal("hide");

@@ -61,12 +61,12 @@
 	<script src="~/js/dialer.js"></script>
     <script>
         globalWorkspaceId = @loggedUser.WorkspaceId;
-        $(() => {
+        $(function () {
             let option = new Option("@Html.Raw(selectedName)", "@Html.Raw(selectedNumber)", true, true);
             $("#frmDialer").find("select").append(option).trigger("change");
         });
 
-        $(this).ajaxError((e, xhr) => {
+        $(this).ajaxError(function (e, xhr) {
             // Ajax Data Error
             // if (xhr.status == 418) {
             //     let title = "<h5><i class='fas fa-exclamation-circle'></i> Data Error</h5>";
@@ -86,29 +86,29 @@
 
         function openConfiguration(btn) {
             startAjaxSpinner(btn);
-            $.get("@Url.Action("Start", "Configuration")", (res) => {
-                configurationDialog = bootModal("Configuration", res);
+            $.get("@Url.Action("Start", "Configuration")", function (response) {
+                configurationDialog = bootModal("Configuration", response);
             });
         }
 
         function openAgentList(btn) {
             startAjaxSpinner(btn);
-            $.get("@Url.Action("Start", "AgentList")", (res) => {
-                agentListDialog = bootModal("Agent List", res, "extra-large");
+            $.get("@Url.Action("Start", "AgentList")", function (response) {
+                agentListDialog = bootModal("Agent List", response, "extra-large");
             });
         }
 
         function changePassword(btn) {
             startAjaxSpinner(btn);
-            $.get("@Url.Action("ChangePassword", "Security")", (res) => {
-                changePasswordDialog = bootModal("Change Password", res, "small");
+            $.get("@Url.Action("ChangePassword", "Security")", function (response) {
+                changePasswordDialog = bootModal("Change Password", response, "small");
             });
         }
 
         function logout(btn) {
             startAjaxSpinner(btn);
-            $.get("@Url.Action("Logout", "Security")", (res) => {
-                logoutDialog = bootModal("Softphone", res, "small");
+            $.get("@Url.Action("Logout", "Security")", function (response) {
+                logoutDialog = bootModal("Softphone", response, "small");
             });
         }
     </script>

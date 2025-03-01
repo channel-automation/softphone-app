@@ -24,7 +24,7 @@ function initializeFormControls(parent) {
     $(parent).find(".select2-agentphone").select2({
         ajax: { url: baseUrl + "/AgentList/RemoteAgentPhone?workspaceId=" + globalWorkspaceId },
         placeholder: "Select Agent",
-        templateResult: (data) => {
+        templateResult: function (data) {
             if (data.loading) return data.text;
             let htm = "<div class='row'><div class='col-12'>";
             htm += data.text + "<br />";
