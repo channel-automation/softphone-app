@@ -49,22 +49,27 @@ function bootModal(title, message, size) {
     return box;
 }
 
-//Custom bootbox confirm dialog implementation
-function bootConfirm(message, callbackEvent) {
-    let box = bootbox.confirm({
-        title: "<span><i class='fa fa-info-circle'></i> Confirmation</span>",
-        message: message,
-        size: "small",
-        centerVertical: true,
-        callback: callbackEvent,
-        buttons: {
-            cancel: { label: "Cancel" },
-            confirm: { label: "Ok", className: "bg-gradient-dark text-center" },
-        },
+//Custom sweetalert2 confirm dialog implementation
+function swalConfirm(title, message, callbackEvent) {
+    Swal.fire({
+        title: title,
+        html: message,
+        showCancelButton: true,
+        confirmButtonText: "<i class='fas fa-check-circle'></i> Yes",
+        cancelButtonText: "<i class='fas fa-times-circle'></i> No",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false,
+        width: "auto",
+        height: "auto",
+        customClass: {
+            title: "text-lg",
+        }
+    }).then((result) => {
+        if (result.isConfirmed) callbackEvent();
     });
-    _bootboxScrollFix(box);
-    return box;
 }
+
 
 //This function is to solve bootstrap multi-modal scroll issue. (Just use it here privately)
 function _bootboxScrollFix(box) {

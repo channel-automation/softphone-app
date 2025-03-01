@@ -50,13 +50,7 @@ public class SecurityController : Controller
     }
 
     [Authorize]
-    public IActionResult Logout()
-    {
-        return PartialView();
-    }
-
-    [Authorize]
-    public async Task<IActionResult> LogoutYes()
+    public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");

@@ -130,6 +130,12 @@
         },
         {
             "provider": "cdnjs",
+            "library": "sweetalert2@11.15.10",
+            "files": [ "sweetalert2.css", "sweetalert2.min.css", "sweetalert2.all.js", "sweetalert2.all.min.js" ],
+            "destination": "wwwroot/lib/sweetalert2/"
+        },
+        {
+            "provider": "cdnjs",
             "library": "admin-lte@3.2.0",
             "files": [ "css/adminlte.css", "css/adminlte.min.css", "js/adminlte.js", "js/adminlte.min.js" ],
             "destination": "wwwroot/lib/admin-lte/"

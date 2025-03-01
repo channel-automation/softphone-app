@@ -23,21 +23,22 @@
     </div>
 </form>
 <div class="text-center mt-5 mb-1">
-    <button class="btn bg-gradient-dark mr-2" onclick="cancelConfiguration()"><i class="fas fa-times-circle"></i> Cancel</button>
-    <button class="btn bg-gradient-purple" onclick="saveConfiguration(this)"><i class="fas fa-save"></i> Save</button>
+    <button class="btn bg-gradient-purple mr-2" onclick="_save(this)"><i class="fas fa-save"></i> Save</button>
+    <button class="btn bg-gradient-dark" onclick="_cancel()"><i class="fas fa-times-circle"></i> Cancel</button>
 </div>
 
 <script>
-    $(() => {
-        let form = configurationDialog.find("form");
-        initializeFormControls(form);
+    $(function () {
+       // let form = configurationDialog.find("form");
+       // initializeFormControls(form);
     });
 
-    function cancelConfiguration() {
-        configurationDialog.modal("hide");
+    function _cancel() {
+        //configurationDialog.modal("hide");
+        Swal.close(configurationDialog);
     }
 
-    function saveConfiguration(btn) {
+    function _save(btn) {
         let form = configurationDialog.find("form");
         //Client Validation
         if (form.find("[name=TwilioAccountSID]").val().trim() == "") {
@@ -60,7 +61,8 @@
         $.post("@Url.Action("Save")", form.serialize(), function (response) {
             if (errorMessages(response)) return false;
             else {
-                configurationDialog.modal("hide");
+                //configurationDialog.modal("hide");
+                Swal.close(configurationDialog);
                 toastr.success("Configuration successfully saved.", "Success!");
             }
         });

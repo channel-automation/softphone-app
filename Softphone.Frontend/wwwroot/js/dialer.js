@@ -30,12 +30,12 @@
         try {
             // Request audio access from the user
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            console.log('Audio permission granted');
+            console.log("Audio permission granted");
             // Stop the audio stream after permission is granted to release resources
             const tracks = stream.getTracks();
             tracks.forEach(track => track.stop());
         } catch (error) {
-            console.error('Audio permission denied or error occurred:', error);
+            console.error("Audio permission denied or error occurred:", error);
         }
     }
 
@@ -63,7 +63,7 @@
                 expiry = new Date(response.expires);
                 const interval = expiry - Date.now() - 60000; //-> 1 Minute before expiration
                 setTimeout(getAccessToken, interval);
-                console.log(`Token updated at ${moment(Date.now()).format("MMM D, YYYY h:mm:ss A")}`);
+                console.log("Token updated.");
             },
             error: () => {
                 toastr.error("Failed to communicate backend service.", "Error!");
@@ -78,6 +78,9 @@
         });
 
         device.register();
+        device.audio.incoming(true);
+        device.audio.disconnect(true);
+        //device.audio.accept(true);
 
         // Listen for the "ready" event (Device is ready to handle calls)
         device.on("ready", function () {
@@ -105,14 +108,7 @@
             console.log("Incoming call received.");
 
             // Handle incoming call (e.g., answer or reject)
-            const isAccept = confirm("You have an incoming call. Do you want to answer?");
-            if (isAccept) {
-                call.accept(); // Accept the call
-                console.log("Call accepted.");
-            } else {
-                call.reject(); // Reject the call
-                console.log("Call rejected.");
-            }
+            incomingPopup(call);
 
             // Set up event listeners for the connection
             call.on("disconnect", function () {
@@ -144,5 +140,35 @@
     function callDisconnect() {
         device.disconnectAll();
         resetDialer();
+    }
+
+    function incomingPopup(call) {
+        Swal.fire({
+            title: "Incoming Call",
+            html: "Someone is on the line ...",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "<i class='fas fa-phone-volume'></i> Accept",
+            cancelButtonText: "<i class='fas fa-phone-slash'></i> Reject",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            allowEnterKey: false,
+            width: "auto",
+            height: "auto",
+            customClass: {
+                confirmButton: "bg-success",
+                cancelButton: "bg-danger",
+                title: "text-lg",
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                call.accept(); // Accept the call
+                console.log("Call accepted.");
+            }
+            else {
+                call.reject(); // Reject the call
+                console.log("Call rejected.");
+            }
+        });
     }
 })(jQuery);
