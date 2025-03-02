@@ -56,6 +56,11 @@ public class ConfigurationController : Controller
                 
                 // Create HTTP client
                 var client = _httpClientFactory.CreateClient();
+                client.Timeout = TimeSpan.FromSeconds(30); // Increase timeout
+                
+                // Add headers
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.DefaultRequestHeaders.Add("User-Agent", "Softphone.Frontend/1.0");
                 
                 // Prepare request data
                 var requestData = new
@@ -72,13 +77,19 @@ public class ConfigurationController : Controller
                     "application/json");
                 
                 // Send request to configure Twilio
+                Console.WriteLine($"📡 Sending request to configure Twilio: {configureUrl}");
+                Console.WriteLine($"📦 Request data: {JsonSerializer.Serialize(requestData)}");
+                
                 var response = await client.PostAsync(configureUrl, content);
+                
+                // Log the response
+                var responseContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"📥 Response status: {response.StatusCode}, Content: {responseContent}");
                 
                 // Check if successful
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    errors.Add($"Failed to configure Twilio: {errorContent}");
+                    errors.Add($"Failed to configure Twilio: {responseContent}");
                 }
             }
         }
@@ -91,61 +102,26 @@ public class ConfigurationController : Controller
     }
     
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ClearTwilioConfiguration(long workspaceId)
     {
-        var result = new { success = false, message = "", error = "" };
-        
         try
         {
             // Log the request
             Console.WriteLine($" Clearing Twilio configuration for workspace {workspaceId}");
             
-            // Get the backend API URL from configuration
-            var backendUrl = _configuration["BackendApiUrl"] ?? "https://backend-production-3608.up.railway.app";
-            var clearConfigUrl = $"{backendUrl}/api/twilio/clear-configuration";
-            
-            // Create HTTP client
-            var client = _httpClientFactory.CreateClient();
-            
-            // Prepare request data
-            var requestData = new
+            // Only update the workspace to clear Twilio credentials
+            var workspace = await _workspaceService.FindById(workspaceId);
+            if (workspace != null)
             {
-                workspaceId = workspaceId
-            };
-            
-            // Convert to JSON
-            var content = new StringContent(
-                JsonSerializer.Serialize(requestData),
-                Encoding.UTF8,
-                "application/json");
-            
-            // Send request to clear Twilio configuration
-            Console.WriteLine($" Sending request to: {clearConfigUrl}");
-            var response = await client.PostAsync(clearConfigUrl, content);
-            
-            // Log the response
-            var responseContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($" Response status: {response.StatusCode}, Content: {responseContent}");
-            
-            // Check if successful
-            if (response.IsSuccessStatusCode)
-            {
-                // Clear Twilio credentials in the workspace
-                var workspace = await _workspaceService.FindById(workspaceId);
-                if (workspace != null)
-                {
-                    workspace.TwilioAccountSID = null;
-                    workspace.TwilioAuthToken = null;
-                    workspace.TwilioTwiMLAppSID = null;
-                    await _workspaceService.Update(workspace, User.Identity.Name);
-                }
-                
-                return Json(new { success = true, message = "Twilio configuration cleared successfully" });
+                workspace.TwilioAccountSID = null;
+                workspace.TwilioAuthToken = null;
+                workspace.TwilioTwiMLAppSID = null;
+                await _workspaceService.Update(workspace, User.Identity.Name);
+                Console.WriteLine(" Twilio credentials cleared from workspace!");
             }
-            else
-            {
-                return Json(new { success = false, error = $"Failed to clear Twilio configuration: {responseContent}" });
-            }
+            
+            return Json(new { success = true, message = "Twilio configuration cleared successfully. Please run the provided SQL commands in Supabase." });
         }
         catch (Exception ex)
         {
