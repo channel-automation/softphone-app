@@ -48,6 +48,36 @@
 - Credentials are only fetched when needed for specific operations
 - This approach aligns with the multi-tenant architecture of the application
 
+## Path Resolution in Deployment Environments
+
+### Problem
+- The application was crashing in the deployment environment with `Error: Cannot find module './src/routes/twilio'`
+- Local development paths don't always work in deployment environments
+- Different environments may have different working directory structures
+- Relative paths like `../../io` may work locally but fail in deployment
+
+### Solution
+- Restructured the application to have consistent path resolution:
+  - Moved route files to a top-level `routes` directory
+  - Moved utility files like `io.js` and `supabase.js` to the root directory
+  - Updated import paths in all files to use the correct relative paths
+  - Used `./routes/` instead of `./src/routes/` for imports
+  - Simplified relative paths to use single-level navigation (`../io` instead of `../../io`)
+
+### Benefits
+- More consistent file structure across environments
+- Improved deployment reliability
+- Reduced dependency on specific directory structures
+- Easier to maintain and understand codebase organization
+
+### Implementation Notes
+- Always test path resolution in both local and deployment environments
+- Use relative paths that are robust to different working directory contexts
+- When possible, structure your application with a flat or shallow hierarchy
+- Consider using path resolution utilities for more complex applications
+- Remember that in deployment environments like Railway, files might be in different locations
+- Understand the deployment environment's file structure before designing import paths
+
 ## Database Design
 
 ### Workspace-Scoped Credentials
