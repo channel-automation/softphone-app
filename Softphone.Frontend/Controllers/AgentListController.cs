@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Softphone.Frontend.Helpers;
 using Softphone.Frontend.Models;
 using Softphone.Frontend.Services;
 
@@ -15,6 +17,7 @@ public class AgentListController : Controller
         _userService = userService;
     }
 
+    [Authorize(Roles = UserRole.Admin)]
     public IActionResult Start()
     {
         // Get the method info
@@ -31,6 +34,7 @@ public class AgentListController : Controller
         return PartialView();
     }
 
+    [Authorize(Roles = UserRole.Admin)]
     [HttpPost]
     public async Task<IActionResult> Search(int draw, int start, int length, string search, long workspaceId)
     {
@@ -41,6 +45,7 @@ public class AgentListController : Controller
         return Json(new { draw, recordsFiltered = result.RecordsTotal, result.RecordsTotal, result.Data });
     }
 
+    [Authorize(Roles = UserRole.Admin)]
     public async Task<IActionResult> Edit(int id)
     {
         var user = await _userService.FindById(id) ?? new UserBO();
@@ -49,10 +54,13 @@ public class AgentListController : Controller
 
     public async Task<IActionResult> RemoteAgentPhone(int? page, string term, long workspaceId)
     {
+        string role = User.Claims.Where(w => w.Type == ClaimTypes.Role).First().Value;
+        string agentUsername = (role == UserRole.Agent ? User.Identity.Name : string.Empty);
+
         int size = 10;
         int skip = ((page ?? 1) - 1) * size;
 
-        var paged = await _userService.RemoteAgentPhone(skip, size, term ?? string.Empty, workspaceId);
+        var paged = await _userService.RemoteAgentPhone(skip, size, term ?? string.Empty, workspaceId, agentUsername);
 
         var results = new List<object>();
         foreach (var phone in paged.Data)

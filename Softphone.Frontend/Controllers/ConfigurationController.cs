@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Softphone.Frontend.Services;
 using Softphone.Frontend.Models;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using Softphone.Frontend.Helpers;
 
 namespace Softphone.Frontend.Controllers;
 
-[Authorize]
+[Authorize(Roles = UserRole.Admin)]
 public class ConfigurationController : Controller
 {
     private IUserService _userService;

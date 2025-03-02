@@ -3,17 +3,14 @@ using Supabase.Postgrest.Models;
 
 namespace Softphone.Frontend.Models
 {
-    [Table("agent_phone")]
-    public class AgentPhoneBO : BaseModel
+    [Table("workspace_phone")]
+    public class WorkspacePhoneBO : BaseModel
     {
         [PrimaryKey("id")]
         public long Id { get; set; }
 
         [Column("workspace_id")]
         public long WorkspaceId { get; set; }
-
-        [Column("username")]
-        public string Username { get; set; }
 
         [Column("full_name")]
         public string FullName { get; set; }

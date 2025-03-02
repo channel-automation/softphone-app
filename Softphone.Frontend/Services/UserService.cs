@@ -71,13 +71,14 @@ namespace Softphone.Frontend.Services
             return paged;
         }
 
-        public async Task<Paging<AgentPhoneBO>> RemoteAgentPhone(int skip, int take, string search, long workspaceId)
+        public async Task<Paging<AgentPhoneBO>> RemoteAgentPhone(int skip, int take, string search, long workspaceId, string agentUsername)
         {
             var paged = new Paging<AgentPhoneBO>();
 
             var response = await _client.From<AgentPhoneBO>()
                 .Filter(w => w.FullName, Operator.ILike, $"%{search}%")
                 .Filter(w => w.TwilioNumber, Operator.ILike, $"%{search}%")
+                .Filter(w => w.Username, Operator.ILike, $"%{agentUsername}%")
                 .Where(x => x.WorkspaceId == workspaceId)
                 .Get();
 
@@ -86,6 +87,7 @@ namespace Softphone.Frontend.Services
             var response2 = await _client.From<AgentPhoneBO>()
                 .Filter(w => w.FullName, Operator.ILike, $"%{search}%")
                 .Filter(w => w.TwilioNumber, Operator.ILike, $"%{search}%")
+                .Filter(w => w.Username, Operator.ILike, $"%{agentUsername}%")
                 .Where(x => x.WorkspaceId == workspaceId)
                 .Order(w => w.FullName, Ordering.Ascending)
                 .Range(skip, take)
