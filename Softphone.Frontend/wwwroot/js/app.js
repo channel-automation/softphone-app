@@ -15,15 +15,18 @@ function initializeFormControls(parent) {
     //Select2
     $(parent).find(".select2-common").select2({
         placeholder: "Select Value",
+        width: "100%",
     });
     $(parent).find(".select2-common-modal").select2({
         dropdownParent: $(".bootbox").last(),
         placeholder: "Select Value",
+        width: "100%",
     });
     //Select2 Agent Phone
     $(parent).find(".select2-agentphone").select2({
         ajax: { url: baseUrl + "/AgentList/RemoteAgentPhone?workspaceId=" + globalWorkspaceId },
         placeholder: "Select Agent",
+        width: "100%",
         templateResult: function (data) {
             if (data.loading) return data.text;
             let htm = "<div class='row'><div class='col-12'>";

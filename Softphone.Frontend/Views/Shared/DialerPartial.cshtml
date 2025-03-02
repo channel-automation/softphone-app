@@ -1,25 +1,20 @@
-﻿<div class="card card-purple elevation-2">
+﻿<div class="card card-purple elevation-2" id="divDialer">
 	<div class="card-header">
         <h3 class="card-title">Dialer</h3>
 	</div>
 	<div class="card-body p-4">
-        <form onsubmit="return false;" id="frmDialer">
-            <label class="text-purple"><i class="fas fa-mobile-retro"></i> To:</label>
-            <div class="input-group mb-3">
-                <div class="input-group-prepend"><div class="input-group-text">+1</div></div>
-                <input class="form-control inputmask-usphone" placeholder="Phone Number">
-            </div>
-            <label class="text-purple"><i class="fas fa-user-tie"></i> From:</label>
-            <select class="form-control select2-agentphone" style="width:100%"></select>
-            <small class="text-purple"></small>
-        </form>
+        <label class="text-purple"><i class="fas fa-mobile-retro"></i> To:</label>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend"><div class="input-group-text">+1</div></div>
+            <input class="form-control inputmask-usphone" placeholder="Phone Number">
+        </div>
+        <label class="text-purple"><i class="fas fa-user-tie"></i> From:</label>
+        <select class="form-control select2-agentphone"></select>
+        <small class="text-purple"></small>
 	</div>
     <div class="card-footer">
-        <button type="button" class="btn bg-gradient-purple btn-block" id="btnPlaceCall">
+        <button type="button" class="btn bg-gradient-purple btn-block">
             <i class="fas fa-phone"></i> Place Call
-        </button>
-        <button type="button" class="btn bg-gradient-red btn-block" id="btnEndCall" style="display:none">
-            <i class="fas fa-phone-slash"></i> End Call
         </button>
     </div>
 </div>
