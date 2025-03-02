@@ -48,6 +48,41 @@ async function syncPhoneNumbers(workspaceId, client) {
       if (error) throw error;
     }
 
+    // Also update the agent_phone table for the dialer UI
+    // First, get workspace name for the friendly name
+    const { data: workspace, error: workspaceError } = await supabase
+      .from('workspace')
+      .select('name')
+      .eq('id', workspaceId)
+      .single();
+    
+    if (workspaceError) throw workspaceError;
+    
+    // Delete existing agent_phone entries for this workspace
+    await supabase
+      .from('agent_phone')
+      .delete()
+      .eq('workspace_id', workspaceId);
+    
+    // Format for agent_phone table
+    const agentPhones = numbers.map(number => ({
+      workspace_id: workspaceId,
+      full_name: number.friendlyName || `${workspace?.name || 'Softphone'} Line`,
+      twilio_number: number.phoneNumber
+    }));
+    
+    // Insert into agent_phone table
+    if (agentPhones.length > 0) {
+      const { error: agentPhoneError } = await supabase
+        .from('agent_phone')
+        .insert(agentPhones);
+      
+      if (agentPhoneError) {
+        console.error('Error updating agent_phone table:', agentPhoneError);
+        // Don't throw here, as we've already updated the twilio_numbers table
+      }
+    }
+
     // Notify clients about the update
     const io = getIO();
     io.to(workspaceId).emit('phone_numbers_updated', formattedNumbers);
@@ -189,6 +224,120 @@ router.post('/configure-webhook', async (req, res) => {
   } catch (error) {
     console.error('Error configuring webhook:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Configure Twilio when credentials are updated
+router.post('/configure-from-credentials', async (req, res) => {
+  try {
+    const { workspaceId, accountSid, authToken } = req.body;
+    
+    if (!workspaceId || !accountSid || !authToken) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required parameters: workspaceId, accountSid, authToken' 
+      });
+    }
+
+    // Create Twilio client with the provided credentials
+    const client = twilio(accountSid, authToken);
+    
+    // 1. Sync phone numbers
+    const phoneNumbers = await syncPhoneNumbers(workspaceId, client);
+    
+    // 2. Save the Twilio config
+    const { error: configError } = await supabase
+      .from('workspace_twilio_config')
+      .upsert({
+        workspace_id: workspaceId,
+        account_sid: accountSid,
+        auth_token: authToken
+      }, {
+        onConflict: 'workspace_id'
+      });
+
+    if (configError) {
+      throw configError;
+    }
+    
+    // 3. Configure TwiML App
+    // Get the base URL for webhooks
+    const baseUrl = process.env.BASE_URL || 'https://backend-production-3608.up.railway.app';
+    
+    // Voice URLs
+    const voiceUrl = `${baseUrl}/api/voice/outbound`;
+    const statusCallbackUrl = `${baseUrl}/api/voice/status`;
+    
+    // Check if TwiML app already exists
+    const apps = await client.applications.list({ friendlyName: `Softphone-${workspaceId}` });
+    
+    let twimlApp;
+    
+    if (apps.length > 0) {
+      // Update existing app
+      twimlApp = await client.applications(apps[0].sid).update({
+        voiceUrl: voiceUrl,
+        voiceMethod: 'POST',
+        statusCallback: statusCallbackUrl,
+        statusCallbackMethod: 'POST'
+      });
+      
+      console.log(`📱 Updated TwiML App: ${twimlApp.sid}`);
+    } else {
+      // Create new app
+      twimlApp = await client.applications.create({
+        friendlyName: `Softphone-${workspaceId}`,
+        voiceUrl: voiceUrl,
+        voiceMethod: 'POST',
+        statusCallback: statusCallbackUrl,
+        statusCallbackMethod: 'POST'
+      });
+      
+      console.log(`📱 Created TwiML App: ${twimlApp.sid}`);
+    }
+    
+    // 4. Save TwiML app SID to workspace
+    const { error: updateError } = await supabase
+      .from('workspace')
+      .update({ twilio_twiml_app_sid: twimlApp.sid })
+      .eq('id', workspaceId);
+    
+    if (updateError) throw updateError;
+    
+    // 5. Configure phone numbers to use this TwiML app
+    if (phoneNumbers && phoneNumbers.length > 0) {
+      for (const phoneNumber of phoneNumbers) {
+        try {
+          const twilioPhoneNumbers = await client.incomingPhoneNumbers.list({ 
+            phoneNumber: phoneNumber.phone_number 
+          });
+          
+          if (twilioPhoneNumbers.length > 0) {
+            await client.incomingPhoneNumbers(twilioPhoneNumbers[0].sid).update({
+              voiceApplicationSid: twimlApp.sid,
+              smsUrl: `${baseUrl}/api/twilio/webhook`
+            });
+            
+            console.log(`📞 Updated phone number ${phoneNumber.phone_number} to use TwiML App ${twimlApp.sid}`);
+          }
+        } catch (error) {
+          console.error(`Error updating phone number ${phoneNumber.phone_number}:`, error);
+        }
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Twilio configuration completed successfully',
+      twimlAppSid: twimlApp.sid,
+      phoneNumbers: phoneNumbers.length
+    });
+  } catch (error) {
+    console.error('Error configuring Twilio:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message || 'Failed to configure Twilio' 
+    });
   }
 });
 
@@ -764,6 +913,83 @@ router.post('/verify-webhook', async (req, res) => {
   } catch (error) {
     console.error('Error verifying webhook:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Clear Twilio configuration for a workspace
+router.post('/clear-configuration', async (req, res) => {
+  try {
+    const { workspaceId } = req.body;
+    
+    if (!workspaceId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required parameter: workspaceId' 
+      });
+    }
+    
+    console.log(`🧹 Clearing Twilio configuration for workspace ${workspaceId}`);
+    
+    // 1. Delete phone numbers from twilio_numbers table
+    const { error: deleteNumbersError } = await supabase
+      .from('twilio_numbers')
+      .delete()
+      .eq('workspace_id', workspaceId);
+    
+    if (deleteNumbersError) {
+      console.error('Error deleting from twilio_numbers:', deleteNumbersError);
+    }
+    
+    // 2. Delete phone numbers from agent_phone table
+    const { error: deleteAgentPhoneError } = await supabase
+      .from('agent_phone')
+      .delete()
+      .eq('workspace_id', workspaceId);
+    
+    if (deleteAgentPhoneError) {
+      console.error('Error deleting from agent_phone:', deleteAgentPhoneError);
+    }
+    
+    // 3. Delete Twilio config
+    const { error: deleteTwilioConfigError } = await supabase
+      .from('workspace_twilio_config')
+      .delete()
+      .eq('workspace_id', workspaceId);
+    
+    if (deleteTwilioConfigError) {
+      console.error('Error deleting from workspace_twilio_config:', deleteTwilioConfigError);
+    }
+    
+    // 4. Clear Twilio credentials from workspace table
+    const { error: updateWorkspaceError } = await supabase
+      .from('workspace')
+      .update({
+        twilio_account_sid: null,
+        twilio_auth_token: null,
+        twilio_twiml_app_sid: null
+      })
+      .eq('id', workspaceId);
+    
+    if (updateWorkspaceError) {
+      console.error('Error updating workspace:', updateWorkspaceError);
+      throw updateWorkspaceError;
+    }
+    
+    // Notify clients about the update
+    const io = getIO();
+    io.to(workspaceId).emit('twilio_config_cleared');
+    io.to(workspaceId).emit('phone_numbers_updated', []);
+    
+    res.json({ 
+      success: true, 
+      message: 'Twilio configuration cleared successfully'
+    });
+  } catch (error) {
+    console.error('Error clearing Twilio configuration:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message || 'Failed to clear Twilio configuration' 
+    });
   }
 });
 
