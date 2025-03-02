@@ -1,4 +1,4 @@
-﻿@model Softphone.Frontend.Models.WorkspaceBO
+@model Softphone.Frontend.Models.WorkspaceBO
 
 <form onsubmit="return false;">
     @Html.AntiForgeryToken()
@@ -7,12 +7,14 @@
         <div class="col-12">
             <label class="text-purple">Twilio Account SID</label>
             <input type="text" asp-for="TwilioAccountSID" class="form-control" />
+            <small class="text-muted">Your Twilio Account SID from the Twilio Console</small>
         </div>
     </div>
     <div class="form-group row">
         <div class="col-12">
             <label class="text-purple">Twilio Auth Token</label>
             <input type="text" asp-for="TwilioAuthToken" class="form-control" />
+            <small class="text-muted">Your Twilio Auth Token from the Twilio Console</small>
         </div>
     </div>
     <div class="form-group row">
@@ -21,10 +23,22 @@
             <input type="text" asp-for="ChannelAutomationAPIKey" class="form-control" />
         </div>
     </div>
+    <div class="alert alert-info mt-3" role="alert">
+        <i class="fas fa-info-circle"></i> When you save your Twilio credentials, the system will automatically:
+        <ul class="mb-0 mt-2">
+            <li>Configure your Twilio TwiML App for voice calling</li>
+            <li>Set up webhooks for SMS and voice</li>
+            <li>Update your phone numbers to use these configurations</li>
+        </ul>
+    </div>
 </form>
-<div class="text-center mt-5 mb-1">
+<div class="text-center mt-4 mb-1">
     <button class="btn bg-gradient-purple mr-2" onclick="_save(this)"><i class="fas fa-save"></i> Save</button>
-    <button class="btn bg-gradient-dark" onclick="_cancel()"><i class="fas fa-times-circle"></i> Cancel</button>
+    <button class="btn bg-gradient-dark mr-2" onclick="_cancel()"><i class="fas fa-times-circle"></i> Cancel</button>
+    @if (!string.IsNullOrEmpty(Model.TwilioAccountSID))
+    {
+        <button class="btn bg-gradient-danger" onclick="_clearConfiguration(this)"><i class="fas fa-trash"></i> Clear Configuration</button>
+    }
 </div>
 
 <script>
@@ -36,6 +50,64 @@
     function _cancel() {
         //configurationDialog.modal("hide");
         Swal.close(configurationDialog);
+    }
+
+    function _clearConfiguration(btn) {
+        Swal.fire({
+            title: 'Clear Twilio Configuration?',
+            text: 'This will remove all Twilio credentials and phone number data. You will need to reconfigure Twilio to use the dialer and messaging features.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, clear it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading message
+                Swal.fire({
+                    title: 'Clearing Configuration',
+                    html: 'Please wait while we clear your Twilio configuration...',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Call the controller action to clear the configuration
+                startAjaxSpinner(btn);
+                $.ajax({
+                    url: '@Url.Action("ClearTwilioConfiguration", "Configuration")',
+                    type: 'POST',
+                    data: { workspaceId: @Model.Id },
+                    success: function(response) {
+                        Swal.close(); // Close the loading dialog
+                        
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Configuration Cleared',
+                                text: 'Your Twilio configuration has been cleared successfully.',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                // Reload the page to reflect the changes
+                                window.location.reload();
+                            });
+                        } else {
+                            toastr.error(response.error || "Failed to clear configuration. Please try again.", "Error!");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.close(); // Close the loading dialog
+                        console.error("Clear configuration error:", xhr.responseText);
+                        toastr.error("Failed to clear configuration. Please try again. Error: " + error, "Error!");
+                    }
+                });
+            }
+        });
     }
 
     function _save(btn) {
@@ -56,15 +128,39 @@
             toastr.error("Channel Automation API Key is required.", "Error..");
             return false;
         }
+        
+        // Show loading message
+        Swal.fire({
+            title: 'Configuring Twilio',
+            html: 'Please wait while we configure your Twilio account...<br/><small class="text-muted">This may take a few moments</small>',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            allowEnterKey: false,
+            showConfirmButton: false,
+            willOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
         //Server Processing
         startAjaxSpinner(btn);
         $.post("@Url.Action("Save")", form.serialize(), function (response) {
+            Swal.close(); // Close the loading dialog
+            
             if (errorMessages(response)) return false;
             else {
                 //configurationDialog.modal("hide");
                 Swal.close(configurationDialog);
-                toastr.success("Configuration successfully saved.", "Success!");
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Configuration Successful',
+                    html: 'Your Twilio account has been configured successfully!<br/><small class="text-muted">TwiML App and webhooks have been set up for voice and SMS.</small>',
+                    confirmButtonText: 'Great!'
+                });
             }
+        }).fail(function(xhr) {
+            Swal.close(); // Close the loading dialog
+            toastr.error("Failed to save configuration. Please try again.", "Error!");
         });
         return false;
     }
