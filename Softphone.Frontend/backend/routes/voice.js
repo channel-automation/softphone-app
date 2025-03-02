@@ -211,7 +211,17 @@ router.post('/outbound', async (req, res) => {
   try {
     const { To, From, WorkspaceId } = req.body;
     
-    console.log(`📞 Outbound call from ${From} to ${To} for workspace ${WorkspaceId}`);
+    // Log the start of an outbound call with timestamp
+    const timestamp = new Date().toISOString();
+    console.log(`
+📞 ===== OUTBOUND CALL INITIATED =====
+🕒 Timestamp: ${timestamp}
+📱 From: ${From || 'Not provided'} 
+📞 To: ${To || 'Not provided'}
+🏢 Workspace ID: ${WorkspaceId || 'Not provided'}
+📝 Request body: ${JSON.stringify(req.body)}
+📤 Headers: ${JSON.stringify(req.headers['user-agent'])}
+======================================`);
     
     // Create TwiML response
     const twiml = new twilio.twiml.VoiceResponse();
@@ -249,7 +259,12 @@ router.post('/outbound', async (req, res) => {
     res.type('text/xml');
     res.send(twiml.toString());
   } catch (error) {
-    console.error('❌ Error handling outbound call:', error);
+    console.error(`
+❌ ===== OUTBOUND CALL ERROR =====
+🕒 Timestamp: ${new Date().toISOString()}
+🛑 Error: ${error.message}
+📚 Stack: ${error.stack}
+=================================`);
     const twiml = new twilio.twiml.VoiceResponse();
     twiml.say('An error occurred. Please try again later.');
     res.type('text/xml');
@@ -262,7 +277,17 @@ router.post('/inbound', async (req, res) => {
   try {
     const { To, From, CallSid } = req.body;
     
-    console.log(`📞 Inbound call from ${From} to ${To}, CallSid: ${CallSid}`);
+    // Log the inbound call with timestamp and detailed information
+    const timestamp = new Date().toISOString();
+    console.log(`
+📞 ===== INBOUND CALL RECEIVED =====
+🕒 Timestamp: ${timestamp}
+📱 From: ${From || 'Not provided'} 
+📞 To: ${To || 'Not provided'}
+🆔 Call SID: ${CallSid || 'Not provided'}
+📝 Request body: ${JSON.stringify(req.body)}
+📥 Headers: ${JSON.stringify(req.headers['user-agent'])}
+====================================`);
     
     // Find the workspace for this number
     const { data: twilioNumber, error } = await supabase
@@ -301,7 +326,12 @@ router.post('/inbound', async (req, res) => {
     res.type('text/xml');
     res.send(twiml.toString());
   } catch (error) {
-    console.error('❌ Error handling inbound call:', error);
+    console.error(`
+❌ ===== INBOUND CALL ERROR =====
+🕒 Timestamp: ${new Date().toISOString()}
+🛑 Error: ${error.message}
+📚 Stack: ${error.stack}
+=================================`);
     const twiml = new twilio.twiml.VoiceResponse();
     twiml.say('An error occurred. Please try again later.');
     res.type('text/xml');
@@ -312,9 +342,21 @@ router.post('/inbound', async (req, res) => {
 // Handle call status callbacks
 router.post('/status', async (req, res) => {
   try {
-    const { CallSid, CallStatus, From, To } = req.body;
+    const { CallSid, CallStatus, From, To, CallDuration, Direction } = req.body;
     
-    console.log(`📞 Call ${CallSid} from ${From} to ${To} is now ${CallStatus}`);
+    // Log the call status update with detailed information
+    const timestamp = new Date().toISOString();
+    console.log(`
+📞 ===== CALL STATUS UPDATE =====
+🕒 Timestamp: ${timestamp}
+🆔 Call SID: ${CallSid || 'Not provided'}
+📊 Status: ${CallStatus || 'Not provided'}
+📱 From: ${From || 'Not provided'} 
+📞 To: ${To || 'Not provided'}
+⏱️ Duration: ${CallDuration ? `${CallDuration} seconds` : 'Not available'}
+🔄 Direction: ${Direction || 'Not specified'}
+📝 Full data: ${JSON.stringify(req.body)}
+=================================`);
     
     // Notify connected clients about call status
     const io = getIO();
@@ -329,7 +371,12 @@ router.post('/status', async (req, res) => {
     
     res.sendStatus(200);
   } catch (error) {
-    console.error('❌ Error handling call status:', error);
+    console.error(`
+❌ ===== CALL STATUS UPDATE ERROR =====
+🕒 Timestamp: ${new Date().toISOString()}
+🛑 Error: ${error.message}
+📚 Stack: ${error.stack}
+======================================`);
     res.sendStatus(500);
   }
 });
