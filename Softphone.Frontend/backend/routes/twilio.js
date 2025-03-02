@@ -188,7 +188,7 @@ router.post('/configure-webhook', async (req, res) => {
   try {
     const { workspaceId, webhookType, webhookUrl } = req.body;
 
-    // Get workspace Twilio config
+    // Get workspace's Twilio credentials
     const { data: config } = await supabase
       .from('workspace_twilio_config')
       .select('*')
@@ -277,10 +277,16 @@ router.post('/configure-from-credentials', async (req, res) => {
     // 3. Configure TwiML App
     // Get the base URL for webhooks
     const baseUrl = process.env.BASE_URL || 'https://backend-production-3608.up.railway.app';
+    console.log(`🌐 Using base URL for webhooks: ${baseUrl}`);
     
     // Voice URLs
     const voiceUrl = `${baseUrl}/api/voice/outbound`;
     const statusCallbackUrl = `${baseUrl}/api/voice/status`;
+    const inboundVoiceUrl = `${baseUrl}/api/voice/inbound`;
+    
+    console.log(`🔗 Voice URL: ${voiceUrl}`);
+    console.log(`🔗 Status Callback URL: ${statusCallbackUrl}`);
+    console.log(`🔗 Inbound Voice URL: ${inboundVoiceUrl}`);
     
     // Check if TwiML app already exists
     const apps = await client.applications.list({ friendlyName: `Softphone-${workspaceId}` });
@@ -329,10 +335,18 @@ router.post('/configure-from-credentials', async (req, res) => {
           if (twilioPhoneNumbers.length > 0) {
             await client.incomingPhoneNumbers(twilioPhoneNumbers[0].sid).update({
               voiceApplicationSid: twimlApp.sid,
-              smsUrl: `${baseUrl}/api/twilio/webhook`
+              smsUrl: `${baseUrl}/api/twilio/webhook`,
+              voiceUrl: inboundVoiceUrl,
+              voiceMethod: 'POST',
+              statusCallback: statusCallbackUrl,
+              statusCallbackMethod: 'POST'
             });
             
-            console.log(`📞 Updated phone number ${phoneNumber.phone_number} to use TwiML App ${twimlApp.sid}`);
+            console.log(`📞 Updated phone number ${phoneNumber.phone_number} with the following settings:`);
+            console.log(`   - TwiML App SID: ${twimlApp.sid}`);
+            console.log(`   - SMS URL: ${baseUrl}/api/twilio/webhook`);
+            console.log(`   - Voice URL: ${inboundVoiceUrl}`);
+            console.log(`   - Status Callback: ${statusCallbackUrl}`);
           }
         } catch (error) {
           console.error(`Error updating phone number ${phoneNumber.phone_number}:`, error);
@@ -344,7 +358,14 @@ router.post('/configure-from-credentials', async (req, res) => {
       success: true, 
       message: 'Twilio configuration completed successfully',
       twimlAppSid: twimlApp.sid,
-      phoneNumbers: phoneNumbers.length
+      phoneNumbers: phoneNumbers.length,
+      configuration: {
+        baseUrl,
+        voiceUrl,
+        inboundVoiceUrl,
+        statusCallbackUrl,
+        phoneNumbersConfigured: phoneNumbers.map(p => p.phone_number)
+      }
     });
   } catch (error) {
     console.error('Error configuring Twilio:', error);
