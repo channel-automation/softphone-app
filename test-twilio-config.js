@@ -1,9 +1,10 @@
 const axios = require('axios');
 const { URLSearchParams } = require('url');
 
-// Twilio credentials
-const TWILIO_ACCOUNT_SID = 'AC325c5b6a53544748118699bd4099ddf0';
-const TWILIO_AUTH_TOKEN = '00bdd4584a140fef9f9a3126a67f560a';
+// Twilio credentials should be provided as environment variables
+// Never hardcode credentials in source code
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || 'your_account_sid_here';
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || 'your_auth_token_here';
 
 // Base URL for your backend
 const BASE_URL = 'https://backend-production-3608.up.railway.app';
@@ -11,6 +12,14 @@ const BASE_URL = 'https://backend-production-3608.up.railway.app';
 async function testTwilioConfig() {
   try {
     console.log('🔧 Testing Twilio configuration...');
+    
+    // Check if credentials are provided
+    if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+      console.error('❌ Error: Twilio credentials not provided as environment variables.');
+      console.error('Please set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN environment variables.');
+      console.error('Example: TWILIO_ACCOUNT_SID=AC... TWILIO_AUTH_TOKEN=... node test-twilio-config.js');
+      process.exit(1);
+    }
     
     // 1. List phone numbers
     console.log('1. Listing phone numbers...');
