@@ -11,7 +11,7 @@ const server = http.createServer(app);
 
 // Configure CORS
 const corsOptions = {
-  origin: ['https://beta.sofphone.channelautomation.com', 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'],
+  origin: ['https://beta.sofphone.channelautomation.com', 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'https://backend-production-3608.up.railway.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -927,7 +927,7 @@ app.post('/api/configure-twilio', async (req, res) => {
     await workspaceClient.incomingPhoneNumbers.list({ limit: 1 });
     
     // Get the base URL for webhooks
-    const baseUrl = process.env.BASE_URL || 'https://softphone-backend.up.railway.app';
+    const baseUrl = process.env.BASE_URL || 'https://backend-production-3608.up.railway.app';
     
     // Configure TwiML app
     const response = await fetch(`${baseUrl}/api/voice/configure-twiml-app`, {
