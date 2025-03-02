@@ -106,3 +106,69 @@
 - Real-time updates for call status require Socket.IO
 - Socket.IO needs to be properly initialized and exported
 - Events should be emitted to notify clients of call status changes
+
+## Custom Domain Configuration for Webhooks
+
+### Problem
+- Railway provides a default domain for deployments, but it may change with new deployments
+- Twilio webhooks need stable, consistent URLs to function properly
+- Hard-coded URLs in the application code can lead to failures when the deployment environment changes
+
+### Solution
+- Set up a custom domain in Railway for the backend service
+- Update all webhook URLs in the application to use this custom domain
+- Store the base URL as an environment variable for flexibility
+- Update CORS settings to allow the custom domain
+
+### Benefits
+- Stable webhook URLs that don't change between deployments
+- Improved reliability for Twilio integrations
+- Better separation of environment-specific configuration
+- Easier to manage and update webhook endpoints
+
+### Implementation Notes
+- The custom domain (https://backend-production-3608.up.railway.app) is configured in Railway's settings
+- Updated the BASE_URL environment variable in .env.example
+- Added the custom domain to CORS allowed origins
+- Updated fallback URLs in the code to use the custom domain
+- Created a test script to verify and update Twilio webhook configurations
+
+## Twilio Webhook Configuration
+
+### Direct API Configuration vs. Application Logic
+- While our application has logic to configure Twilio resources, direct API access is sometimes more reliable
+- For initial setup or troubleshooting, using Twilio's REST API directly provides more control
+- A combination approach works best: application logic for normal operations, direct API for setup and verification
+
+### Key Webhook Endpoints
+- Voice URL for outbound calls: `/api/voice/outbound`
+- Status callback URL: `/api/voice/status`
+- SMS webhook URL: `/api/twilio/webhook`
+- Inbound voice URL: `/api/voice/inbound`
+
+### Implementation Notes
+- All webhook URLs should use the custom domain
+- TwiML Apps should be configured with the correct voice URL and status callback
+- Phone numbers should be linked to the TwiML App using the `voiceApplicationSid` parameter
+- SMS URLs should be configured separately from voice URLs
+- Always verify webhook configurations after updates
+
+## Testing and Verification
+
+### Importance of Verification
+- Always verify that webhook configurations are correctly applied
+- Check both the TwiML App configuration and the phone number configuration
+- Test the full communication flow from end to end
+
+### Verification Tools
+- Created a test script that:
+  - Lists all phone numbers and their current configurations
+  - Updates or creates a TwiML App with the correct webhook URLs
+  - Updates all phone numbers to use the TwiML App
+  - Verifies that the changes were applied correctly
+
+### Lessons Learned
+- Twilio's API provides a reliable way to verify and update configurations
+- Regular verification helps catch configuration drift
+- Automating the verification process improves reliability
+- Always check both the TwiML App and phone number configurations
