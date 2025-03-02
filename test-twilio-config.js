@@ -3,8 +3,8 @@ const { URLSearchParams } = require('url');
 
 // Twilio credentials should be provided as environment variables
 // Never hardcode credentials in source code
-const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || 'your_account_sid_here';
-const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || 'your_auth_token_here';
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || 'ACCOUNT_SID_PLACEHOLDER';
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || 'AUTH_TOKEN_PLACEHOLDER';
 
 // Base URL for your backend
 const BASE_URL = 'https://backend-production-3608.up.railway.app';
@@ -17,7 +17,7 @@ async function testTwilioConfig() {
     if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
       console.error('❌ Error: Twilio credentials not provided as environment variables.');
       console.error('Please set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN environment variables.');
-      console.error('Example: TWILIO_ACCOUNT_SID=AC... TWILIO_AUTH_TOKEN=... node test-twilio-config.js');
+      console.error('Example: TWILIO_ACCOUNT_SID=[your-sid] TWILIO_AUTH_TOKEN=[your-token] node test-twilio-config.js');
       process.exit(1);
     }
     
