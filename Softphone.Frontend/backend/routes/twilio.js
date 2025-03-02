@@ -1,6 +1,6 @@
 const express = require('express');
-const { getIO } = require('../../io');
-const supabase = require('../../supabase'); 
+const { getIO } = require('../io');
+const supabase = require('../supabase'); 
 const twilio = require('twilio');
 
 const router = express.Router();
