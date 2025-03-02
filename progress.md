@@ -21,6 +21,15 @@
   - [x] Added TwiML app creation/update
   - [x] Configured phone numbers automatically
   - [x] Enhanced error handling and feedback
+- [x] Fixed CORS configuration to allow proper communication between frontend and backend
+
+### Updates 03/02/2025
+- [x] Implemented Twilio Configuration Reset feature
+  - [x] Controller clears Twilio credentials from workspace table
+  - [x] UI displays SQL commands for administrators to run in Supabase
+  - [x] Fixed 404 routing issues with proper controller action URLs
+  - [x] Added anti-forgery token validation for security
+  - [x] Improved user experience with clear instructions and feedback
 
 ## Deployment History
 

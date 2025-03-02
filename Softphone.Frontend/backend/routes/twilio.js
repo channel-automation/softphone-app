@@ -5,6 +5,13 @@ const twilio = require('twilio');
 
 const router = express.Router();
 
+// Handle CORS preflight requests for all routes
+router.options('*', (req, res) => {
+  console.log('🔍 Handling CORS preflight request for Twilio routes');
+  // CORS headers are already set by the cors middleware
+  res.status(204).end();
+});
+
 // Helper function to get Twilio client for a workspace
 async function getTwilioClientForWorkspace(workspaceId) {
   const { data, error } = await supabase
@@ -230,9 +237,15 @@ router.post('/configure-webhook', async (req, res) => {
 // Configure Twilio when credentials are updated
 router.post('/configure-from-credentials', async (req, res) => {
   try {
+    console.log('📞 Received configure-from-credentials request');
     const { workspaceId, accountSid, authToken } = req.body;
     
+    // Log the request (masking sensitive data)
+    console.log(`🔑 Configure request for workspace ${workspaceId}`);
+    console.log(`🔑 Account SID: ${accountSid?.substring(0, 6)}...${accountSid?.substring(accountSid.length - 4)}`);
+    
     if (!workspaceId || !accountSid || !authToken) {
+      console.log('❌ Missing required parameters');
       return res.status(400).json({ 
         success: false, 
         error: 'Missing required parameters: workspaceId, accountSid, authToken' 
@@ -240,6 +253,7 @@ router.post('/configure-from-credentials', async (req, res) => {
     }
 
     // Create Twilio client with the provided credentials
+    console.log('🔄 Creating Twilio client with credentials');
     const client = twilio(accountSid, authToken);
     
     // 1. Sync phone numbers

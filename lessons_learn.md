@@ -78,6 +78,68 @@
 - Remember that in deployment environments like Railway, files might be in different locations
 - Understand the deployment environment's file structure before designing import paths
 
+## CORS Configuration in Hybrid Deployment Environments
+
+When working with a hybrid deployment where the frontend and backend are running in different environments (e.g., frontend on localhost and backend on Railway), CORS configuration becomes critical.
+
+### Challenges Encountered
+
+1. **CORS Origin Mismatch**: The backend was configured to accept requests from specific origins that didn't include our local ASP.NET Core development server (`https://localhost:7245`).
+
+2. **Cross-Environment Communication Issues**: 
+   - Frontend could save Twilio credentials to the database
+   - But the backend API calls (to configure TwiML apps and webhooks) were failing with CORS errors
+   - Phone numbers weren't being populated in the agent_phone and twilio_numbers tables
+
+3. **Socket.IO CORS Configuration**: Socket.IO requires its own CORS configuration, which also needed to be updated.
+
+### Solution
+
+1. **Environment Variable-Driven CORS**: 
+   - Updated backend to read CORS origins from environment variables
+   - Added our local development server to the allowed origins
+   - Added fallback defaults for when environment variables aren't set
+
+2. **Preflight Request Handling**:
+   - Added explicit OPTIONS route handlers to properly handle CORS preflight requests
+   - Ensured proper HTTP status codes (204) were returned
+
+3. **Detailed Logging**:
+   - Added comprehensive logging throughout the request/response cycle
+   - Logs show exactly where communication breaks down
+
+4. **Improved Error Handling**:
+   - Updated frontend to show detailed error information
+   - Backend now provides more context in error responses
+
+### Key Takeaways
+
+1. When deploying applications across different environments, always consider CORS implications early in the development process.
+2. Maintain a list of all potential origins that might need access to your API.
+3. Use environment variables to manage CORS configuration to avoid hardcoding values.
+4. Add detailed logging to quickly identify where communication breaks down.
+5. Remember that Socket.IO needs its own CORS configuration separate from the Express app.
+
+## Handling Twilio Configuration Reset
+
+When implementing a feature to clear Twilio configuration, we explored two approaches:
+
+1. **Controller-to-Backend API approach**: Initially tried having the ASP.NET Core controller call the Express backend API endpoint to clear configuration. However, this approach faced CORS and routing issues.
+
+2. **Hybrid approach**: Instead of making cross-service calls, we implemented a solution where:
+   - The controller clears the Twilio credentials from the workspace table
+   - The UI provides SQL commands for the administrator to run in Supabase to clear the related tables
+
+This approach maintains separation of concerns while providing a clean user experience:
+- Frontend controller handles what it owns (workspace credentials)
+- Database-specific operations are presented as SQL commands
+- No need for complex cross-service API calls
+
+The key lessons:
+- Sometimes a pragmatic hybrid approach is better than a fully automated but complex solution
+- Providing clear instructions to administrators can be more reliable than trying to automate everything
+- Important to maintain separation between frontend and backend data operations
+
 ## Database Design
 
 ### Workspace-Scoped Credentials

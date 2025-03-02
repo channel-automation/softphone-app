@@ -10,8 +10,14 @@ const app = express();
 const server = http.createServer(app);
 
 // Configure CORS
+const corsOrigins = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(',') 
+  : ['https://beta.sofphone.channelautomation.com', 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'https://localhost:7245'];
+
+console.log('⚙️ CORS Origins:', corsOrigins);
+
 const corsOptions = {
-  origin: ['https://beta.sofphone.channelautomation.com', 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'https://backend-production-3608.up.railway.app'],
+  origin: corsOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -193,8 +199,19 @@ app.use('/api/twilio', twilioRoutes);
 app.use('/api/voice', voiceRoutes);
 
 // Configure Socket.IO
+const socketCorsOrigins = process.env.SOCKET_CORS_ORIGIN 
+  ? process.env.SOCKET_CORS_ORIGIN.split(',') 
+  : corsOrigins;
+
+console.log('⚙️ Socket.IO CORS Origins:', socketCorsOrigins);
+
 const io = new Server(server, {
-  cors: corsOptions
+  cors: {
+    origin: socketCorsOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+  }
 });
 
 // Function to get the Socket.IO instance
