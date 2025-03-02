@@ -11,7 +11,7 @@ const server = http.createServer(app);
 
 // Configure CORS
 const corsOptions = {
-  origin: ['https://beta.sofphone.channelautomation.com', 'http://localhost:3000'],
+  origin: ['https://beta.sofphone.channelautomation.com', 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -28,12 +28,6 @@ app.use((req, res, next) => {
 // Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Initialize Twilio client
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
 
 // Validate Supabase environment variables
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
@@ -114,6 +108,33 @@ app.get('/', (req, res) => {
     domain: req.get('host')
   });
 });
+
+// Helper function to get Twilio credentials for a workspace
+async function getTwilioClient(workspaceId) {
+  try {
+    // Fetch Twilio credentials from the database
+    const { data, error } = await supabase
+      .from('workspaces')
+      .select('twilio_account_sid, twilio_auth_token')
+      .eq('id', workspaceId)
+      .single();
+
+    if (error || !data) {
+      console.error('Error fetching Twilio credentials:', error);
+      throw new Error('Failed to fetch Twilio credentials');
+    }
+
+    if (!data.twilio_account_sid || !data.twilio_auth_token) {
+      throw new Error('Twilio credentials not configured for this workspace');
+    }
+
+    // Create and return a new Twilio client
+    return twilio(data.twilio_account_sid, data.twilio_auth_token);
+  } catch (error) {
+    console.error('Error creating Twilio client:', error);
+    throw error;
+  }
+}
 
 // Handle inbound message from Twilio
 async function handleInboundMessage({ twilioSid, contactId, workspaceId, direction, content }) {
@@ -334,7 +355,7 @@ io.on('connection', (socket) => {
       }
 
       // Initialize Twilio client with workspace credentials
-      const client = twilio(twilioConfig.account_sid, twilioConfig.auth_token);
+      const client = await getTwilioClient(workspaceId);
 
       // Send message via Twilio
       const twilioMessage = await client.messages.create({
@@ -735,110 +756,32 @@ app.post('/send-sms', async (req, res) => {
       console.error('Missing required fields:', { to, message, workspaceId });
       return res.status(400).json({ 
         success: false, 
-        error: 'Missing required fields: to, message, workspaceId' 
+        error: 'Missing required parameters: to, message, workspaceId' 
       });
     }
 
-    // Get workspace's Twilio credentials and phone number
-    const { data: twilioConfig, error: configError } = await supabase
-      .from('workspace_twilio_config')
-      .select('account_sid, auth_token')
-      .eq('workspace_id', workspaceId)
-      .single();
-
-    if (configError) {
-      console.error('Error fetching Twilio config:', configError);
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Failed to fetch Twilio configuration' 
-      });
-    }
-
-    if (!twilioConfig) {
-      console.error('Twilio configuration not found for workspace');
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Twilio configuration not found for workspace' 
-      });
-    }
-
-    // Get workspace's phone number
-    const { data: phoneNumber, error: phoneError } = await supabase
-      .from('twilio_numbers')
-      .select('phone_number')
-      .eq('workspace_id', workspaceId)
-      .eq('is_active', true)
-      .single();
-
-    if (phoneError) {
-      console.error('Error fetching Twilio number:', phoneError);
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Failed to fetch Twilio number' 
-      });
-    }
-
-    if (!phoneNumber) {
-      console.error('No active phone number found for workspace');
-      return res.status(500).json({ 
-        success: false, 
-        error: 'No active phone number found for workspace' 
-      });
-    }
-
+    // Format the phone number
     const formattedPhone = formatPhoneForTwilio(to);
-    console.log('Formatted phone:', formattedPhone);
-
-    // Create Twilio client with workspace credentials
-    const client = twilio(twilioConfig.account_sid, twilioConfig.auth_token);
-
-    // Find or create contact for this phone number
-    let contactId;
-    const { data: existingContact, error: contactError } = await supabase
-      .from('contacts')
-      .select('id')
-      .eq('workspace_id', workspaceId)
-      .eq('phone_number', formattedPhone)
-      .single();
-
-    if (contactError && contactError.code !== 'PGRST116') {
-      console.error('Error fetching contact:', contactError);
-      return res.status(500).json({ 
+    
+    // Get workspace phone numbers from database
+    const { data: phoneNumbers, error: phoneError } = await supabase
+      .from('phone_numbers')
+      .select('*')
+      .eq('workspace_id', workspaceId);
+    
+    if (phoneError || !phoneNumbers || phoneNumbers.length === 0) {
+      return res.status(400).json({ 
         success: false, 
-        error: 'Failed to fetch contact' 
+        error: 'No phone numbers found for this workspace' 
       });
     }
-
-    if (existingContact) {
-      contactId = existingContact.id;
-    } else {
-      // Create new contact with required firstname field
-      const { data: newContact, error: newContactError } = await supabase
-        .from('contacts')
-        .insert({
-          workspace_id: workspaceId,
-          phone_number: formattedPhone,
-          name: `Contact ${formattedPhone}`,
-          firstname: 'New', // Adding required firstname field
-          lastname: 'Contact', // Adding lastname for completeness
-          email: '', // Empty email
-          lead_source: 'SMS' // Adding lead source
-        })
-        .select('id')
-        .single();
-
-      if (newContactError) {
-        console.error('Error creating contact:', newContactError);
-        return res.status(500).json({ 
-          success: false, 
-          error: 'Failed to create contact' 
-        });
-      }
-      
-      contactId = newContact.id;
-    }
-
-    // Send message via Twilio
+    
+    // Use the first phone number for now (can be enhanced later)
+    const phoneNumber = phoneNumbers[0];
+    
+    // Get Twilio credentials for this workspace
+    const client = await getTwilioClient(workspaceId);
+    
     let twilioMessage;
     try {
       twilioMessage = await client.messages.create({
@@ -855,7 +798,7 @@ app.post('/send-sms', async (req, res) => {
       });
       
       const { data, error: sqlError } = await supabase.from('messages').insert({
-        contact_id: contactId,
+        contact_id: null,
         workspace_id: workspaceId,
         direction: 'outbound',
         body: message,
@@ -875,7 +818,7 @@ app.post('/send-sms', async (req, res) => {
       // Notify connected clients
       io.to(workspaceId).emit('new_message', {
         workspaceId,
-        contactId,
+        contactId: null,
         messageSid: twilioMessage.sid,
         from: phoneNumber.phone_number,
         to: formattedPhone,
