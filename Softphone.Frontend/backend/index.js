@@ -185,8 +185,8 @@ async function handleInboundMessage({ twilioSid, contactId, workspaceId, directi
 };
 
 // Import routes
-const twilioRoutes = require('./src/routes/twilio');
-const voiceRoutes = require('./src/routes/voice');
+const twilioRoutes = require('./routes/twilio');
+const voiceRoutes = require('./routes/voice');
 
 // Mount routes
 app.use('/api/twilio', twilioRoutes);
@@ -201,7 +201,7 @@ const io = new Server(server, {
 const getIO = () => io;
 
 // Export io instance
-require('./src/io').init(io);
+require('./io').init(io);
 
 // Add error event handler
 io.engine.on("connection_error", (err) => {
