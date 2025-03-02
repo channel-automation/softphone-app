@@ -22,6 +22,32 @@
 - Railway provides a reliable hosting solution with automatic HTTPS
 - Base URL should be configurable via environment variables
 
+## Dynamic Twilio Client Initialization
+
+### Problem
+- Initializing the Twilio client globally with environment variables causes deployment failures when those variables aren't set
+- This approach doesn't work with our multi-tenant design where each workspace has its own Twilio credentials
+
+### Solution
+- Create Twilio clients on-demand using credentials fetched from the database
+- Implement a helper function `getTwilioClient(workspaceId)` that:
+  - Fetches the appropriate credentials from Supabase for the given workspace
+  - Creates and returns a new Twilio client instance
+  - Handles errors gracefully with proper logging
+
+### Benefits
+- No need for global Twilio environment variables
+- Each workspace uses its own credentials
+- More resilient application startup
+- Better separation of concerns
+- Improved error handling for credential-related issues
+
+### Implementation Notes
+- All Twilio API calls now use workspace-specific clients
+- The server can start without any Twilio credentials configured
+- Credentials are only fetched when needed for specific operations
+- This approach aligns with the multi-tenant architecture of the application
+
 ## Database Design
 
 ### Workspace-Scoped Credentials
