@@ -212,9 +212,20 @@ router.post('/configure-webhook', async (req, res) => {
     for (const { twilio_number } of phoneNumbers) {
       const numbers = await client.incomingPhoneNumbers.list({ phoneNumber: twilio_number });
       if (numbers.length > 0) {
-        await client.incomingPhoneNumbers(numbers[0].sid).update({
-          smsUrl: webhookUrl
-        });
+        const updateParams = {};
+        
+        if (webhookType === 'voice') {
+          updateParams.voiceUrl = webhookUrl;
+          updateParams.voiceMethod = 'POST';
+        } else if (webhookType === 'status') {
+          updateParams.statusCallback = webhookUrl;
+          updateParams.statusCallbackMethod = 'POST';
+        } else {
+          updateParams.smsUrl = webhookUrl;
+          updateParams.smsMethod = 'POST';
+        }
+        
+        await client.incomingPhoneNumbers(numbers[0].sid).update(updateParams);
       }
     }
 
