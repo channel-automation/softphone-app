@@ -75,7 +75,7 @@ router.post('/token', async (req, res) => {
     console.log('🔍 Querying workspace table...');
     const query = supabase
       .from('workspace')
-      .select('twilio_account_sid, twilio_auth_token, twilio_twiml_app_sid')
+      .select('twilio_account_sid, twilio_auth_token, twilio_api_key, twilio_api_secret')
       .eq('id', workspaceId)
       .single();
       
@@ -101,46 +101,84 @@ router.post('/token', async (req, res) => {
     
     console.log('✅ Found workspace:', workspace);
     
-    if (!workspace.twilio_account_sid || !workspace.twilio_auth_token) {
+    // Check if we have API key/secret first
+    if (workspace.twilio_api_key && workspace.twilio_api_secret) {
+      console.log('Using API Key authentication');
+      // Create an Access Token using API Key (preferred method)
+      const AccessToken = twilio.jwt.AccessToken;
+      const VoiceGrant = AccessToken.VoiceGrant;
+
+      try {
+        // Create an access token which we will sign and return to the client
+        const token = new AccessToken(
+          workspace.twilio_account_sid || process.env.TWILIO_ACCOUNT_SID,
+          workspace.twilio_api_key,
+          workspace.twilio_api_secret,
+          { identity: identity }
+        );
+
+        // Create a Voice grant for this token
+        const grant = new VoiceGrant({
+          outgoingApplicationSid: process.env.TWILIO_TWIML_APP_SID,
+          incomingAllow: true
+        });
+
+        // Add the voice grant to our token
+        token.addGrant(grant);
+
+        // Generate the token
+        console.log('✅ Token generated successfully using API Key');
+        return res.json({
+          success: true,
+          token: token.toJwt()
+        });
+      } catch (tokenError) {
+        console.error('❌ Token generation error:', tokenError);
+        return res.status(500).json({
+          success: false,
+          error: `Token generation failed: ${tokenError.message}`
+        });
+      }
+    }
+    // Fall back to Account SID + Auth Token if API key not available
+    else if (workspace.twilio_account_sid && workspace.twilio_auth_token) {
+      console.log('Falling back to Account SID + Auth Token authentication');
+      try {
+        // Create an access token which we will sign and return to the client
+        const token = new AccessToken(
+          workspace.twilio_account_sid,
+          workspace.twilio_account_sid,  // Using Account SID as API Key SID
+          workspace.twilio_auth_token,   // Using Auth Token as API Key Secret
+          { identity: identity }
+        );
+
+        // Create a Voice grant for this token
+        const grant = new VoiceGrant({
+          outgoingApplicationSid: process.env.TWILIO_TWIML_APP_SID,
+          incomingAllow: true
+        });
+
+        // Add the voice grant to our token
+        token.addGrant(grant);
+
+        // Generate the token
+        console.log('✅ Token generated successfully using Account SID + Auth Token');
+        return res.json({
+          success: true,
+          token: token.toJwt()
+        });
+      } catch (tokenError) {
+        console.error('❌ Token generation error:', tokenError);
+        return res.status(500).json({
+          success: false,
+          error: `Token generation failed: ${tokenError.message}`
+        });
+      }
+    }
+    else {
       return res.status(400).json({
         success: false,
         error: 'Workspace is missing Twilio credentials'
-      });
-    }
-    
-    // Create an Access Token using Account SID and Auth Token
-    const AccessToken = twilio.jwt.AccessToken;
-    const VoiceGrant = AccessToken.VoiceGrant;
-
-    try {
-      // Create an access token which we will sign and return to the client
-      const token = new AccessToken(
-        workspace.twilio_account_sid,
-        workspace.twilio_account_sid,  // API Key SID (using Account SID since we don't have API Key)
-        workspace.twilio_auth_token,   // API Key Secret (using Auth Token since we don't have API Key)
-        { identity: identity }
-      );
-
-      // Create a Voice grant for this token
-      const grant = new VoiceGrant({
-        outgoingApplicationSid: workspace.twilio_twiml_app_sid || process.env.TWILIO_TWIML_APP_SID,
-        incomingAllow: true
-      });
-
-      // Add the voice grant to our token
-      token.addGrant(grant);
-
-      // Generate the token
-      console.log('✅ Token generated successfully');
-      return res.json({
-        success: true,
-        token: token.toJwt()
-      });
-    } catch (tokenError) {
-      console.error('❌ Token generation error:', tokenError);
-      return res.status(500).json({
-        success: false,
-        error: `Token generation failed: ${tokenError.message}`
       });
     }
   } catch (error) {
