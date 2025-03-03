@@ -3,7 +3,7 @@ using Supabase.Postgrest.Models;
 
 namespace Softphone.Frontend.Models
 {
-    [Table("user")]
+    [Table("user_twilio_number")]
     public class UserTwilioNumberBO : BaseModel
     {
         [PrimaryKey("id")]

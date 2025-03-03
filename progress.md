@@ -33,6 +33,20 @@
 
 ## Deployment History
 
+### March 2, 2025 - Enhanced Call Logging
+
+#### Completed Tasks
+- Added comprehensive logging for inbound and outbound calls
+- Enhanced error logging for call failures and status updates
+- Improved debugging capabilities with timestamp and detailed call information
+- Added full request body logging for troubleshooting
+
+#### Technical Improvements
+- Structured log format for better readability and parsing
+- Consistent error handling across all voice endpoints
+- Added call direction, duration, and status information to logs
+- Improved diagnostic information for error scenarios
+
 ### March 2, 2025 - Improved Clear Configuration Feature
 
 #### Completed Tasks
@@ -117,6 +131,94 @@
 - Implement additional voice features (call recording, call transfer, etc.)
 - Add analytics for tracking call metrics
 - Enhance the UI for a better calling experience
+
+### March 2, 2025 - Backend URL Configuration Fix
+
+#### Completed Tasks
+- Fixed critical backend URL configuration issues that were causing calling features to fail
+- Updated hardcoded URLs in the frontend code that were pointing to an outdated endpoint
+- Properly configured environment variables in the backend `.env` file
+- Ensured all API calls (token generation, inbound/outbound call handling) use the correct backend URL
+- Updated image URLs to use the correct backend domain
+
+#### Technical Improvements
+- Eliminated dependency on the outdated `webhook.call-app.channelautomation.com` domain
+- Properly configured `BASE_URL` environment variable to use `backend-production-3d08.up.railway.app`
+- Updated client-side code to use the current backend deployment
+- Documented URL configuration best practices in lessons_learn.md
+
+#### Next Steps
+- Consider implementing a configuration validation step at application startup
+- Refactor client-side code to avoid hardcoded backend URLs
+- Implement dynamic configuration retrieval for frontend code
+- Add comprehensive logging for API communication
+
+### March 3, 2025 - Backend URL Domain Consistency Fix
+
+#### Completed Tasks
+- Fixed inconsistent backend URL references throughout the codebase
+- Updated multiple files that were incorrectly using `backend-production-3608.up.railway.app` instead of the correct `backend-production-3d08.up.railway.app`
+- Modified the following files to ensure consistent URLs:
+  - `Softphone.Frontend/Controllers/ConfigurationController.cs`
+  - `test-twilio-config.js`
+  - `test-auto-config.js`
+- Added documentation in lessons_learn.md about URL consistency
+
+#### Technical Improvements
+- Ensured all backend API calls use the correct domain
+- Prevented potential failures in Twilio configuration due to mismatched URLs
+- Improved overall system reliability with consistent endpoint references
+- Enhanced documentation to highlight the importance of URL consistency
+
+#### Next Steps
+- Consider implementing a centralized configuration system for backend URLs
+- Add automated checks for URL consistency as part of CI/CD
+- Refactor code to minimize the use of hardcoded fallback URLs
+
+### March 3, 2025 - Database Table Structure Alignment
+
+#### Completed Tasks
+- Fixed database table references to match existing schema
+- Updated code to use `workspace_twilio_number` instead of `twilio_numbers`
+- Modified phone number sync process to work with correct tables
+- Ensured proper data flow between related tables
+- Deployed changes to Railway for testing
+
+#### Technical Improvements
+- Better alignment with existing database structure
+- More accurate table naming conventions
+- Improved data relationships between entities
+- Enhanced code clarity with proper table references
+- Fixed potential data synchronization issues
+
+#### Next Steps
+- Monitor the deployment for any issues
+- Test phone number synchronization with the updated table structure
+- Verify webhook functionality with the new configuration
+- Update documentation to reflect the correct table structure
+
+### March 4, 2025 - Webhook Configuration Enhancement
+
+#### Completed Tasks
+- Successfully configured all webhook URLs for Twilio integration:
+  - Set voice URL to `/api/voice/inbound`
+  - Set status callback URL to `/api/voice/status`
+  - Verified configurations in Twilio console
+- Implemented separate webhook type handling in backend
+- Added comprehensive documentation about webhook configuration
+- Fixed issues with status callback URL reverting to demo URL
+
+#### Technical Improvements
+- Enhanced webhook configuration endpoint to handle different webhook types
+- Improved error handling for webhook updates
+- Added verification steps for webhook configuration
+- Updated documentation with webhook configuration best practices
+
+#### Next Steps
+- Test webhook configuration through UI changes
+- Implement automated webhook verification
+- Add webhook status monitoring
+- Create webhook configuration backup system
 
 ## In Progress
 

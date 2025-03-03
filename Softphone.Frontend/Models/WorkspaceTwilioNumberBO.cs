@@ -3,7 +3,7 @@ using Supabase.Postgrest.Models;
 
 namespace Softphone.Frontend.Models
 {
-    [Table("user")]
+    [Table("workspace_twilio_number")]
     public class WorkspaceTwilioNumberBO : BaseModel
     {
         [PrimaryKey("id")]
@@ -13,6 +13,6 @@ namespace Softphone.Frontend.Models
         public long WorkspaceId { get; set; }
 
         [Column("twilio_number")]
-        public string TwilioNumber { get; set; }
+        public string? TwilioNumber { get; set; }
     }
 }

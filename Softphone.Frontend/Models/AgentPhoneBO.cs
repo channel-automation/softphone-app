@@ -13,9 +13,9 @@ namespace Softphone.Frontend.Models
         public long WorkspaceId { get; set; }
 
         [Column("full_name")]
-        public string FullName { get; set; }
+        public string? FullName { get; set; }
 
         [Column("twilio_number")]
-        public string TwilioNumber { get; set; }
+        public string? TwilioNumber { get; set; }
     }
 }

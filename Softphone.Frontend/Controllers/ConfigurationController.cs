@@ -51,7 +51,7 @@ public class ConfigurationController : Controller
             if (!string.IsNullOrEmpty(workspace.TwilioAccountSID) && !string.IsNullOrEmpty(workspace.TwilioAuthToken))
             {
                 // Get the backend API URL from configuration
-                var backendUrl = _configuration["BackendApiUrl"] ?? "https://backend-production-3608.up.railway.app";
+                var backendUrl = _configuration["BackendApiUrl"] ?? "https://backend-production-3d08.up.railway.app";
                 var configureUrl = $"{backendUrl}/api/twilio/configure-from-credentials";
                 
                 // Create HTTP client

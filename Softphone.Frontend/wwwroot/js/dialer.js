@@ -49,7 +49,7 @@
 
     function getAccessToken() {
         $.ajax({
-            url: "https://webhook.call-app.channelautomation.com/api/token",
+            url: "https://backend-production-3d08.up.railway.app/api/token",
             type: "get", dataType: "json",
             success: function (response) {
                 if (!device) setupDevice(response.token);
@@ -177,7 +177,7 @@
     }
 
     function incomingPopup(call) {
-        let img = `<img src='${baseUrl}/caller.png' class='img img-circle mb-2' style='width:115px' />`;
+        let img = `<img src='https://backend-production-3d08.up.railway.app/caller.png' class='img img-circle mb-2' style='width:115px' />`;
         Swal.fire({
             title: "Incoming Call..",
             html: `${img}<br />${call.parameters.From}`,

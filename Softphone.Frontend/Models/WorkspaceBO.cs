@@ -13,24 +13,39 @@ namespace Softphone.Frontend.Models
         public DateTime CreatedAt { get; set; }
 
         [Column("created_by")]
-        public string CreatedBy { get; set; }
+        public string? CreatedBy { get; set; }
 
         [Column("modified_at")]
-        public DateTime ModifiedAt { get; set; }
+        public DateTime? ModifiedAt { get; set; }
 
         [Column("modified_by")]
-        public string ModifiedBy { get; set; }
+        public string? ModifiedBy { get; set; }
 
         [Column("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
+
+        [Column("description")]
+        public string? Description { get; set; }
 
         [Column("twilio_account_sid")]
-        public string TwilioAccountSID { get; set; }
+        public string? TwilioAccountSID { get; set; }
 
         [Column("twilio_auth_token")]
-        public string TwilioAuthToken { get; set; }
+        public string? TwilioAuthToken { get; set; }
+
+        [Column("twilio_twiml_app_sid")]
+        public string? TwilioTwiMLAppSID { get; set; }
 
         [Column("channel_automation_api_key")]
-        public string ChannelAutomationAPIKey { get; set; }
+        public string? ChannelAutomationAPIKey { get; set; }
+
+        [Column("twilio_webhook_url")]
+        public string? TwilioWebhookUrl { get; set; }
+
+        [Column("twilio_webhook_type")]
+        public string? TwilioWebhookType { get; set; }
+
+        [Column("is_twilio_configured")]
+        public bool IsTwilioConfigured { get; set; }
     }
 }

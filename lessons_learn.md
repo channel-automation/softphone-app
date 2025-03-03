@@ -7,6 +7,29 @@
 - Each workspace should have its own TwiML app for proper isolation
 - The TwiML app SID needs to be stored in the database for token generation
 
+### Webhook Configuration Best Practices
+- Each phone number requires three webhook configurations:
+  1. Voice URL (`/api/voice/inbound`) - Handles incoming calls
+  2. Status Callback URL (`/api/voice/status`) - Tracks call status changes
+  3. SMS URL (`/api/twilio/webhook`) - Handles SMS messages
+
+- Webhook URLs must be configured separately:
+  - Using `webhookType: "voice"` for voice URL
+  - Using `webhookType: "status"` for status callback URL
+  - Using `webhookType: "sms"` for SMS URL
+
+- Common Issues:
+  - Status callback URL may revert to demo URL if not explicitly set
+  - Changes may not appear immediately after configuration
+  - Always refresh Twilio console to verify changes
+  - Deployment delays can affect webhook updates
+
+- Best Practices:
+  - Always verify webhook URLs after configuration
+  - Use the same base URL for all webhooks
+  - Test each webhook type separately
+  - Keep webhook endpoints consistent across environments
+
 ### Phone Number Configuration
 - Twilio phone numbers need to be configured to use the TwiML app for voice
 - This configuration needs to happen automatically when users enter their Twilio credentials
@@ -119,6 +142,30 @@ When working with a hybrid deployment where the frontend and backend are running
 3. Use environment variables to manage CORS configuration to avoid hardcoding values.
 4. Add detailed logging to quickly identify where communication breaks down.
 5. Remember that Socket.IO needs its own CORS configuration separate from the Express app.
+
+## Twilio Voice Configuration Best Practices
+
+When configuring Twilio for voice calls, we encountered several important lessons:
+
+1. **Explicit Voice URL Configuration**: When setting up phone numbers for voice calls, it's important to explicitly configure both the `voiceApplicationSid` AND the `voiceUrl`. While setting just the TwiML Application SID should be sufficient according to Twilio's documentation, we found that explicitly setting the voice URL provides more reliable behavior.
+
+2. **Comprehensive Webhook Setup**: For voice calls to work properly, you need to correctly configure multiple webhooks:
+   - Voice URL for outbound calls
+   - Voice URL for inbound calls
+   - Status callback URL for call status updates
+   - SMS URL for messaging features
+
+3. **Environment-Specific Base URLs**: The BASE_URL environment variable is critical for proper webhook configuration. Different environments (development, staging, production) need different BASE_URL values, and this can cause confusion when testing across environments.
+
+4. **Database Synchronization**: For our softphone to work properly, two database tables must be properly synchronized:
+   - `twilio_numbers`: Used by the backend API
+   - `agent_phone`: Used by the frontend UI
+
+   If either table is not properly populated, the phone functionality will appear to be configured but won't work correctly.
+
+5. **Enhanced Logging**: Detailed logging of the configuration process helps tremendously with debugging. Log all webhook URLs being configured and all phone numbers being updated to quickly identify configuration issues.
+
+By addressing these points and ensuring proper configuration of all webhook URLs, we were able to resolve issues with voice call functionality.
 
 ## Handling Twilio Configuration Reset
 
@@ -380,3 +427,89 @@ The key lessons:
 - Controller actions provide a clean abstraction layer between the frontend and backend
 - Detailed logging is essential for debugging communication issues between services
 - Always include error details in the response to help with troubleshooting
+
+## Backend URL Configuration
+
+### Problem
+- Hardcoded backend URLs in the frontend code pointed to an outdated endpoint (`https://webhook.call-app.channelautomation.com`)
+- The environment variables in `.env` file were not properly configured with the current backend URL
+- This caused features like inbound and outbound calling to fail as they couldn't reach the correct endpoints
+
+### Solution
+- Updated hardcoded URL in `dialer.js` to point to the current backend at `backend-production-3d08.up.railway.app`
+- Properly configured the `BASE_URL` and `BACKEND_URL` environment variables in the `.env` file
+- Made sure image URLs also use the correct backend domain
+
+### Benefits
+- Fixed inbound and outbound calling functionality
+- Ensured token generation works correctly
+- Established a single source of truth for backend URL configuration
+- Improved system reliability by eliminating dependency on an outdated endpoint
+
+### Implementation Notes
+- Client-side code should ideally not hardcode backend URLs
+- Environment variables should be properly configured before deployment
+- A configuration check should be added at startup to verify that essential URLs are properly configured
+
+## URL Consistency Across Environments
+
+### Problem
+- Several files in the application contained inconsistent backend URL references
+- Some files used `https://backend-production-3608.up.railway.app` (incorrect domain) 
+- Others used `https://backend-production-3d08.up.railway.app` (correct domain)
+- This inconsistency could lead to failures in certain parts of the application
+
+### Investigation
+- Identified all files containing URL references using grep searches
+- Found that configuration files, test scripts, and fallback URLs contained the incorrect domain
+- Specifically found issues in the following files:
+  - `Softphone.Frontend/Controllers/ConfigurationController.cs`
+  - `test-twilio-config.js`
+  - `test-auto-config.js`
+
+### Solution
+- Updated all references to use the correct domain `https://backend-production-3d08.up.railway.app`
+- Ensured consistency across all files in the application
+- Fixed the domain in both hardcoded fallback URLs and configuration files
+
+### Key Takeaways
+- Domain and URL consistency is critical for reliable operation across environments
+- Regular audits of URL references should be performed, especially after deployment changes
+- Centralizing URL configuration in environment variables reduces the risk of inconsistencies
+- When changing deployment domains or URLs, a systematic approach to finding and updating all references is necessary
+
+## Database Table Structure and Naming Conventions
+
+### Problem
+- Initial code was using a single `twilio_numbers` table for phone number management
+- This didn't align with the existing database structure which used more specific tables:
+  - `workspace_twilio_number` for workspace-level phone numbers
+  - `agent_phone` for agent-specific phone number assignments
+  - `user_twilio_number` for user-to-phone number mappings
+
+### Solution
+- Updated all code references from `twilio_numbers` to use the correct table names
+- Modified the phone number sync process to work with the existing table structure
+- Ensured proper data flow between tables:
+  1. `workspace_twilio_number`: Primary storage for Twilio numbers at workspace level
+  2. `agent_phone`: UI-focused table for the dialer component
+  3. `user_twilio_number`: Maps specific users to their assigned numbers
+
+### Benefits
+- Better data organization with clear separation of concerns
+- More accurate representation of relationships between entities
+- Improved data integrity with proper foreign key relationships
+- Clearer code that matches the database schema
+
+### Implementation Notes
+- Updated the `syncPhoneNumbers` function to handle both `workspace_twilio_number` and `agent_phone` tables
+- Removed unnecessary fields that weren't part of the existing schema
+- Maintained backward compatibility with existing features
+- Ensured all webhook and configuration endpoints use the correct table references
+
+### Key Takeaways
+1. Always verify the existing database schema before writing new code
+2. Use table names that clearly indicate their purpose and relationships
+3. Maintain consistency in naming conventions across the application
+4. Document table relationships and their purposes
+5. Consider the impact on existing features when modifying database interactions

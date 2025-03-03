@@ -1,0 +1,188 @@
+﻿<error errorId="4c51f1a4-8c44-4c3a-a487-4d16d997a568" application="Softphone.Frontend" host="MacBookPro" type="HTTP" message="NotFound" detail="# caller: @C:\Sources\ElmahCore\ElmahCore\ElmahCore\Internal$\CallerInfo.cs:9&#xA;ElmahCore.HttpException: NotFound" user="benjie" time="2025-03-02T08:55:55.4345530Z" statusCode="404">
+  <serverVariables>
+    <item name="RequestTimedOut">
+      <value string="False" />
+    </item>
+    <item name="MinResponseDataRate">
+      <value string="Bytes per second: 240, Grace Period: 00:00:05" />
+    </item>
+    <item name="ConnectionIdFeature">
+      <value string="0HNAP7N9U7NKC" />
+    </item>
+    <item name="HasStartedConsumingRequestBody">
+      <value string="True" />
+    </item>
+    <item name="MaxRequestBodySize">
+      <value string="30000000" />
+    </item>
+    <item name="MinRequestBodyDataRate">
+      <value string="Bytes per second: 240, Grace Period: 00:00:05" />
+    </item>
+    <item name="AllowSynchronousIO">
+      <value string="False" />
+    </item>
+    <item name="TraceIdentifier">
+      <value string="0HNAP7N9U7NKC:0000000F" />
+    </item>
+    <item name="IsUpgradableRequest">
+      <value string="False" />
+    </item>
+    <item name="IsUpgraded">
+      <value string="False" />
+    </item>
+    <item name="RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="RemotePort">
+      <value string="55571" />
+    </item>
+    <item name="LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="LocalPort">
+      <value string="7245" />
+    </item>
+    <item name="Scheme">
+      <value string="https" />
+    </item>
+    <item name="Method">
+      <value string="Post" />
+    </item>
+    <item name="MethodText">
+      <value string="POST" />
+    </item>
+    <item name="Path">
+      <value string="/api/twilio/clear-configuration" />
+    </item>
+    <item name="QueryString">
+      <value string="" />
+    </item>
+    <item name="RawTarget">
+      <value string="/api/twilio/clear-configuration" />
+    </item>
+    <item name="HttpVersion">
+      <value string="HTTP/1.1" />
+    </item>
+    <item name="Header_Accept">
+      <value string="*/*" />
+    </item>
+    <item name="Header_Connection">
+      <value string="keep-alive" />
+    </item>
+    <item name="Header_Host">
+      <value string="localhost:7245" />
+    </item>
+    <item name="Header_User-Agent">
+      <value string="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0" />
+    </item>
+    <item name="Header_Accept-Encoding">
+      <value string="gzip, deflate, br, zstd" />
+    </item>
+    <item name="Header_Accept-Language">
+      <value string="en-AU,en-GB;q=0.9,en;q=0.8,en-US;q=0.7" />
+    </item>
+    <item name="Header_Content-Type">
+      <value string="application/json" />
+    </item>
+    <item name="Header_Cookie">
+      <value string="__clerk_db_jwt_VJYxooTe=dvb_2qzELwGuZyOt3x1Khf1nTzZvytM; __clerk_db_jwt=dvb_2qzELwGuZyOt3x1Khf1nTzZvytM; __client_uat_VJYxooTe=0; __client_uat=0; ajs_anonymous_id=5b39c1e5-ac10-47c2-b9fe-302f9abbaa2f; .AspNetCore.Antiforgery.Iurz_WNRkCY=CfDJ8DQmb9f2FrNPhfOZYlqPY5J56W7GWQur5UPd-MDH4ECAy1-MI8cb4zcWhCs4VGuy6mp3YFn74Sd_68xfx1Kl8XudIi3-09svbjRKciuYo3BkY37LSWFdAtQKSJKfsd_oULRK1aKla3RyczfPGGO1UV4; .AspNetCore.Antiforgery.33L0OiAzZxk=CfDJ8DQmb9f2FrNPhfOZYlqPY5JZI0XmF3bsa2ETCIpYuSWAEO69EBGTCQ8Mptxzux-Ia7cj4NxuXUnkbT7k3aJXGX44OL610jesiEjdPZwBQzvftqIqsR6AyVXaGA93DGxavi5fDoNdHJ5E_swsP_vy1uA; .AspNetCore.Antiforgery.ZJO3N3a8NZk=CfDJ8DQmb9f2FrNPhfOZYlqPY5IGWSSnc57Vj8NMnDrXfyQi7pzwxiQyIWWU2uXqKfbB6j8yNL-nH39e6qkJ1jLM09o2leUx1QociUta2rHJuXRG9R5GTFMt6ECmEWG5jvypnWkOf5I_p2tpk9YLEQmjtsc; .AspNetCore.Cookies=CfDJ8DQmb9f2FrNPhfOZYlqPY5IW1vZRdmGVt4DdN6nLky-v-6FUYxCaYxrBx6ZZzU9e0KiToRPMS9pEeysUCN04j5l--ISWjFrfFI6hPjfo6oKTkS_g9-7JiLWrQqNe9yP7vNo0yDVdeybIDfeo2mJCSsuxEZDvTeGcoMRz6GLjcl_ik_BDV00IWT7T4V4A-xuj2XaXiEhlY0kDjiIP9oqOBZdg9W4lAofILbw08sRxc1_RAsMoRjS6VKgylQd3pT7FkuzBtIUN8MkNi_AiXSJTteS9fRWAK9JTxUcrFfz5roQV1vW7zpiJwmETdYpcgKT0i6AMoNIGyBNJuW7fod2YtkAmBs7tIIGSdeW9V9aE2DgHTIfwg1KjpHmv5-YtENCA9UBzKK8ipMH6mdFgp1hmhWQ" />
+    </item>
+    <item name="Header_Origin">
+      <value string="https://localhost:7245" />
+    </item>
+    <item name="Header_Referer">
+      <value string="https://localhost:7245/" />
+    </item>
+    <item name="Header_Content-Length">
+      <value string="19" />
+    </item>
+    <item name="Header_sec-ch-ua-platform">
+      <value string="&quot;macOS&quot;" />
+    </item>
+    <item name="Header_X-Requested-With">
+      <value string="XMLHttpRequest" />
+    </item>
+    <item name="Header_sec-ch-ua">
+      <value string="&quot;Not(A:Brand&quot;;v=&quot;99&quot;, &quot;Microsoft Edge&quot;;v=&quot;133&quot;, &quot;Chromium&quot;;v=&quot;133&quot;" />
+    </item>
+    <item name="Header_sec-ch-ua-mobile">
+      <value string="?0" />
+    </item>
+    <item name="Header_Sec-Fetch-Site">
+      <value string="same-origin" />
+    </item>
+    <item name="Header_Sec-Fetch-Mode">
+      <value string="cors" />
+    </item>
+    <item name="Header_Sec-Fetch-Dest">
+      <value string="empty" />
+    </item>
+    <item name="RequestTrailersAvailable">
+      <value string="True" />
+    </item>
+    <item name="StatusCode">
+      <value string="404" />
+    </item>
+    <item name="HasResponseStarted">
+      <value string="False" />
+    </item>
+    <item name="HasFlushedHeaders">
+      <value string="False" />
+    </item>
+    <item name="HasResponseCompleted">
+      <value string="False" />
+    </item>
+    <item name="Connection_Id">
+      <value string="0HNAP7N9U7NKC" />
+    </item>
+    <item name="Connection_RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_RemotePort">
+      <value string="55571" />
+    </item>
+    <item name="Connection_LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_LocalPort">
+      <value string="7245" />
+    </item>
+    <item name="HttpStatusCode">
+      <value string="404" />
+    </item>
+  </serverVariables>
+  <form>
+    <item name="$request-body">
+      <value string="{&quot;workspaceId&quot;:127}" />
+    </item>
+  </form>
+  <cookies>
+    <item name="__clerk_db_jwt_VJYxooTe">
+      <value string="dvb_2qzELwGuZyOt3x1Khf1nTzZvytM" />
+    </item>
+    <item name="__clerk_db_jwt">
+      <value string="dvb_2qzELwGuZyOt3x1Khf1nTzZvytM" />
+    </item>
+    <item name="__client_uat_VJYxooTe">
+      <value string="0" />
+    </item>
+    <item name="__client_uat">
+      <value string="0" />
+    </item>
+    <item name="ajs_anonymous_id">
+      <value string="5b39c1e5-ac10-47c2-b9fe-302f9abbaa2f" />
+    </item>
+    <item name=".AspNetCore.Antiforgery.Iurz_WNRkCY">
+      <value string="CfDJ8DQmb9f2FrNPhfOZYlqPY5J56W7GWQur5UPd-MDH4ECAy1-MI8cb4zcWhCs4VGuy6mp3YFn74Sd_68xfx1Kl8XudIi3-09svbjRKciuYo3BkY37LSWFdAtQKSJKfsd_oULRK1aKla3RyczfPGGO1UV4" />
+    </item>
+    <item name=".AspNetCore.Antiforgery.33L0OiAzZxk">
+      <value string="CfDJ8DQmb9f2FrNPhfOZYlqPY5JZI0XmF3bsa2ETCIpYuSWAEO69EBGTCQ8Mptxzux-Ia7cj4NxuXUnkbT7k3aJXGX44OL610jesiEjdPZwBQzvftqIqsR6AyVXaGA93DGxavi5fDoNdHJ5E_swsP_vy1uA" />
+    </item>
+    <item name=".AspNetCore.Antiforgery.ZJO3N3a8NZk">
+      <value string="CfDJ8DQmb9f2FrNPhfOZYlqPY5IGWSSnc57Vj8NMnDrXfyQi7pzwxiQyIWWU2uXqKfbB6j8yNL-nH39e6qkJ1jLM09o2leUx1QociUta2rHJuXRG9R5GTFMt6ECmEWG5jvypnWkOf5I_p2tpk9YLEQmjtsc" />
+    </item>
+    <item name=".AspNetCore.Cookies">
+      <value string="CfDJ8DQmb9f2FrNPhfOZYlqPY5IW1vZRdmGVt4DdN6nLky-v-6FUYxCaYxrBx6ZZzU9e0KiToRPMS9pEeysUCN04j5l--ISWjFrfFI6hPjfo6oKTkS_g9-7JiLWrQqNe9yP7vNo0yDVdeybIDfeo2mJCSsuxEZDvTeGcoMRz6GLjcl_ik_BDV00IWT7T4V4A-xuj2XaXiEhlY0kDjiIP9oqOBZdg9W4lAofILbw08sRxc1_RAsMoRjS6VKgylQd3pT7FkuzBtIUN8MkNi_AiXSJTteS9fRWAK9JTxUcrFfz5roQV1vW7zpiJwmETdYpcgKT0i6AMoNIGyBNJuW7fod2YtkAmBs7tIIGSdeW9V9aE2DgHTIfwg1KjpHmv5-YtENCA9UBzKK8ipMH6mdFgp1hmhWQ" />
+    </item>
+  </cookies>
+</error>

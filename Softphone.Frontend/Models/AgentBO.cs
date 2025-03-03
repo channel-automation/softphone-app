@@ -16,12 +16,12 @@ namespace Softphone.Frontend.Models
         public DateTime CreatedAt { get; set; }
 
         [Column("full_name")]
-        public string FullName { get; set; }
+        public string? FullName { get; set; }
 
         [Column("username")]
-        public string Username { get; set; }
+        public string? Username { get; set; }
 
         [Column("twilio_numbers")]
-        public string TwilioNumbers { get; set; }
+        public string? TwilioNumbers { get; set; }
     }
 }
