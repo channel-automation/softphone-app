@@ -11,16 +11,24 @@ const server = http.createServer(app);
 
 // Configure CORS
 const corsOrigins = process.env.CORS_ORIGIN 
-  ? process.env.CORS_ORIGIN.split(',') 
-  : ['https://beta.sofphone.channelautomation.com', 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'https://localhost:7245'];
+  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+  : ['https://beta.sofphone.channelautomation.com', 'https://localhost:7245'];
 
 console.log('⚙️ CORS Origins:', corsOrigins);
 
 const corsOptions = {
-  origin: corsOrigins,
+  origin: (origin, callback) => {
+    if (!origin || corsOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('❌ Blocked by CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
@@ -975,6 +983,15 @@ app.post('/api/configure-twilio', async (req, res) => {
       error: error.message 
     });
   }
+});
+
+// Add error handling middleware
+app.use((err, req, res, next) => {
+  console.error('❌ Error:', err.message);
+  res.status(err.status || 500).json({
+    success: false,
+    error: err.message
+  });
 });
 
 // Start the server
