@@ -6,8 +6,8 @@ const config = {
     // API endpoints
     endpoints: {
         token: "/api/voice/token",
-        call: "/api/voice/call",
-        incomingWebhook: "/api/voice/incoming",
-        statusCallback: "/api/voice/status-callback"
+        call: "/api/voice/outbound",
+        incomingWebhook: "/api/voice/inbound",
+        statusCallback: "/api/voice/status"
     }
 }; 
