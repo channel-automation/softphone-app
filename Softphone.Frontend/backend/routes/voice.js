@@ -102,7 +102,7 @@ router.post('/token', async (req, res) => {
     console.log('✅ Found workspace:', workspace);
     
     // Check if we have API key/secret first
-    if (workspace.twilio_api_key && workspace.twilio_api_secret) {
+    if (workspace.twilio_api_key && workspace.twilio_api_secret && workspace.twilio_account_sid) {
       console.log('Using API Key authentication');
       // Create an Access Token using API Key (preferred method)
       const AccessToken = twilio.jwt.AccessToken;
@@ -111,7 +111,7 @@ router.post('/token', async (req, res) => {
       try {
         // Create an access token which we will sign and return to the client
         const token = new AccessToken(
-          workspace.twilio_account_sid || process.env.TWILIO_ACCOUNT_SID,
+          workspace.twilio_account_sid,
           workspace.twilio_api_key,
           workspace.twilio_api_secret,
           { identity: identity }
@@ -176,9 +176,15 @@ router.post('/token', async (req, res) => {
       }
     }
     else {
+      console.error('❌ Missing credentials:', {
+        hasAccountSid: !!workspace.twilio_account_sid,
+        hasAuthToken: !!workspace.twilio_auth_token,
+        hasApiKey: !!workspace.twilio_api_key,
+        hasApiSecret: !!workspace.twilio_api_secret
+      });
       return res.status(400).json({
         success: false,
-        error: 'Workspace is missing Twilio credentials'
+        error: 'Workspace is missing required Twilio credentials'
       });
     }
   } catch (error) {
