@@ -52,7 +52,7 @@ router.post('/token', async (req, res) => {
     // Get workspace Twilio credentials
     const { data: workspace, error } = await supabase
       .from('workspace')
-      .select('twilio_api_key, twilio_api_secret')
+      .select('twilio_api_key, twilio_api_secret, twilio_account_sid, twilio_twiml_app_sid')
       .eq('id', workspaceId)
       .single();
     
@@ -75,29 +75,37 @@ router.post('/token', async (req, res) => {
     const AccessToken = twilio.jwt.AccessToken;
     const VoiceGrant = AccessToken.VoiceGrant;
 
-    // Create an access token which we will sign and return to the client
-    const token = new AccessToken(
-      process.env.TWILIO_ACCOUNT_SID,  // Use the system-wide Account SID
-      workspace.twilio_api_key,        // Use workspace's API Key
-      workspace.twilio_api_secret,     // Use workspace's API Secret
-      { identity: identity }
-    );
+    try {
+      // Create an access token which we will sign and return to the client
+      const token = new AccessToken(
+        workspace.twilio_account_sid || process.env.TWILIO_ACCOUNT_SID, // Try workspace SID first
+        workspace.twilio_api_key,
+        workspace.twilio_api_secret,
+        { identity: identity }
+      );
 
-    // Create a Voice grant for this token
-    const grant = new VoiceGrant({
-      outgoingApplicationSid: process.env.TWILIO_TWIML_APP_SID, // Use system-wide TwiML App SID
-      incomingAllow: true // Allow incoming calls
-    });
+      // Create a Voice grant for this token
+      const grant = new VoiceGrant({
+        outgoingApplicationSid: workspace.twilio_twiml_app_sid || process.env.TWILIO_TWIML_APP_SID,
+        incomingAllow: true
+      });
 
-    // Add the voice grant to our token
-    token.addGrant(grant);
+      // Add the voice grant to our token
+      token.addGrant(grant);
 
-    // Generate the token
-    console.log('✅ Token generated successfully');
-    return res.json({
-      success: true,
-      token: token.toJwt()
-    });
+      // Generate the token
+      console.log('✅ Token generated successfully');
+      return res.json({
+        success: true,
+        token: token.toJwt()
+      });
+    } catch (tokenError) {
+      console.error('❌ Token generation error:', tokenError);
+      return res.status(500).json({
+        success: false,
+        error: `Token generation failed: ${tokenError.message}`
+      });
+    }
   } catch (error) {
     console.error('❌ Error generating token:', error);
     // Return generic error message to avoid exposing sensitive details
