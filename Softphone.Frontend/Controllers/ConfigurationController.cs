@@ -31,10 +31,48 @@ public class ConfigurationController : Controller
 
     public async Task<IActionResult> Start()
     {
-        var user = await _userService.FindByUsername(User.Identity.Name);
-        var workspace = await _workspaceService.FindById(user.WorkspaceId);
+        try
+        {
+            var user = await _userService.FindByUsername(User.Identity?.Name);
+            if (user == null)
+            {
+                // Create a default workspace if user doesn't exist
+                return PartialView(new WorkspaceBO 
+                { 
+                    Id = 0,
+                    Name = "New Workspace",
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = User.Identity?.Name
+                });
+            }
 
-        return PartialView(workspace);
+            var workspace = await _workspaceService.FindById(user.WorkspaceId);
+            if (workspace == null)
+            {
+                // Create a default workspace if it doesn't exist
+                workspace = new WorkspaceBO
+                {
+                    Id = user.WorkspaceId,
+                    Name = "New Workspace",
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = User.Identity?.Name
+                };
+            }
+
+            return PartialView(workspace);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in Start action: {ex.Message}");
+            // Return a default workspace in case of any error
+            return PartialView(new WorkspaceBO 
+            { 
+                Id = 0,
+                Name = "New Workspace",
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = User.Identity?.Name
+            });
+        }
     }
 
     [HttpPost]
@@ -45,7 +83,7 @@ public class ConfigurationController : Controller
         try
         {
             // 1. Update workspace in database
-            await _workspaceService.Update(workspace, User.Identity.Name);
+            await _workspaceService.Update(workspace, User.Identity?.Name ?? "system");
             
             // 2. If Twilio credentials are provided, configure Twilio
             if (!string.IsNullOrEmpty(workspace.TwilioAccountSID) && !string.IsNullOrEmpty(workspace.TwilioAuthToken))
@@ -96,6 +134,8 @@ public class ConfigurationController : Controller
         catch (Exception ex)
         {
             errors.Add($"Error saving configuration: {ex.Message}");
+            Console.WriteLine($"Error in Save action: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
         }
         
         return Json(errors);
@@ -117,7 +157,7 @@ public class ConfigurationController : Controller
                 workspace.TwilioAccountSID = null;
                 workspace.TwilioAuthToken = null;
                 workspace.TwilioTwiMLAppSID = null;
-                await _workspaceService.Update(workspace, User.Identity.Name);
+                await _workspaceService.Update(workspace, User.Identity?.Name ?? "system");
                 Console.WriteLine(" Twilio credentials cleared from workspace!");
             }
             
@@ -126,6 +166,7 @@ public class ConfigurationController : Controller
         catch (Exception ex)
         {
             Console.WriteLine($" Error clearing Twilio configuration: {ex.Message}");
+            Console.WriteLine($" Stack trace: {ex.StackTrace}");
             return Json(new { success = false, error = $"Error clearing Twilio configuration: {ex.Message}" });
         }
     }
