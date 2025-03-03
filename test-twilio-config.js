@@ -7,7 +7,7 @@ const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || 'ACCOUNT_SID_PLACEH
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || 'AUTH_TOKEN_PLACEHOLDER';
 
 // Base URL for your backend
-const BASE_URL = 'https://backend-production-3608.up.railway.app';
+const BASE_URL = 'https://backend-production-3d08.up.railway.app';
 
 async function testTwilioConfig() {
   try {
