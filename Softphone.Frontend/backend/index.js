@@ -332,10 +332,9 @@ io.on('connection', (socket) => {
 
       // Get workspace Twilio number
       const { data: twilioNumber, error: numberError } = await supabase
-        .from('twilio_numbers')
-        .select('phone_number')
+        .from('workspace_twilio_number')
+        .select('twilio_number')
         .eq('workspace_id', workspaceId)
-        .eq('is_active', true)
         .single();
 
       if (numberError) {
@@ -378,7 +377,7 @@ io.on('connection', (socket) => {
       const twilioMessage = await client.messages.create({
         body: message,
         to: formatPhoneForTwilio(to),
-        from: twilioNumber.phone_number
+        from: twilioNumber.twilio_number
       });
 
       // Update message with Twilio SID and status
@@ -944,7 +943,7 @@ app.post('/api/configure-twilio', async (req, res) => {
     await workspaceClient.incomingPhoneNumbers.list({ limit: 1 });
     
     // Get the base URL for webhooks
-    const baseUrl = process.env.BASE_URL || 'https://backend-production-3608.up.railway.app';
+    const baseUrl = process.env.BASE_URL || 'https://backend-production-3d08.up.railway.app';
     
     // Configure TwiML app
     const response = await fetch(`${baseUrl}/api/voice/configure-twiml-app`, {
