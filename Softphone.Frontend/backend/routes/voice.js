@@ -37,56 +37,73 @@ function normalizePhone(phone) {
 // Generate access token for Twilio Client
 router.post('/token', async (req, res) => {
   try {
-    const { workspaceId, identity } = req.body;
+    const workspaceId = req.body.workspaceId || req.body.workspace_id;
+    const { identity } = req.body;
     
     if (!workspaceId || !identity) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Missing required parameters: workspaceId, identity' 
+        error: 'Missing required parameters: workspaceId/workspace_id, identity' 
       });
     }
+    
+    console.log(`📱 Generating token for workspace: ${workspaceId}, identity: ${identity}`);
     
     // Get workspace Twilio credentials
     const { data: workspace, error } = await supabase
       .from('workspace')
-      .select('twilio_account_sid, twilio_auth_token, twilio_twiml_app_sid')
+      .select('twilio_api_key, twilio_api_secret')
       .eq('id', workspaceId)
       .single();
     
     if (error || !workspace) {
-      throw new Error('Workspace not found or error retrieving workspace');
+      console.error('❌ Error retrieving workspace:', error?.message || 'Workspace not found');
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Workspace not found' 
+      });
+    }
+
+    if (!workspace.twilio_api_key || !workspace.twilio_api_secret) {
+      return res.status(400).json({
+        success: false,
+        error: 'Workspace is missing Twilio API credentials'
+      });
     }
     
-    // Create an Access Token
+    // Create an Access Token using API Key
     const AccessToken = twilio.jwt.AccessToken;
     const VoiceGrant = AccessToken.VoiceGrant;
-    
-    // Create a Voice grant for this token
-    const voiceGrant = new VoiceGrant({
-      outgoingApplicationSid: workspace.twilio_twiml_app_sid,
-      incomingAllow: true
-    });
-    
-    // Create the access token
+
+    // Create an access token which we will sign and return to the client
     const token = new AccessToken(
-      workspace.twilio_account_sid,
-      workspace.twilio_auth_token,
+      process.env.TWILIO_ACCOUNT_SID,  // Use the system-wide Account SID
+      workspace.twilio_api_key,        // Use workspace's API Key
+      workspace.twilio_api_secret,     // Use workspace's API Secret
       { identity: identity }
     );
-    
-    // Add the voice grant to the token
-    token.addGrant(voiceGrant);
-    
-    // Return the token
-    res.json({ 
-      success: true, 
-      token: token.toJwt() 
+
+    // Create a Voice grant for this token
+    const grant = new VoiceGrant({
+      outgoingApplicationSid: process.env.TWILIO_TWIML_APP_SID, // Use system-wide TwiML App SID
+      incomingAllow: true // Allow incoming calls
+    });
+
+    // Add the voice grant to our token
+    token.addGrant(grant);
+
+    // Generate the token
+    console.log('✅ Token generated successfully');
+    return res.json({
+      success: true,
+      token: token.toJwt()
     });
   } catch (error) {
     console.error('❌ Error generating token:', error);
+    // Return generic error message to avoid exposing sensitive details
     res.status(500).json({ 
       success: false, 
-      error: error.message 
+      error: 'Failed to generate access token. Please try again later.' 
     });
   }
 });
@@ -103,12 +120,29 @@ router.post('/configure-twiml-app', async (req, res) => {
       });
     }
     
+    // Validate baseUrl format
+    try {
+      new URL(baseUrl);
+    } catch (e) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid baseUrl format. Must be a complete URL (e.g., https://example.com)'
+      });
+    }
+    
     // Get Twilio client for workspace
     const client = await getTwilioClientForWorkspace(workspaceId);
     
-    // Voice URLs
-    const voiceUrl = `${baseUrl}/api/voice/outbound`;
-    const statusCallbackUrl = `${baseUrl}/api/voice/status`;
+    // Ensure baseUrl doesn't end with a slash
+    const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    
+    // Voice URLs - use absolute URLs
+    const voiceUrl = `${normalizedBaseUrl}/api/voice/outbound`;
+    const statusCallbackUrl = `${normalizedBaseUrl}/api/voice/status`;
+    
+    console.log(`📱 Configuring TwiML App with URLs:
+    - Voice URL: ${voiceUrl}
+    - Status Callback URL: ${statusCallbackUrl}`);
     
     // Check if TwiML app already exists
     const apps = await client.applications.list({ friendlyName: `Softphone-${workspaceId}` });
@@ -144,20 +178,25 @@ router.post('/configure-twiml-app', async (req, res) => {
       .update({ twilio_twiml_app_sid: twimlApp.sid })
       .eq('id', workspaceId);
     
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Error updating workspace with TwiML app SID:', error);
+      throw new Error('Failed to save TwiML app SID to workspace');
+    }
     
     // Configure phone numbers to use this TwiML app
     await configurePhoneNumbersForVoice(workspaceId, client, twimlApp.sid);
     
     res.json({ 
       success: true, 
-      twimlAppSid: twimlApp.sid 
+      twimlAppSid: twimlApp.sid,
+      voiceUrl: voiceUrl,
+      statusCallbackUrl: statusCallbackUrl
     });
   } catch (error) {
     console.error('❌ Error configuring TwiML app:', error);
     res.status(500).json({ 
       success: false, 
-      error: error.message 
+      error: 'Failed to configure TwiML app. Please try again later.' 
     });
   }
 });
