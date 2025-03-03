@@ -75,7 +75,7 @@ router.post('/token', async (req, res) => {
     console.log('🔍 Querying workspace table...');
     const query = supabase
       .from('workspace')
-      .select('twilio_api_key, twilio_api_secret, twilio_account_sid, twilio_twiml_app_sid')
+      .select('twilio_account_sid, twilio_auth_token, twilio_twiml_app_sid')
       .eq('id', workspaceId)
       .single();
       
@@ -101,23 +101,23 @@ router.post('/token', async (req, res) => {
     
     console.log('✅ Found workspace:', workspace);
     
-    if (!workspace.twilio_api_key || !workspace.twilio_api_secret) {
+    if (!workspace.twilio_account_sid || !workspace.twilio_auth_token) {
       return res.status(400).json({
         success: false,
-        error: 'Workspace is missing Twilio API credentials'
+        error: 'Workspace is missing Twilio credentials'
       });
     }
     
-    // Create an Access Token using API Key
+    // Create an Access Token using Account SID and Auth Token
     const AccessToken = twilio.jwt.AccessToken;
     const VoiceGrant = AccessToken.VoiceGrant;
 
     try {
       // Create an access token which we will sign and return to the client
       const token = new AccessToken(
-        workspace.twilio_account_sid || process.env.TWILIO_ACCOUNT_SID, // Try workspace SID first
-        workspace.twilio_api_key,
-        workspace.twilio_api_secret,
+        workspace.twilio_account_sid,
+        workspace.twilio_account_sid,  // API Key SID (using Account SID since we don't have API Key)
+        workspace.twilio_auth_token,   // API Key Secret (using Auth Token since we don't have API Key)
         { identity: identity }
       );
 
