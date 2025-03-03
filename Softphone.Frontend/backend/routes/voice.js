@@ -10,7 +10,7 @@ async function getTwilioClientForWorkspace(workspaceId) {
   const { data, error } = await supabase
     .from('workspace')
     .select('twilio_account_sid, twilio_auth_token')
-    .eq('id', workspaceId)
+    .eq('workspace_id', workspaceId)
     .single();
     
   if (error) throw error;
@@ -53,7 +53,7 @@ router.post('/token', async (req, res) => {
     const { data: workspace, error } = await supabase
       .from('workspace')
       .select('twilio_api_key, twilio_api_secret, twilio_account_sid, twilio_twiml_app_sid')
-      .eq('id', workspaceId)
+      .eq('workspace_id', workspaceId)
       .single();
     
     if (error || !workspace) {
@@ -184,7 +184,7 @@ router.post('/configure-twiml-app', async (req, res) => {
     const { error } = await supabase
       .from('workspace')
       .update({ twilio_twiml_app_sid: twimlApp.sid })
-      .eq('id', workspaceId);
+      .eq('workspace_id', workspaceId);
     
     if (error) {
       console.error('❌ Error updating workspace with TwiML app SID:', error);
