@@ -56,49 +56,38 @@ async function syncPhoneNumbers(workspaceId, client) {
 
     // Insert new numbers
     if (formattedNumbers.length > 0) {
-      console.log('📥 Inserting new numbers...');
+      console.log('📥 Inserting new numbers into workspace_twilio_number...');
       const { error: insertError } = await supabase
         .from('workspace_twilio_number')
         .insert(formattedNumbers);
       
       if (insertError) {
-        console.error('❌ Error inserting new numbers:', insertError);
+        console.error('❌ Error inserting numbers:', insertError);
         throw insertError;
       }
-    }
-    
-    // Also update the agent_phone table for the dialer UI
-    // First, get workspace name for the friendly name
-    const { data: workspace, error: workspaceError } = await supabase
-      .from('workspace')
-      .select('name')
-      .eq('id', workspaceId)
-      .single();
-    
-    if (workspaceError) throw workspaceError;
-    
-    // Delete existing agent_phone entries for this workspace
-    await supabase
-      .from('agent_phone')
-      .delete()
-      .eq('workspace_id', workspaceId);
-    
-    // Format for agent_phone table
-    const agentPhones = numbers.map(number => ({
-      workspace_id: workspaceId,
-      full_name: number.friendlyName || `${workspace?.name || 'Softphone'} Line`,
-      twilio_number: number.phoneNumber
-    }));
-    
-    // Insert into agent_phone table
-    if (agentPhones.length > 0) {
+
+      // Also update agent_phone table for UI
+      console.log('📞 Updating agent_phone table...');
+      const agentPhoneNumbers = numbers.map(number => ({
+        workspace_id: workspaceId,
+        phone_number: number.phoneNumber,
+        friendly_name: number.friendlyName || number.phoneNumber
+      }));
+
       const { error: agentPhoneError } = await supabase
         .from('agent_phone')
-        .insert(agentPhones);
-      
-      if (agentPhoneError) {
-        console.error('Error updating agent_phone table:', agentPhoneError);
-        // Don't throw here, as we've already updated the workspace_twilio_number table
+        .delete()
+        .eq('workspace_id', workspaceId);
+
+      if (!agentPhoneError) {
+        const { error: insertAgentError } = await supabase
+          .from('agent_phone')
+          .insert(agentPhoneNumbers);
+
+        if (insertAgentError) {
+          console.error('⚠️ Warning: Failed to update agent_phone table:', insertAgentError);
+          // Don't throw here as the main sync was successful
+        }
       }
     }
 
@@ -108,9 +97,7 @@ async function syncPhoneNumbers(workspaceId, client) {
 
     return formattedNumbers;
   } catch (error) {
-    console.error('❌ Error in syncPhoneNumbers:', error.message);
-    if (error.code) console.error('Error code:', error.code);
-    if (error.status) console.error('Error status:', error.status);
+    console.error('Error syncing phone numbers:', error);
     throw error;
   }
 }
