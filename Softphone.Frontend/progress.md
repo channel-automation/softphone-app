@@ -11,6 +11,8 @@
 - [x] Modified handleOutboundCall function to use the backend API instead of direct Twilio connection
 - [x] Ensured proper parameter naming for API compatibility (WorkspaceId vs workspaceId)
 - [x] Tested inbound and outbound call functionality
+- [x] Fixed dialer UI issues by adding phone numbers to database tables and updating TwiML App SID
+- [x] Added hidden username field to DialerPartial.cshtml for token generation
 
 ## Pending Tasks
 - [ ] Implement phone number management UI
@@ -31,3 +33,12 @@ To test the integration:
 3. Make a test call using the dialer
 4. Verify that the call is routed through the correct Twilio account
 5. Test incoming calls by using the Twilio API to initiate a call to your Twilio number 
+
+## Recent Fixes
+- Fixed issue with "Place Call" button not being enabled by:
+  1. Adding phone numbers to the agent_phone table
+  2. Adding phone numbers to the workspace_twilio_number table
+  3. Updating the TwiML App SID in the workspace table
+  4. Adding a hidden username field to the DialerPartial.cshtml file
+- Created documentation in fix_dialer_commands.md with all SQL commands needed to fix the issue
+- Updated lessons_learn.md with details about the dialer UI issue and its solution 
