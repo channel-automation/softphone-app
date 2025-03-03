@@ -49,7 +49,29 @@ router.post('/token', async (req, res) => {
     
     console.log(`📱 Generating token for workspace: ${workspaceId}, identity: ${identity}`);
     
-    // Get workspace Twilio credentials
+    // First verify the user exists and belongs to the workspace
+    const { data: user, error: userError } = await supabase
+      .from('user')
+      .select('workspace_id')
+      .eq('username', identity)
+      .single();
+      
+    if (userError || !user) {
+      console.error('❌ User not found:', identity);
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+    
+    if (user.workspace_id !== parseInt(workspaceId)) {
+      console.error('❌ User does not belong to workspace:', { user: user.workspace_id, requested: workspaceId });
+      return res.status(403).json({
+        success: false,
+        error: 'User does not belong to this workspace'
+      });
+    }
+    
     console.log('🔍 Querying workspace table...');
     const query = supabase
       .from('workspace')
