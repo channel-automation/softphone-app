@@ -50,20 +50,35 @@ router.post('/token', async (req, res) => {
     console.log(`📱 Generating token for workspace: ${workspaceId}, identity: ${identity}`);
     
     // Get workspace Twilio credentials
-    const { data: workspace, error } = await supabase
+    console.log('🔍 Querying workspace table...');
+    const query = supabase
       .from('workspace')
       .select('twilio_api_key, twilio_api_secret, twilio_account_sid, twilio_twiml_app_sid')
       .eq('id', workspaceId)
       .single();
+      
+    console.log('Query:', query.toString());
     
-    if (error || !workspace) {
-      console.error('❌ Error retrieving workspace:', error?.message || 'Workspace not found');
-      return res.status(404).json({ 
+    const { data: workspace, error } = await query;
+    
+    if (error) {
+      console.error('❌ Database error:', error);
+      return res.status(500).json({ 
         success: false, 
-        error: 'Workspace not found' 
+        error: `Database error: ${error.message}` 
       });
     }
-
+    
+    if (!workspace) {
+      console.error('❌ Workspace not found for ID:', workspaceId);
+      return res.status(404).json({ 
+        success: false, 
+        error: `Workspace not found for ID: ${workspaceId}` 
+      });
+    }
+    
+    console.log('✅ Found workspace:', workspace);
+    
     if (!workspace.twilio_api_key || !workspace.twilio_api_secret) {
       return res.status(400).json({
         success: false,
