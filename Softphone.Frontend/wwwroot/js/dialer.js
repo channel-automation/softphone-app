@@ -2,16 +2,22 @@
     "use strict"
     let device; //Twilio Device object
     let expiry; //Access Token expiration time
+    let isDeviceReady = false;
 
     let divDialer;
     let divCalling;
 
     let callTimerInterval;
     let callTimerStartTime;
+    let tokenRetryTimeout;
+    const TOKEN_RETRY_INTERVAL = 5000; // 5 seconds
 
     $(function () {
         requestAudioPermission();
-        getAccessToken();
+        initializeDialer();
+    });
+
+    function initializeDialer() {
         divDialer = $("#divDialer");
         divCalling = $("#divCalling");
         initializeFormControls(divDialer);
@@ -19,21 +25,21 @@
         divDialer.find("input").on("paste", checkDialer);
         divDialer.find("input").on("cut", checkDialer);
         divDialer.find("select").on("change", checkDialer);
-        divDialer.find("button").on("click", deviceConnect);
+        divDialer.find("button").on("click", handleOutboundCall);
         divCalling.find("button").on("click", deviceDisconnect);
         checkDialer();
-    });
+        getAccessToken();
+    }
 
     async function requestAudioPermission() {
         try {
-            // Request audio access from the user
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             console.log("Audio permission granted");
-            // Stop the audio stream after permission is granted to release resources
             const tracks = stream.getTracks();
             tracks.forEach(track => track.stop());
         } catch (error) {
             console.error("Audio permission denied or error occurred:", error);
+            toastr.error("Please allow microphone access to make calls.", "Microphone Access Required");
         }
     }
 
@@ -44,92 +50,137 @@
             let mask = new Inputmask("(999) 999-9999");
             divDialer.find("small").text(mask.format(from.replaceAll("+1", "")));
         }
-        divDialer.find("button").prop("disabled", (to.length !== 10 || from === null));
+        // Disable the button if no numbers or device not ready
+        divDialer.find("button").prop("disabled", (to.length !== 10 || from === null || !isDeviceReady));
     }
 
     function getAccessToken() {
+        if (tokenRetryTimeout) {
+            clearTimeout(tokenRetryTimeout);
+        }
+
         $.ajax({
             url: "https://backend-production-3d08.up.railway.app/api/token",
-            type: "get", dataType: "json",
+            type: "get",
+            dataType: "json",
             success: function (response) {
-                if (!device) setupDevice(response.token);
-                else device.updateToken(response.token);
+                if (!device) {
+                    setupDevice(response.token);
+                } else {
+                    device.updateToken(response.token);
+                }
                 expiry = new Date(response.expires);
                 const sched = expiry - Date.now() - 60000; //-> 1 Minute before expiration
                 setTimeout(getAccessToken, sched);
-                console.log("Token updated.");
+                console.log("Token updated successfully.");
             },
-            error: () => {
-                toastr.error("Failed to communicate backend service.", "Error!");
+            error: (jqXHR, textStatus, errorThrown) => {
+                console.error("Failed to get access token:", textStatus, errorThrown);
+                toastr.error("Failed to initialize phone system. Please check your Twilio configuration.", "Configuration Error");
+                // Retry after delay
+                tokenRetryTimeout = setTimeout(getAccessToken, TOKEN_RETRY_INTERVAL);
+                isDeviceReady = false;
+                checkDialer();
             }
         });
     }
 
-     function setupDevice(token) {
-        device = new Twilio.Device(token, {
-            closeProtection: true,
-            enableRingingState: true,
-            edge: ['ashburn', 'sydney', 'dublin', 'frankfurt']
-        });
+    function setupDevice(token) {
+        try {
+            device = new Twilio.Device(token, {
+                closeProtection: true,
+                enableRingingState: true,
+                edge: ['ashburn', 'sydney', 'dublin', 'frankfurt']
+            });
 
-        device.register();
-        device.audio.incoming(true);
-        device.audio.disconnect(true);
+            device.register();
+            device.audio.incoming(true);
+            device.audio.disconnect(true);
 
-        // Listen for the "ready" event
-        device.on("ready", () => {
-            console.log("Device is ready.");
-        });
-        // Listen for the "offline" event
-        device.on("offline", () => {
-            console.log('Device is offline.');
-        });
-        // Listen for the "error" event
-        device.on("error", (error) => {
-            console.log(`Device Error: ${error}`);
-        });
+            device.on("ready", () => {
+                console.log("Device is ready.");
+                isDeviceReady = true;
+                checkDialer();
+                toastr.success("Phone system initialized successfully.", "Ready");
+            });
 
-        // Listen for incoming calls
-        device.on("incoming", (call) => {
-            console.log(`Incoming call received from ${call.parameters.From}.`);
-            incomingPopup(call); // Handle incoming call (e.g., answer or reject)
+            device.on("offline", () => {
+                console.log('Device is offline.');
+                isDeviceReady = false;
+                checkDialer();
+                toastr.warning("Phone system is offline. Attempting to reconnect...", "Offline");
+                getAccessToken();
+            });
 
-            // Set up event listeners for the connection
-            call.on("disconnect", () => {
-                console.log("Inbound call disconnected.");
-                divDialer.show();
-                divCalling.hide();
-                clearInterval(callTimerInterval);
+            device.on("error", (error) => {
+                console.error(`Device Error:`, error);
+                isDeviceReady = false;
+                checkDialer();
+                toastr.error("Phone system encountered an error. Please refresh the page.", "Error");
             });
-            call.on("cancel", () => {
-                console.log("Inbound call cancelled.");
-                Swal.close();
-            });
-            call.on("accept", () => {
-                console.log("Inbound call accepted.");
-                divDialer.hide();
-                divCalling.show();
-                setCallingInfo(call.parameters.From, true);
-            });
-            call.on("reject", () => {
-                console.log("Inbound call rejected.");
-            });
-            call.on("error", (error) => {
-                console.log(`Error during inbound call: ${error}`);
-                toastr.error("Unexpected error during call.", "Error!");
-                divDialer.show();
-                divCalling.hide();
-                clearInterval(callTimerInterval);
-            });
+
+            device.on("incoming", handleIncomingCall);
+        } catch (error) {
+            console.error("Error setting up Twilio device:", error);
+            toastr.error("Failed to initialize phone system. Please refresh the page.", "Setup Error");
+            isDeviceReady = false;
+            checkDialer();
+        }
+    }
+
+    function handleIncomingCall(call) {
+        console.log(`Incoming call received from ${call.parameters.From}.`);
+        incomingPopup(call);
+
+        call.on("disconnect", () => {
+            console.log("Inbound call disconnected.");
+            divDialer.show();
+            divCalling.hide();
+            clearInterval(callTimerInterval);
+        });
+        call.on("cancel", () => {
+            console.log("Inbound call cancelled.");
+            Swal.close();
+        });
+        call.on("accept", () => {
+            console.log("Inbound call accepted.");
+            divDialer.hide();
+            divCalling.show();
+            setCallingInfo(call.parameters.From, true);
+        });
+        call.on("reject", () => {
+            console.log("Inbound call rejected.");
+        });
+        call.on("error", (error) => {
+            console.error(`Error during inbound call:`, error);
+            toastr.error("Unexpected error during call.", "Call Error");
+            divDialer.show();
+            divCalling.hide();
+            clearInterval(callTimerInterval);
         });
     }
 
-    async function deviceConnect() {
-        let to = `+1${divDialer.find("input").inputmask("unmaskedvalue")}`;
-        let from = divDialer.find("select").val();
-        let params = { To: to, From: from };
-        const call = await device.connect({ params });
+    async function handleOutboundCall() {
+        if (!isDeviceReady || !device) {
+            toastr.error("Phone system is not ready. Please wait a moment and try again.", "Not Ready");
+            return;
+        }
 
+        try {
+            let to = `+1${divDialer.find("input").inputmask("unmaskedvalue")}`;
+            let from = divDialer.find("select").val();
+            let params = { To: to, From: from };
+            const call = await device.connect({ params });
+            setupOutboundCallHandlers(call, to);
+        } catch (error) {
+            console.error("Error making outbound call:", error);
+            toastr.error("Failed to place call. Please try again.", "Call Error");
+            divDialer.show();
+            divCalling.hide();
+        }
+    }
+
+    function setupOutboundCallHandlers(call, to) {
         call.on("connecting", () => {
             console.log("Outbound call connecting.");
         });
@@ -150,9 +201,15 @@
         });
         call.on("reject", () => {
             console.log("Outbound call rejected.");
+            divDialer.show();
+            divCalling.hide();
+            toastr.warning("Call was rejected.", "Call Ended");
         });
         call.on("cancel", () => {
             console.log("Outbound call cancelled.");
+            divDialer.show();
+            divCalling.hide();
+            toastr.info("Call was cancelled.", "Call Ended");
         });
         call.on("disconnect", () => {
             console.log("Outbound call disconnected.");
@@ -161,8 +218,8 @@
             clearInterval(callTimerInterval);
         });
         call.on("error", (error) => {
-            console.log(`Error during outbound call: ${error}`);
-            toastr.error("Unexpected error during call.", "Error!");
+            console.error(`Error during outbound call:`, error);
+            toastr.error("Unexpected error during call.", "Call Error");
             divDialer.show();
             divCalling.hide();
             clearInterval(callTimerInterval);
@@ -170,7 +227,9 @@
     }
 
     function deviceDisconnect() {
-        device.disconnectAll();
+        if (device) {
+            device.disconnectAll();
+        }
         divDialer.show();
         divCalling.hide();
         clearInterval(callTimerInterval);
