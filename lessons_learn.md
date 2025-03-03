@@ -513,3 +513,34 @@ The key lessons:
 3. Maintain consistency in naming conventions across the application
 4. Document table relationships and their purposes
 5. Consider the impact on existing features when modifying database interactions
+
+## Dialer Integration with Backend API
+
+### Problem
+- The original dialer implementation used Twilio's client-side SDK to initiate calls directly
+- This approach doesn't work well with our multi-tenant architecture where each workspace has its own Twilio credentials
+- Direct client-side calling bypasses our backend, making it difficult to track and manage calls
+
+### Solution
+- Modified the dialer to use our backend API for initiating outbound calls
+- Updated the `deviceConnect` function to make an AJAX call to the backend endpoint
+- Changed the `handleOutboundCall` function to use the new approach
+- Ensured proper parameter naming for API compatibility (WorkspaceId vs workspaceId)
+
+### Implementation Details
+1. **API-Based Calling**: Instead of using `device.connect()` directly, we now make an AJAX call to our backend API
+2. **Parameter Standardization**: Ensured consistent parameter naming between frontend and backend
+3. **Error Handling**: Added proper error handling for API calls
+4. **UI Updates**: Maintained the same UI experience despite the underlying implementation change
+
+### Benefits
+- Centralized call management through our backend
+- Better integration with our multi-tenant architecture
+- Improved tracking and logging capabilities
+- More consistent behavior across different Twilio accounts
+
+### Key Takeaways
+- When working with third-party services in a multi-tenant application, routing requests through your backend provides better control
+- Maintaining consistent parameter naming between frontend and backend is crucial for smooth integration
+- Proper error handling and user feedback are essential for a good user experience
+- The UI experience should remain consistent even when the underlying implementation changes

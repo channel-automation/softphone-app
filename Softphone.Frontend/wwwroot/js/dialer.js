@@ -168,11 +168,8 @@
         }
 
         try {
-            let to = `+1${divDialer.find("input").inputmask("unmaskedvalue")}`;
-            let from = divDialer.find("select").val();
-            let params = { To: to, From: from };
-            const call = await device.connect({ params });
-            setupOutboundCallHandlers(call, to);
+            // Call the deviceConnect function which uses our backend API
+            deviceConnect();
         } catch (error) {
             console.error("Error making outbound call:", error);
             toastr.error("Failed to place call. Please try again.", "Call Error");
@@ -292,50 +289,26 @@
         const params = { 
             To: to, 
             From: from,
-            workspaceId: workspaceId,
-            identity: identity,
-            statusCallback: `${config.backendUrl}${config.endpoints.statusCallback}`
+            WorkspaceId: workspaceId,
+            identity: identity
         };
         
         try {
-            const call = await device.connect({ params });
-
-            call.on("connecting", () => {
-                console.log("Outbound call connecting.");
-            });
-            call.on("ringing", () => {
-                console.log("Outbound call ringing.");
-                divDialer.hide();
-                divCalling.show();
-                setCallingInfo(to, false);
-            });
-            call.on("connect", () => {
-                console.log("Outbound call connected.");
-            });
-            call.on("accept", () => {
-                console.log("Outbound call accepted.");
-                divDialer.hide();
-                divCalling.show();
-                setCallingInfo(to, true);
-            });
-            call.on("reject", () => {
-                console.log("Outbound call rejected.");
-            });
-            call.on("cancel", () => {
-                console.log("Outbound call cancelled.");
-            });
-            call.on("disconnect", () => {
-                console.log("Outbound call disconnected.");
-                divDialer.show();
-                divCalling.hide();
-                clearInterval(callTimerInterval);
-            });
-            call.on("error", (error) => {
-                console.error("Call error:", error);
-                toastr.error("An error occurred during the call.", "Error");
-                divDialer.show();
-                divCalling.hide();
-                clearInterval(callTimerInterval);
+            // Make the API call to initiate the outbound call
+            $.ajax({
+                url: `${config.backendUrl}${config.endpoints.call}`,
+                type: "POST",
+                data: params,
+                success: function(response) {
+                    console.log("Call initiated successfully:", response);
+                    divDialer.hide();
+                    divCalling.show();
+                    setCallingInfo(to, false);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Failed to initiate call:", error);
+                    toastr.error("Failed to connect call. Please check your Twilio configuration.", "Error");
+                }
             });
         } catch (error) {
             console.error("Failed to connect call:", error);
