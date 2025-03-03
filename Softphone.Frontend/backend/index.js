@@ -26,16 +26,31 @@ const corsOptions = {
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'Access-Control-Request-Method',
+    'Access-Control-Request-Headers',
+    'X-CSRF-Token'
+  ],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
   credentials: true,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 204,
+  maxAge: 86400 // 24 hours
 };
 
 app.use(cors(corsOptions));
 
-// Add content type middleware
+// Add content type and CORS headers middleware
 app.use((req, res, next) => {
-  res.set('Content-Type', 'application/json');
+  res.set({
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Origin': req.headers.origin || '*'
+  });
   next();
 });
 
@@ -217,9 +232,20 @@ const io = new Server(server, {
   cors: {
     origin: socketCorsOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers',
+      'X-CSRF-Token'
+    ],
     credentials: true
-  }
+  },
+  allowEIO3: true, // Allow Engine.IO version 3
+  transports: ['websocket', 'polling']
 });
 
 // Function to get the Socket.IO instance
