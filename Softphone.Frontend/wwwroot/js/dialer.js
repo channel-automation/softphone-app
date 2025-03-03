@@ -55,32 +55,33 @@
     }
 
     function getAccessToken() {
-        if (tokenRetryTimeout) {
-            clearTimeout(tokenRetryTimeout);
-        }
-
+        // Get the workspace ID from the global variable
+        const workspaceId = globalWorkspaceId;
+        const identity = $("#hdnUsername").val(); // Assuming username is stored in a hidden field
+        
         $.ajax({
-            url: "https://backend-production-3d08.up.railway.app/api/token",
-            type: "get",
+            url: `${config.backendUrl}${config.endpoints.token}`,
+            type: "post", 
             dataType: "json",
-            success: function (response) {
-                if (!device) {
-                    setupDevice(response.token);
-                } else {
-                    device.updateToken(response.token);
-                }
-                expiry = new Date(response.expires);
-                const sched = expiry - Date.now() - 60000; //-> 1 Minute before expiration
-                setTimeout(getAccessToken, sched);
-                console.log("Token updated successfully.");
+            data: {
+                workspaceId: workspaceId,
+                identity: identity
             },
-            error: (jqXHR, textStatus, errorThrown) => {
-                console.error("Failed to get access token:", textStatus, errorThrown);
-                toastr.error("Failed to initialize phone system. Please check your Twilio configuration.", "Configuration Error");
-                // Retry after delay
-                tokenRetryTimeout = setTimeout(getAccessToken, TOKEN_RETRY_INTERVAL);
-                isDeviceReady = false;
-                checkDialer();
+            success: function (response) {
+                if (response.success) {
+                    if (!device) setupDevice(response.token);
+                    else device.updateToken(response.token);
+                    expiry = new Date(response.expires);
+                    const sched = expiry - Date.now() - 60000; //-> 1 Minute before expiration
+                    setTimeout(getAccessToken, sched);
+                    console.log("Token updated.");
+                } else {
+                    toastr.error(response.error || "Failed to get access token", "Error!");
+                }
+            },
+            error: (xhr) => {
+                console.error("Token error:", xhr);
+                toastr.error("Failed to communicate with backend service.", "Error!");
             }
         });
     }
@@ -277,6 +278,53 @@
 
     function pad(number) {
         return number < 10 ? '0' + number : number;
+    }
+
+    async function deviceConnect() {
+        let to = `+1${divDialer.find("input").inputmask("unmaskedvalue")}`;
+        let from = divDialer.find("select").val();
+        
+        // Use the backend API for making calls
+        const workspaceId = globalWorkspaceId;
+        const params = { 
+            To: to, 
+            From: from,
+            workspaceId: workspaceId,
+            statusCallback: `${config.backendUrl}${config.endpoints.statusCallback}`
+        };
+        
+        const call = await device.connect({ params });
+
+        call.on("connecting", () => {
+            console.log("Outbound call connecting.");
+        });
+        call.on("ringing", () => {
+            console.log("Outbound call ringing.");
+            divDialer.hide();
+            divCalling.show();
+            setCallingInfo(to, false);
+        });
+        call.on("connect", () => {
+            console.log("Outbound call connected.");
+        });
+        call.on("accept", () => {
+            console.log("Outbound call accepted.");
+            divDialer.hide();
+            divCalling.show();
+            setCallingInfo(to, true);
+        });
+        call.on("reject", () => {
+            console.log("Outbound call rejected.");
+        });
+        call.on("cancel", () => {
+            console.log("Outbound call cancelled.");
+        });
+        call.on("disconnect", () => {
+            console.log("Outbound call disconnected.");
+            divDialer.show();
+            divCalling.hide();
+            clearInterval(callTimerInterval);
+        });
     }
 
 })(jQuery);

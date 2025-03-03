@@ -7,14 +7,12 @@
         <div class="col-12">
             <label class="text-purple">Twilio Account SID</label>
             <input type="text" asp-for="TwilioAccountSID" class="form-control" />
-            <small class="text-muted">Your Twilio Account SID from the Twilio Console</small>
         </div>
     </div>
     <div class="form-group row">
         <div class="col-12">
             <label class="text-purple">Twilio Auth Token</label>
             <input type="text" asp-for="TwilioAuthToken" class="form-control" />
-            <small class="text-muted">Your Twilio Auth Token from the Twilio Console</small>
         </div>
     </div>
     <div class="form-group row">
@@ -23,22 +21,45 @@
             <input type="text" asp-for="ChannelAutomationAPIKey" class="form-control" />
         </div>
     </div>
-    <div class="alert alert-info mt-3" role="alert">
-        <i class="fas fa-info-circle"></i> When you save your Twilio credentials, the system will automatically:
-        <ul class="mb-0 mt-2">
-            <li>Configure your Twilio TwiML App for voice calling</li>
-            <li>Set up webhooks for SMS and voice</li>
-            <li>Update your phone numbers to use these configurations</li>
-        </ul>
+    
+    <div class="card mt-3">
+        <div class="card-header bg-light">
+            <h5 class="card-title mb-0">Twilio Webhook Configuration</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Configure these URLs in your Twilio phone number settings.
+            </div>
+            <div class="form-group">
+                <label class="text-purple">Voice Webhook URL</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" readonly value="https://backend-production-3d08.up.railway.app/voice/incoming" />
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard(this)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <small class="text-muted">Set this as the "A Call Comes In" webhook in your Twilio phone number settings.</small>
+            </div>
+            <div class="form-group">
+                <label class="text-purple">Status Callback URL</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" readonly value="https://backend-production-3d08.up.railway.app/voice/status-callback" />
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard(this)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <small class="text-muted">Set this as the "Status Callback URL" in your Twilio phone number settings.</small>
+            </div>
+        </div>
     </div>
 </form>
-<div class="text-center mt-4 mb-1">
+<div class="text-center mt-5 mb-1">
     <button class="btn bg-gradient-purple mr-2" onclick="_save(this)"><i class="fas fa-save"></i> Save</button>
-    <button class="btn bg-gradient-dark mr-2" onclick="_cancel()"><i class="fas fa-times-circle"></i> Cancel</button>
-    @if (!string.IsNullOrEmpty(Model.TwilioAccountSID))
-    {
-        <button class="btn bg-gradient-danger" onclick="_clearConfiguration(this)"><i class="fas fa-trash"></i> Clear Configuration</button>
-    }
+    <button class="btn bg-gradient-dark" onclick="_cancel()"><i class="fas fa-times-circle"></i> Cancel</button>
 </div>
 
 <script>
@@ -51,84 +72,12 @@
         //configurationDialog.modal("hide");
         Swal.close(configurationDialog);
     }
-
-    function _clearConfiguration(btn) {
-        Swal.fire({
-            title: 'Clear Twilio Configuration?',
-            text: 'This will remove all Twilio credentials and phone number data. You will need to reconfigure Twilio to use the dialer and messaging features.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, clear it!',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Show loading message
-                Swal.fire({
-                    title: 'Clearing Configuration',
-                    html: 'Please wait while we clear your Twilio configuration...',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    allowEnterKey: false,
-                    showConfirmButton: false,
-                    willOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-                
-                // Call the controller action to clear the configuration
-                startAjaxSpinner(btn);
-                $.ajax({
-                    url: '@Url.Action("ClearTwilioConfiguration", "Configuration")',
-                    type: 'POST',
-                    data: { workspaceId: @Model.Id },
-                    headers: {
-                        "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
-                    },
-                    success: function(response) {
-                        Swal.close(); // Close the loading dialog
-                        
-                        if (response.success) {
-                            // Show success and SQL commands to run
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Configuration cleared',
-                                html: `
-                                    <p>${response.message}</p>
-                                    <div class="mt-3 text-left">
-                                        <p><strong>Run these SQL commands in Supabase:</strong></p>
-                                        <pre style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; text-align: left; overflow: auto;">
--- 1. Delete phone numbers from twilio_numbers table
-DELETE FROM twilio_numbers 
-WHERE workspace_id = ${@Model.Id};
-
--- 2. Delete phone numbers from agent_phone table
-DELETE FROM agent_phone 
-WHERE workspace_id = ${@Model.Id};
-
--- 3. Delete configuration from workspace_twilio_config table
-DELETE FROM workspace_twilio_config 
-WHERE workspace_id = ${@Model.Id};
-                                        </pre>
-                                    </div>
-                                `,
-                                confirmButtonText: 'OK',
-                            }).then(() => {
-                                location.reload(); // Reload the page to show the configuration form
-                            });
-                        } else {
-                            toastr.error(response.error || "Failed to clear configuration. Please try again.", "Error!");
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        Swal.close(); // Close the loading dialog
-                        console.error("Clear configuration error:", xhr.responseText);
-                        toastr.error("Failed to clear configuration. Please try again. Error: " + error, "Error!");
-                    }
-                });
-            }
-        });
+    
+    function copyToClipboard(btn) {
+        const input = $(btn).closest('.input-group').find('input');
+        input.select();
+        document.execCommand('copy');
+        toastr.success('URL copied to clipboard!', 'Success');
     }
 
     function _save(btn) {
@@ -149,54 +98,15 @@ WHERE workspace_id = ${@Model.Id};
             toastr.error("Channel Automation API Key is required.", "Error..");
             return false;
         }
-        
-        // Show loading message
-        Swal.fire({
-            title: 'Configuring Twilio',
-            html: 'Please wait while we configure your Twilio account...<br/><small class="text-muted">This may take a few moments</small>',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            allowEnterKey: false,
-            showConfirmButton: false,
-            willOpen: () => {
-                Swal.showLoading();
-            }
-        });
-        
         //Server Processing
         startAjaxSpinner(btn);
         $.post("@Url.Action("Save")", form.serialize(), function (response) {
-            Swal.close(); // Close the loading dialog
-            
             if (errorMessages(response)) return false;
             else {
                 //configurationDialog.modal("hide");
                 Swal.close(configurationDialog);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Configuration Successful',
-                    html: 'Your Twilio account has been configured successfully!<br/><small class="text-muted">TwiML App and webhooks have been set up for voice and SMS.</small>',
-                    confirmButtonText: 'Great!'
-                });
+                toastr.success("Configuration successfully saved.", "Success!");
             }
-        }).fail(function(xhr, textStatus, errorThrown) {
-            Swal.close(); // Close the loading dialog
-            console.error("AJAX Error:", textStatus, errorThrown);
-            console.error("Response:", xhr.responseText);
-            
-            // Show more detailed error message
-            Swal.fire({
-                icon: 'error',
-                title: 'Configuration Failed',
-                html: `
-                    <p>Failed to save configuration. Please try again.</p>
-                    <div class="mt-3">
-                        <p><strong>Error Details:</strong></p>
-                        <pre style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; text-align: left; overflow: auto; font-size: 12px;">${textStatus}: ${errorThrown}\n${xhr.responseText || 'No response details'}</pre>
-                    </div>
-                `,
-                confirmButtonText: 'OK'
-            });
         });
         return false;
     }
