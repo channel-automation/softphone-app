@@ -286,45 +286,61 @@
         
         // Use the backend API for making calls
         const workspaceId = globalWorkspaceId;
+        const identity = $("#hdnUsername").val(); // Assuming username is stored in a hidden field
+        
+        // Set up parameters for the call
         const params = { 
             To: to, 
             From: from,
             workspaceId: workspaceId,
+            identity: identity,
             statusCallback: `${config.backendUrl}${config.endpoints.statusCallback}`
         };
         
-        const call = await device.connect({ params });
+        try {
+            const call = await device.connect({ params });
 
-        call.on("connecting", () => {
-            console.log("Outbound call connecting.");
-        });
-        call.on("ringing", () => {
-            console.log("Outbound call ringing.");
-            divDialer.hide();
-            divCalling.show();
-            setCallingInfo(to, false);
-        });
-        call.on("connect", () => {
-            console.log("Outbound call connected.");
-        });
-        call.on("accept", () => {
-            console.log("Outbound call accepted.");
-            divDialer.hide();
-            divCalling.show();
-            setCallingInfo(to, true);
-        });
-        call.on("reject", () => {
-            console.log("Outbound call rejected.");
-        });
-        call.on("cancel", () => {
-            console.log("Outbound call cancelled.");
-        });
-        call.on("disconnect", () => {
-            console.log("Outbound call disconnected.");
-            divDialer.show();
-            divCalling.hide();
-            clearInterval(callTimerInterval);
-        });
+            call.on("connecting", () => {
+                console.log("Outbound call connecting.");
+            });
+            call.on("ringing", () => {
+                console.log("Outbound call ringing.");
+                divDialer.hide();
+                divCalling.show();
+                setCallingInfo(to, false);
+            });
+            call.on("connect", () => {
+                console.log("Outbound call connected.");
+            });
+            call.on("accept", () => {
+                console.log("Outbound call accepted.");
+                divDialer.hide();
+                divCalling.show();
+                setCallingInfo(to, true);
+            });
+            call.on("reject", () => {
+                console.log("Outbound call rejected.");
+            });
+            call.on("cancel", () => {
+                console.log("Outbound call cancelled.");
+            });
+            call.on("disconnect", () => {
+                console.log("Outbound call disconnected.");
+                divDialer.show();
+                divCalling.hide();
+                clearInterval(callTimerInterval);
+            });
+            call.on("error", (error) => {
+                console.error("Call error:", error);
+                toastr.error("An error occurred during the call.", "Error");
+                divDialer.show();
+                divCalling.hide();
+                clearInterval(callTimerInterval);
+            });
+        } catch (error) {
+            console.error("Failed to connect call:", error);
+            toastr.error("Failed to connect call. Please check your Twilio configuration.", "Error");
+        }
     }
 
 })(jQuery);
