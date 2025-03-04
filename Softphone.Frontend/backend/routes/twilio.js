@@ -1081,31 +1081,40 @@ router.post('/call', async (req, res) => {
     // Create TwiML for outbound call
     const twiml = new twilio.twiml.VoiceResponse();
     
+    console.log('🔄 Starting outbound call flow...');
+    
     // Add a brief wait message while the call connects
     twiml.say('Please wait while we connect your call.');
     
     // Create a direct connection between parties with proper bridging
-    twiml.dial({
+    const dialParams = {
       callerId: from,
       answerOnBridge: true,
       record: 'record-from-answer',
-      timeout: 20 // Give enough time for the call to be answered
-    }).number({
+      timeout: 20,
+      action: `${req.protocol}://${req.get('host')}/api/twilio/dial-status`,
+      method: 'POST'
+    };
+    
+    console.log('📞 Dial parameters:', JSON.stringify(dialParams, null, 2));
+    
+    const numberParams = {
       statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
       statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
-    }, to);
+    };
+    
+    console.log('📱 Number parameters:', JSON.stringify(numberParams, null, 2));
+    
+    twiml.dial(dialParams).number(numberParams, to);
 
-    console.log('Using TwiML:', twiml.toString());
-    console.log('Twilio credentials:', {
-      accountSid: workspace.twilio_account_sid,
-      authToken: '***' // Don't log the actual auth token
-    });
-
+    const twimlString = twiml.toString();
+    console.log('📜 Generated TwiML:', twimlString);
+    
     // Make the call
     const call = await client.calls.create({
       to: normalizePhone(to),
       from: from || workspace.twilio_account_sid, // Use from if provided, otherwise use first Twilio number
-      twiml: twiml.toString(),
+      twiml: twimlString,
       statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
       statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
       statusCallbackMethod: 'POST'
@@ -1149,31 +1158,40 @@ router.post('/call/:workspaceId', async (req, res) => {
     // Create TwiML for outbound call
     const twiml = new twilio.twiml.VoiceResponse();
     
+    console.log('🔄 Starting outbound call flow...');
+    
     // Add a brief wait message while the call connects
     twiml.say('Please wait while we connect your call.');
     
     // Create a direct connection between parties with proper bridging
-    twiml.dial({
+    const dialParams = {
       callerId: from,
       answerOnBridge: true,
       record: 'record-from-answer',
-      timeout: 20 // Give enough time for the call to be answered
-    }).number({
+      timeout: 20,
+      action: `${req.protocol}://${req.get('host')}/api/twilio/dial-status`,
+      method: 'POST'
+    };
+    
+    console.log('📞 Dial parameters:', JSON.stringify(dialParams, null, 2));
+    
+    const numberParams = {
       statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
       statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
-    }, to);
+    };
+    
+    console.log('📱 Number parameters:', JSON.stringify(numberParams, null, 2));
+    
+    twiml.dial(dialParams).number(numberParams, to);
 
-    console.log('Using TwiML:', twiml.toString());
-    console.log('Twilio credentials:', {
-      accountSid: config.twilio_account_sid,
-      authToken: '***' // Don't log the actual auth token
-    });
-
+    const twimlString = twiml.toString();
+    console.log('📜 Generated TwiML:', twimlString);
+    
     // Make the call
     const call = await client.calls.create({
       to: normalizePhone(to),
       from: from || config.twilio_account_sid, // Use from if provided, otherwise use first Twilio number
-      twiml: twiml.toString(),
+      twiml: twimlString,
       statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
       statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
       statusCallbackMethod: 'POST'
@@ -1190,8 +1208,13 @@ router.post('/call/:workspaceId', async (req, res) => {
 // Status callback endpoint
 router.post('/status', async (req, res) => {
   try {
-    const { CallSid, CallStatus } = req.body;
-    console.log(`📞 Call ${CallSid} status update: ${CallStatus}`);
+    const { CallSid, CallStatus, DialCallStatus, DialCallDuration } = req.body;
+    console.log(`📞 Call ${CallSid} status update:`, {
+      status: CallStatus,
+      dialStatus: DialCallStatus,
+      duration: DialCallDuration,
+      rawBody: req.body
+    });
     
     // Get the IO instance
     const io = getIO();
@@ -1199,12 +1222,34 @@ router.post('/status', async (req, res) => {
     // Emit status update to all connected clients
     io.emit('call_status_update', {
       callSid: CallSid,
-      status: CallStatus
+      status: CallStatus,
+      dialStatus: DialCallStatus,
+      duration: DialCallDuration
     });
     
     res.sendStatus(200);
   } catch (error) {
-    console.error('Error handling status callback:', error);
+    console.error('❌ Error handling status callback:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// New endpoint to handle dial status
+router.post('/dial-status', async (req, res) => {
+  try {
+    console.log('📞 Dial status callback received:', {
+      body: req.body,
+      query: req.query,
+      headers: req.headers
+    });
+    
+    const twiml = new VoiceResponse();
+    twiml.hangup();
+    
+    res.type('text/xml');
+    res.send(twiml.toString());
+  } catch (error) {
+    console.error('❌ Error handling dial status:', error);
     res.status(500).json({ error: error.message });
   }
 });
