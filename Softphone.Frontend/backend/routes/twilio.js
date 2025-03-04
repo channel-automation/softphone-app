@@ -977,10 +977,10 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
   try {
     const { workspaceId } = req.params;
     
-    // Get workspace's Twilio credentials from workspace table
+    // Get workspace's Twilio credentials and user info
     const { data: config, error: configError } = await supabase
       .from('workspace')
-      .select('twilio_account_sid, twilio_auth_token, twilio_twiml_app_sid')
+      .select('twilio_account_sid, twilio_auth_token, twilio_api_key, twilio_api_secret, twilio_twiml_app_sid')
       .eq('id', workspaceId)
       .single();
 
@@ -991,6 +991,22 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
 
     if (!config) {
       return res.status(404).json({ error: 'Twilio configuration not found' });
+    }
+
+    // Get user info from user table
+    const { data: user, error: userError } = await supabase
+      .from('user')
+      .select('username')
+      .eq('workspace_id', workspaceId)
+      .single();
+
+    if (userError) {
+      console.error('Error fetching user:', userError);
+      return res.status(500).json({ error: 'Failed to fetch user information' });
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
     if (!config.twilio_twiml_app_sid) {
@@ -1006,12 +1022,12 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
       outgoingApplicationSid: config.twilio_twiml_app_sid
     });
 
-    // Create access token with Voice grant
+    // Create access token with Voice grant using username as identity
     const token = new AccessToken(
       config.twilio_account_sid,
-      config.twilio_auth_token,
-      config.twilio_twiml_app_sid,
-      { identity: 'softphone-user' }  // Use a simple default identity
+      config.twilio_api_key,     // Use API Key from workspace
+      config.twilio_api_secret,  // Use API Secret from workspace
+      { identity: user.username }  // Use username as identity
     );
 
     // Add Voice grant to token
