@@ -13,6 +13,7 @@ if (builder.Environment.IsDevelopment())
     builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 }
 
+builder.Services.AddHttpClient(); 
 builder.Services.AddControllers().AddNewtonsoftJson(o => { o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore; });
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(o => o.LoginPath = new PathString("/Security/Login"));
 builder.Services.AddControllersWithViews(o => o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
