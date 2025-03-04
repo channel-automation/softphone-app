@@ -386,84 +386,124 @@
     }
 
     async function deviceConnect() {
-        // Get the to number, removing any formatting
-        const phoneInput = divDialer.find("input.inputmask-usphone");
-        const rawNumber = phoneInput.inputmask("unmaskedvalue").toString().replace(/\D/g, '');
-        console.log('Raw number before formatting:', rawNumber);
-        
-        // Ensure we have exactly 10 digits
-        if (rawNumber.length !== 10) {
-            console.error('Invalid phone number length:', rawNumber.length);
-            toastr.error('Please enter a valid 10-digit phone number');
-            return;
-        }
-        
-        let to = `+1${rawNumber}`;
-        let from = '+13614704885'; // Use the actual Twilio number
-        
-        console.log(`Making call from ${from} to ${to}`);
-        
         try {
-            // Update UI to show we're initiating the call
-            setCallingInfo(to, true);
+            const phoneInput = $('#txtPhoneNumber');
+            const rawNumber = phoneInput.inputmask("unmaskedvalue").toString().replace(/\D/g, '');
+            console.log('Raw number before formatting:', rawNumber);
             
-            // If device isn't ready yet, try to make a direct API call instead
-            if (!isDeviceReady || !device) {
-                console.log('Device not ready, attempting direct API call');
-                
-                // Get the workspace ID
-                const workspaceId = $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val();
-                
-                if (!workspaceId) {
-                    throw new Error("No workspace ID found");
-                }
-                
-                console.log(`Making direct API call to ${config.backendUrl}${config.endpoints.call}/${workspaceId}`);
-                
-                // Make a direct call to the backend API
-                $.ajax({
-                    url: `${config.backendUrl}${config.endpoints.call}/${workspaceId}`,
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify({ 
-                        to: to,
-                        from: from
-                    }),
-                    success: (data) => {
-                        console.log('Call initiated via API:', data);
-                        toastr.success("Call initiated successfully", "Call Connected");
-                    },
-                    error: (xhr) => {
-                        console.error('Failed to initiate call via API:', xhr);
-                        console.error('Status:', xhr.status, 'Response:', xhr.responseText);
-                        throw new Error(xhr.responseJSON?.error || xhr.statusText || "Unknown error");
-                    }
-                });
+            // Ensure we have exactly 10 digits
+            if (rawNumber.length !== 10) {
+                console.error('Invalid phone number length:', rawNumber.length);
+                toastr.error('Please enter a valid 10-digit phone number');
                 return;
             }
             
-            // Create params for the call
-            const params = {
-                To: to,
-                From: from
-            };
-            console.log('Call params:', params);
+            // Get the workspace ID
+            const workspaceId = $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val();
             
-            // Make the call via Twilio Device
-            console.log('Connecting call via device...');
-            const call = await device.connect({ params });
-            console.log('Call connected:', call);
+            if (!workspaceId) {
+                throw new Error("No workspace ID found");
+            }
             
-            // Set up handlers for call status events
-            setupOutboundCallHandlers(call, to);
+            // Get the selected "from" number from the dropdown
+            const from = $('#ddlFromNumber').val();
+            if (!from) {
+                toastr.error('Please select a phone number to call from');
+                return;
+            }
+            
+            let to = `+1${rawNumber}`;
+            
+            console.log(`Making call from ${from} to ${to}`);
+            
+            try {
+                // Update UI to show we're initiating the call
+                setCallingInfo(to, true);
+                
+                // If device isn't ready yet, try to make a direct API call instead
+                if (!isDeviceReady || !device) {
+                    console.log('Device not ready, attempting direct API call');
+                    
+                    console.log(`Making direct API call to ${config.backendUrl}${config.endpoints.call}/${workspaceId}`);
+                    
+                    // Make a direct call to the backend API
+                    $.ajax({
+                        url: `${config.backendUrl}${config.endpoints.call}/${workspaceId}`,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify({ 
+                            to: to,
+                            from: from
+                        }),
+                        success: (data) => {
+                            console.log('Call initiated via API:', data);
+                            toastr.success("Call initiated successfully", "Call Connected");
+                        },
+                        error: (xhr) => {
+                            console.error('Failed to initiate call via API:', xhr);
+                            console.error('Status:', xhr.status, 'Response:', xhr.responseText);
+                            throw new Error(xhr.responseJSON?.error || xhr.statusText || "Unknown error");
+                        }
+                    });
+                    return;
+                }
+                
+                // Create params for the call
+                const params = {
+                    To: to,
+                    From: from
+                };
+                console.log('Call params:', params);
+                
+                device.connect(params);
+            } catch (error) {
+                console.error('Error connecting device:', error);
+                toastr.error(error.message || "Failed to connect call");
+                setCallingInfo(null, false);
+            }
         } catch (error) {
-            console.error("Failed to connect call:", error);
-            toastr.error(`Call failed: ${error.message || "Unknown error"}`, "Call Error");
-            
-            // Reset UI
-            endCall();
+            console.error('Error in deviceConnect:', error);
+            toastr.error(error.message || "Error making call");
+            setCallingInfo(null, false);
         }
     }
+
+    // Function to load phone numbers into dropdown
+    async function loadPhoneNumbers() {
+        try {
+            const workspaceId = $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val();
+            
+            if (!workspaceId) {
+                throw new Error("No workspace ID found");
+            }
+            
+            const response = await $.get(`${config.backendUrl}/api/twilio/phone-numbers/${workspaceId}`);
+            const phones = response.phones;
+            
+            if (!phones || phones.length === 0) {
+                toastr.warning('No phone numbers available for this workspace');
+                return;
+            }
+            
+            const ddl = $('#ddlFromNumber');
+            ddl.empty();
+            ddl.append($('<option></option>').val('').text('Select a number...'));
+            
+            phones.forEach(phone => {
+                ddl.append($('<option></option>')
+                    .val(phone.phone_number)
+                    .text(phone.friendly_name || phone.phone_number));
+            });
+        } catch (error) {
+            console.error('Error loading phone numbers:', error);
+            toastr.error('Failed to load available phone numbers');
+        }
+    }
+
+    // Call loadPhoneNumbers when the page loads
+    $(document).ready(function() {
+        loadPhoneNumbers();
+    });
 
     function endCall() {
         // Reset UI

@@ -516,16 +516,31 @@ router.get('/phone-numbers/:workspaceId', async (req, res) => {
   try {
     const { workspaceId } = req.params;
     
-    const { data, error } = await supabase
-      .from('user_twilio_number')
-      .select('*')
-      .eq('workspace_id', workspaceId);
+    // Get phone numbers for this workspace
+    const { data: agents, error } = await supabase
+      .from('agent')
+      .select('username, full_name, twilio_number')
+      .eq('workspace_id', workspaceId)
+      .not('twilio_number', 'is', null);
       
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching phone numbers:', error);
+      return res.status(500).json({ error: 'Failed to fetch phone numbers' });
+    }
     
-    res.json({ phoneNumbers: data });
+    if (!agents || agents.length === 0) {
+      return res.status(404).json({ error: 'No phone numbers found for workspace' });
+    }
+    
+    // Format the response
+    const formattedPhones = agents.map(agent => ({
+      phone_number: agent.twilio_number,
+      friendly_name: `${agent.full_name} (${agent.username})`
+    }));
+    
+    res.json({ phones: formattedPhones });
   } catch (error) {
-    console.error('Error fetching phone numbers:', error);
+    console.error('Error in phone-numbers endpoint:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -1011,30 +1026,21 @@ router.post('/call/:workspaceId', async (req, res) => {
     const { workspaceId } = req.params;
     const { to, from } = req.body;
     
-    // Normalize the from number for comparison
-    const normalizedFrom = normalizePhone(from);
-    
-    // Get all phone numbers for this workspace
-    const { data: agentPhones, error: phoneError } = await supabase
-      .from('agent_phone')
-      .select('phone_number')
-      .eq('workspace_id', workspaceId);
+    // Verify the from number belongs to this workspace
+    const { data: agent, error: phoneError } = await supabase
+      .from('agent')
+      .select('username, full_name, twilio_number')
+      .eq('workspace_id', workspaceId)
+      .eq('twilio_number', from)
+      .single();
       
-    if (phoneError) {
-      console.error('Error fetching workspace phone numbers:', phoneError);
-      return res.status(500).json({ error: 'Failed to validate phone number' });
-    }
-    
-    // Find a matching phone number (comparing normalized versions)
-    const validPhone = agentPhones.find(p => normalizePhone(p.phone_number) === normalizedFrom);
-    
-    if (!validPhone) {
-      console.error(`Invalid from phone number: ${from} (normalized: ${normalizedFrom})`);
-      console.error('Available phones:', agentPhones.map(p => `${p.phone_number} (${normalizePhone(p.phone_number)})`));
+    if (phoneError || !agent) {
+      console.error('Invalid from phone number:', phoneError || 'Phone not found');
+      console.error(`Attempted to use number ${from} in workspace ${workspaceId}`);
       return res.status(400).json({ error: 'Invalid from phone number for this workspace' });
     }
     
-    console.log(`📞 Making outbound call to ${to} from workspace ${workspaceId} - phone ${validPhone.phone_number}`);
+    console.log(`📞 Making outbound call to ${to} from workspace ${workspaceId} - ${agent.full_name} (${agent.username}) using ${agent.twilio_number}`);
     
     // Get workspace's Twilio credentials
     const { data: config, error: configError } = await supabase
@@ -1055,17 +1061,42 @@ router.post('/call/:workspaceId', async (req, res) => {
     // Create Twilio client
     const client = twilio(config.twilio_account_sid, config.twilio_auth_token);
 
-    // Make the call directly without creating TwiML first
+    // Create TwiML for outbound call
+    const twiml = new twilio.twiml.VoiceResponse();
+    
+    console.log('🔄 Starting outbound call flow...');
+    
+    // Create a direct connection between parties with proper bridging
+    const dial = twiml.dial({
+      callerId: from,
+      answerOnBridge: true, // This ensures no hold music
+      timeout: 30,
+      hangupOnStar: true, // Allow ending call by pressing *
+      action: `${req.protocol}://${req.get('host')}/api/twilio/dial-complete`,
+      method: 'POST'
+    });
+
+    // Add number with status callbacks
+    dial.number({
+      statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+      statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
+      statusCallbackMethod: 'POST'
+    }, to);
+
+    const twimlString = twiml.toString();
+    console.log('📜 Generated TwiML:', twimlString);
+    
+    // Make the call
     const call = await client.calls.create({
       to: normalizePhone(to),
       from: from,
-      url: `${req.protocol}://${req.get('host')}/api/twilio/outbound-twiml`,
+      twiml: twimlString,
       statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
       statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
       statusCallbackMethod: 'POST'
     });
 
-    console.log('Call created successfully:', call.sid);
+    console.log('📞 Call initiated:', call.sid);
     res.json({ success: true, callSid: call.sid });
   } catch (error) {
     console.error('Error making outbound call:', error);
