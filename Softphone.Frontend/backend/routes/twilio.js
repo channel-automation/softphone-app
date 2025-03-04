@@ -471,7 +471,7 @@ router.post('/', async (req, res) => {
         twilio_sid: MessageSid,
         body: Body,
         direction: 'inbound',
-        message_type: 'sms',
+        message_type: 'text',
         status: 'delivered',
         metadata: {
           twilio_from: From,
@@ -969,6 +969,166 @@ router.post('/clear-configuration', async (req, res) => {
       success: false, 
       error: error.message || 'Failed to clear Twilio configuration' 
     });
+  }
+});
+
+// Generate voice token
+router.post('/voice-token/:workspaceId', async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+    
+    // Get workspace's Twilio credentials
+    const { data: config, error: configError } = await supabase
+      .from('workspace_twilio_config')
+      .select('account_sid, auth_token, twiml_app_sid')
+      .eq('workspace_id', workspaceId)
+      .single();
+
+    if (configError) {
+      console.error('Error fetching Twilio config:', configError);
+      return res.status(500).json({ error: 'Failed to fetch Twilio configuration' });
+    }
+
+    if (!config) {
+      return res.status(404).json({ error: 'Twilio configuration not found' });
+    }
+
+    if (!config.twiml_app_sid) {
+      return res.status(400).json({ error: 'TwiML App SID not configured' });
+    }
+
+    // Create an access token
+    const AccessToken = twilio.jwt.AccessToken;
+    const VoiceGrant = AccessToken.VoiceGrant;
+
+    // Create Voice grant
+    const voiceGrant = new VoiceGrant({
+      outgoingApplicationSid: config.twiml_app_sid,
+      incomingAllow: true
+    });
+
+    // Create access token with Voice grant
+    const token = new AccessToken(
+      config.account_sid,
+      config.account_sid,
+      config.auth_token
+    );
+
+    // Add Voice grant to token
+    token.addGrant(voiceGrant);
+
+    // Set identity (using workspace ID for now)
+    token.identity = workspaceId;
+
+    // Generate the token with 1 hour expiry
+    token.ttl = 3600;
+    
+    res.json({ token: token.toJwt() });
+  } catch (error) {
+    console.error('Error generating voice token:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Call endpoint for outbound calls
+router.post('/call', async (req, res) => {
+  try {
+    const { workspaceId, to } = req.body;
+    
+    // Get workspace's Twilio credentials
+    const { data: config, error: configError } = await supabase
+      .from('workspace_twilio_config')
+      .select('account_sid, auth_token, twiml_app_sid')
+      .eq('workspace_id', workspaceId)
+      .single();
+
+    if (configError) {
+      console.error('Error fetching Twilio config:', configError);
+      return res.status(500).json({ error: 'Failed to fetch Twilio configuration' });
+    }
+
+    if (!config) {
+      return res.status(404).json({ error: 'Twilio configuration not found' });
+    }
+
+    // Create Twilio client
+    const client = twilio(config.account_sid, config.auth_token);
+
+    // Create TwiML for outbound call
+    const twiml = new twilio.twiml.VoiceResponse();
+    twiml.dial({
+      callerId: to
+    }, to);
+
+    // Make the call
+    const call = await client.calls.create({
+      to: normalizePhone(to),
+      from: config.twilio_number,
+      twiml: twiml.toString(),
+      statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
+      statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+      statusCallbackMethod: 'POST'
+    });
+
+    res.json({ success: true, callSid: call.sid });
+  } catch (error) {
+    console.error('Error making outbound call:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Status callback endpoint
+router.post('/status', async (req, res) => {
+  try {
+    const { CallSid, CallStatus } = req.body;
+    console.log(`📞 Call ${CallSid} status update: ${CallStatus}`);
+    
+    // Get the IO instance
+    const io = getIO();
+    
+    // Emit status update to all connected clients
+    io.emit('call_status_update', {
+      callSid: CallSid,
+      status: CallStatus
+    });
+    
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Error handling status callback:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Incoming call webhook
+router.post('/incoming', async (req, res) => {
+  try {
+    const { From, To, CallSid } = req.body;
+    console.log(`📞 Incoming call from ${From} to ${To}`);
+    
+    // Create TwiML response
+    const twiml = new twilio.twiml.VoiceResponse();
+    
+    // Add basic greeting
+    twiml.say('Thank you for calling. Please wait while we connect you.');
+    
+    // Get the IO instance
+    const io = getIO();
+    
+    // Emit incoming call event to all connected clients
+    io.emit('incoming_call', {
+      from: From,
+      to: To,
+      callSid: CallSid
+    });
+    
+    res.type('text/xml');
+    res.send(twiml.toString());
+  } catch (error) {
+    console.error('Error handling incoming call:', error);
+    const twiml = new twilio.twiml.VoiceResponse();
+    twiml.say('We are unable to process your call at this time. Please try again later.');
+    res.type('text/xml');
+    res.send(twiml.toString());
   }
 });
 
