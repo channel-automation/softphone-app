@@ -16,15 +16,15 @@ router.options('*', (req, res) => {
 // Helper function to get Twilio client for a workspace
 async function getTwilioClientForWorkspace(workspaceId) {
   const { data, error } = await supabase
-    .from('workspace_twilio_config')
-    .select('account_sid, auth_token')
-    .eq('workspace_id', workspaceId)
+    .from('workspace')
+    .select('twilio_account_sid, twilio_auth_token')
+    .eq('id', workspaceId)
     .single();
     
   if (error) throw error;
   if (!data) throw new Error('No Twilio configuration found for workspace');
   
-  return twilio(data.account_sid, data.auth_token);
+  return twilio(data.twilio_account_sid, data.twilio_auth_token);
 }
 
 // Helper function to sync phone numbers
@@ -46,7 +46,7 @@ async function syncPhoneNumbers(workspaceId, client) {
     console.log('🗑️ Deleting existing numbers for workspace...');
     // Delete existing numbers for this workspace
     const { error: deleteError } = await supabase
-      .from('workspace_twilio_number')
+      .from('user_twilio_number')
       .delete()
       .eq('workspace_id', workspaceId);
       
@@ -57,9 +57,9 @@ async function syncPhoneNumbers(workspaceId, client) {
 
     // Insert new numbers
     if (formattedNumbers.length > 0) {
-      console.log('📥 Inserting new numbers into workspace_twilio_number...');
+      console.log('📥 Inserting new numbers into user_twilio_number...');
       const { error: insertError } = await supabase
-        .from('workspace_twilio_number')
+        .from('user_twilio_number')
         .insert(formattedNumbers);
       
       if (insertError) {
@@ -205,7 +205,7 @@ router.post('/configure-webhook', async (req, res) => {
     
     // Get all phone numbers for this workspace
     const { data: phoneNumbers } = await supabase
-      .from('workspace_twilio_number')
+      .from('user_twilio_number')
       .select('twilio_number')
       .eq('workspace_id', workspaceId);
 
@@ -410,7 +410,7 @@ router.post('/', async (req, res) => {
     // Find the workspace by the To (destination) number
     console.log('Looking up phone number:', To);
     const { data: phoneNumber, error: phoneError } = await supabase
-      .from('workspace_twilio_number')
+      .from('user_twilio_number')
       .select('*')
       .eq('twilio_number', To)
       .single();
@@ -423,7 +423,7 @@ router.post('/', async (req, res) => {
       console.error('Phone number not found:', To);
       // List all numbers in database for debugging
       const { data: allNumbers } = await supabase
-        .from('workspace_twilio_number')
+        .from('user_twilio_number')
         .select('twilio_number, workspace_id');
       console.log('Available numbers:', allNumbers);
       throw new Error('Phone number not found in any workspace');
@@ -517,7 +517,7 @@ router.get('/phone-numbers/:workspaceId', async (req, res) => {
     const { workspaceId } = req.params;
     
     const { data, error } = await supabase
-      .from('workspace_twilio_number')
+      .from('user_twilio_number')
       .select('*')
       .eq('workspace_id', workspaceId);
       
@@ -571,7 +571,7 @@ router.post('/send/:workspaceId', async (req, res) => {
 
     // Get workspace's phone number
     const { data: phoneNumber, error: phoneError } = await supabase
-      .from('workspace_twilio_number')
+      .from('user_twilio_number')
       .select('*')
       .eq('workspace_id', workspaceId)
       .eq('is_active', true)
@@ -795,7 +795,7 @@ router.post('/purchase-number', async (req, res) => {
 
     // Save to database
     const { error: dbError } = await supabase
-      .from('workspace_twilio_number')
+      .from('user_twilio_number')
       .insert({
         workspace_id: workspaceId,
         twilio_number: purchasedNumber.phoneNumber,
@@ -844,7 +844,7 @@ router.post('/verify-webhook', async (req, res) => {
     
     // Get all phone numbers for this workspace
     const { data: phoneNumbers } = await supabase
-      .from('workspace_twilio_number')
+      .from('user_twilio_number')
       .select('twilio_number')
       .eq('workspace_id', workspaceId);
 
@@ -917,14 +917,14 @@ router.post('/clear-configuration', async (req, res) => {
     
     console.log(`🧹 Clearing Twilio configuration for workspace ${workspaceId}`);
     
-    // 1. Delete phone numbers from workspace_twilio_number table
+    // 1. Delete phone numbers from user_twilio_number table
     const { error: deleteNumbersError } = await supabase
-      .from('workspace_twilio_number')
+      .from('user_twilio_number')
       .delete()
       .eq('workspace_id', workspaceId);
     
     if (deleteNumbersError) {
-      console.error('Error deleting from workspace_twilio_number:', deleteNumbersError);
+      console.error('Error deleting from user_twilio_number:', deleteNumbersError);
     }
     
     // 2. Delete phone numbers from agent_phone table
