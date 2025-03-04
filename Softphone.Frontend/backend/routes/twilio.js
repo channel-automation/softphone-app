@@ -1027,7 +1027,9 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
 // Handle outbound calls
 router.post('/call', async (req, res) => {
   try {
-    const { To, From } = req.body.params || req.body;  // Get params from either location
+    console.log('Received call request:', req.body);
+    const { To, From } = req.body.params || req.body;
+    console.log('Making call from', From, 'to', To);
     
     // Generate TwiML for outbound call
     const twiml = new twilio.twiml.VoiceResponse();
@@ -1035,6 +1037,7 @@ router.post('/call', async (req, res) => {
       callerId: From
     }, To);
     
+    console.log('Generated TwiML:', twiml.toString());
     res.type('text/xml');
     res.send(twiml.toString());
   } catch (error) {

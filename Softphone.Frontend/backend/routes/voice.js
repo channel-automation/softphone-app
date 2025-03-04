@@ -120,7 +120,8 @@ router.post('/token', async (req, res) => {
         // Create a Voice grant for this token
         const grant = new VoiceGrant({
           outgoingApplicationSid: process.env.TWILIO_TWIML_APP_SID,
-          incomingAllow: true
+          incomingAllow: true,
+          edge: ['ashburn', 'sydney', 'dublin', 'frankfurt']
         });
 
         // Add the voice grant to our token
@@ -130,7 +131,8 @@ router.post('/token', async (req, res) => {
         console.log('✅ Token generated successfully using API Key');
         return res.json({
           success: true,
-          token: token.toJwt()
+          token: token.toJwt(),
+          edge: ['ashburn', 'sydney', 'dublin', 'frankfurt']
         });
       } catch (tokenError) {
         console.error('❌ Token generation error:', tokenError);
@@ -155,7 +157,8 @@ router.post('/token', async (req, res) => {
         // Create a Voice grant for this token
         const grant = new VoiceGrant({
           outgoingApplicationSid: process.env.TWILIO_TWIML_APP_SID,
-          incomingAllow: true
+          incomingAllow: true,
+          edge: ['ashburn', 'sydney', 'dublin', 'frankfurt']
         });
 
         // Add the voice grant to our token
@@ -165,7 +168,8 @@ router.post('/token', async (req, res) => {
         console.log('✅ Token generated successfully using Account SID + Auth Token');
         return res.json({
           success: true,
-          token: token.toJwt()
+          token: token.toJwt(),
+          edge: ['ashburn', 'sydney', 'dublin', 'frankfurt']
         });
       } catch (tokenError) {
         console.error('❌ Token generation error:', tokenError);
