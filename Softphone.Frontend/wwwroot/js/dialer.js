@@ -59,34 +59,30 @@
     }
 
     function checkDialer() {
-        const to = divDialer.find("input").inputmask("unmaskedvalue") || '';
-        const from = divDialer.find("select").val();
+        // Get the current phone number without formatting
+        const phoneInput = divDialer.find("input.inputmask-usphone");
+        const phoneNumber = phoneInput.inputmask("unmaskedvalue").toString();
+        console.log('Raw phone number:', phoneNumber, 'Length:', phoneNumber.length);
+        
+        // Check if we have a valid phone number (10 digits)
+        const isPhoneValid = phoneNumber && phoneNumber.replace(/\D/g, '').length === 10;
+        console.log('Phone number valid:', isPhoneValid);
+        
+        // Check if we have a from number selected
+        const hasFromNumber = true; // We're now hardcoding the from number
+        
+        // Update UI based on validation
+        const canMakeCall = (isPhoneValid || bypassValidation) && (isDeviceReady || bypassValidation);
         const callButton = divDialer.find("button");
+        callButton.prop('disabled', !canMakeCall);
         
-        console.log(`Checking dialer status - To: ${to.length}/10 digits, From: ${from ? 'selected' : 'not selected'}, Device Ready: ${isDeviceReady}`);
+        console.log(`Checking dialer status - To: ${phoneNumber.length}/10 digits, From: ${hasFromNumber ? 'selected' : 'not selected'}, Device Ready: ${isDeviceReady}`);
         
-        // TEMPORARILY DISABLED VALIDATION - Comment back in when ready
-        // const isValid = to.length === 10 && from !== null && isDeviceReady;
-        
-        // Force button to be enabled for testing
-        const isValid = true;
-        
-        // Update button state
-        callButton.prop("disabled", !isValid);
-        
-        // Still log what conditions would normally be required
-        if (to.length !== 10 || !from || !isDeviceReady) {
-            let message = [];
-            if (to.length !== 10) message.push("Enter a complete 10-digit number");
-            if (!from) message.push("Select a 'From' number");
-            if (!isDeviceReady) message.push("Waiting for phone system to initialize");
-            
-            console.log('Dialer validation bypassed. Would normally require:', message.join(', '));
-        } else {
-            console.log('Dialer is ready to make calls');
+        if (!isPhoneValid && !bypassValidation) {
+            console.log('Dialer validation bypassed. Would normally require: Enter a complete 10-digit number, Waiting for phone system to initialize');
         }
         
-        return isValid;
+        return canMakeCall;
     }
 
     // Get a token from the backend
@@ -256,7 +252,7 @@
         
         try {
             // First ensure we have a valid phone number and "from" number
-            const to = divDialer.find("input").inputmask("unmaskedvalue") || '';
+            const to = divDialer.find("input.inputmask-usphone").inputmask("unmaskedvalue").toString().replace(/\D/g, '');
             const from = divDialer.find("select").val();
             
             // TEMPORARY: Log validation warnings but proceed anyway
@@ -390,8 +386,19 @@
     }
 
     async function deviceConnect() {
-        // Get the to and from values
-        let to = `+1${divDialer.find("input").inputmask("unmaskedvalue")}`;
+        // Get the to number, removing any formatting
+        const phoneInput = divDialer.find("input.inputmask-usphone");
+        const rawNumber = phoneInput.inputmask("unmaskedvalue").toString().replace(/\D/g, '');
+        console.log('Raw number before formatting:', rawNumber);
+        
+        // Ensure we have exactly 10 digits
+        if (rawNumber.length !== 10) {
+            console.error('Invalid phone number length:', rawNumber.length);
+            toastr.error('Please enter a valid 10-digit phone number');
+            return;
+        }
+        
+        let to = `+1${rawNumber}`;
         let from = '+13614704885'; // Use the actual Twilio number
         
         console.log(`Making call from ${from} to ${to}`);
