@@ -1040,24 +1040,45 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
   }
 });
 
-// Handle outbound calls
+// Make outbound call
 router.post('/call', async (req, res) => {
   try {
-    console.log('Received call request:', req.body);
-    const { To, From } = req.body.params || req.body;
-    console.log('Making call from', From, 'to', To);
+    const { workspaceId, to, from } = req.body;
+    console.log(`📞 Making outbound call from ${from} to ${to}`);
+
+    // Get workspace's Twilio credentials
+    const { data: workspace, error: workspaceError } = await supabase
+      .from('workspace')
+      .select('*')
+      .eq('id', workspaceId)
+      .single();
+
+    if (workspaceError) {
+      console.error('❌ Error fetching workspace:', workspaceError);
+      return res.status(500).json({ error: 'Failed to fetch workspace configuration' });
+    }
+
+    // Initialize Twilio client
+    const client = twilio(workspace.twilio_account_sid, workspace.twilio_auth_token);
     
-    // Generate TwiML for outbound call
+    // Create TwiML for outbound call
     const twiml = new twilio.twiml.VoiceResponse();
-    twiml.dial({
-      callerId: From
-    }, To);
-    
-    console.log('Generated TwiML:', twiml.toString());
+    twiml.dial({ callerId: from }, to);
+
+    // Make the call
+    const call = await client.calls.create({
+      to: to,
+      from: from,
+      twiml: twiml.toString(),
+      statusCallback: `${config.backendUrl}/api/twilio/status`,
+      statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed']
+    });
+
+    console.log(`✅ Call initiated with SID: ${call.sid}`);
     res.type('text/xml');
     res.send(twiml.toString());
   } catch (error) {
-    console.error('Error handling outbound call:', error);
+    console.error('❌ Error making outbound call:', error);
     res.status(500).json({ error: error.message });
   }
 });
