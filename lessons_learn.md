@@ -584,3 +584,51 @@ The key lessons:
 - The `workspace_twilio_number` table structure includes: id, workspace_id, twilio_number, friendly_name
 - The TwiML App SID should be in the format 'APxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 - The hidden username field should be added to the DialerPartial.cshtml file within the card-body div
+
+## Browser-Based Voice Calling with Twilio
+
+### Database Schema and Column Naming
+- When working with Twilio, ensure database column names match exactly what the code expects
+- The error `column workspace_twilio_config.twiml_app_sid does not exist` was caused by looking for the TwiML App SID in the wrong table
+- Solution: Update backend code to use the correct table (`workspace` instead of `workspace_twilio_config`)
+- Always verify database schema before writing code that depends on it
+
+### AudioContext Initialization
+- Modern browsers require user interaction before initializing or resuming an AudioContext
+- This affects Twilio's Device initialization which relies on AudioContext
+- Solution: Add a click handler to initialize AudioContext after user interaction
+- Displaying a notification to the user about the need to click to activate audio improves UX
+
+### Workspace ID for Token Generation
+- Token generation requires a valid workspace ID to fetch the correct Twilio credentials
+- Always include a hidden field with the workspace ID in the dialer UI
+- Check for workspace ID from multiple possible sources for resilience
+- Provide clear error messages when workspace ID is missing
+
+### Device Initialization Sequence
+- Properly handling the Twilio Device lifecycle is crucial:
+  1. Request audio permissions first
+  2. Get a valid token from the backend
+  3. Initialize the device with the token
+  4. Register event handlers
+  5. Register the device with Twilio
+  6. Set up audio options
+
+### Error Handling
+- Comprehensive error logging at every step improves reliability:
+  - Token retrieval errors
+  - Device initialization errors
+  - Call connection errors
+  - Audio context state management
+- Provide specific error messages with actionable steps for users
+
+### UI State Management
+- Keep UI state consistent with the underlying device state
+- Properly handle transitions between dialer and calling views
+- Reset UI elements when calls end
+- Disable call button until all required conditions are met (valid number, selected from number, device ready)
+
+### Fallback Mechanisms
+- Implement fallback mechanisms when the primary approach fails
+- For example, if the Twilio Device isn't ready, make a direct API call to the backend
+- This ensures the user can still make calls even if the browser-based device initialization fails

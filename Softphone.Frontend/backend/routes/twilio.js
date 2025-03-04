@@ -720,6 +720,7 @@ router.post('/send/:workspaceId', async (req, res) => {
       message: savedMessage,
       twilioSid: twilioMessage.sid
     });
+    
   } catch (error) {
     console.error('❌ Error sending message:', error);
     return res.status(500).json({
@@ -984,6 +985,8 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
   try {
     const { workspaceId } = req.params;
     
+    console.log(`🔑 Generating voice token for workspace ${workspaceId}`);
+    
     // Get workspace's Twilio credentials and user info
     const { data: config, error: configError } = await supabase
       .from('workspace')
@@ -1038,17 +1041,18 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
     // Create access token with Voice grant using username as identity
     const token = new AccessToken(
       config.twilio_account_sid,
-      config.twilio_api_key,         // Use API Key
-      config.twilio_api_secret,      // Use API Secret
-      { identity: user.username }     // Use username as identity
+      config.twilio_api_key,
+      config.twilio_api_secret,
+      { identity: user.username }
     );
 
     // Add Voice grant to token
     token.addGrant(voiceGrant);
     
+    console.log('✅ Voice token generated successfully');
     res.json({ token: token.toJwt() });
   } catch (error) {
-    console.error('Error generating voice token:', error);
+    console.error('❌ Error generating voice token:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -1100,13 +1104,15 @@ router.post('/call', async (req, res) => {
 router.post('/call/:workspaceId', async (req, res) => {
   try {
     const { workspaceId } = req.params;
-    const { to } = req.body;
+    const { to, from } = req.body;
+    
+    console.log(`📞 Making outbound call to ${to} from workspace ${workspaceId}`);
     
     // Get workspace's Twilio credentials
     const { data: config, error: configError } = await supabase
-      .from('workspace_twilio_config')
-      .select('account_sid, auth_token, twiml_app_sid')
-      .eq('workspace_id', workspaceId)
+      .from('workspace')
+      .select('twilio_account_sid, twilio_auth_token, twilio_twiml_app_sid')
+      .eq('id', workspaceId)
       .single();
 
     if (configError) {
@@ -1119,24 +1125,31 @@ router.post('/call/:workspaceId', async (req, res) => {
     }
 
     // Create Twilio client
-    const client = twilio(config.account_sid, config.auth_token);
+    const client = twilio(config.twilio_account_sid, config.twilio_auth_token);
 
     // Create TwiML for outbound call
     const twiml = new twilio.twiml.VoiceResponse();
     twiml.dial({
-      callerId: to
+      callerId: from || to // Use from if provided, otherwise use to as the caller ID
     }, to);
+
+    console.log('Using TwiML:', twiml.toString());
+    console.log('Twilio credentials:', {
+      accountSid: config.twilio_account_sid,
+      authToken: '***' // Don't log the actual auth token
+    });
 
     // Make the call
     const call = await client.calls.create({
       to: normalizePhone(to),
-      from: config.twilio_number,
+      from: from || config.twilio_account_sid, // Use from if provided, otherwise use first Twilio number
       twiml: twiml.toString(),
       statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
       statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
       statusCallbackMethod: 'POST'
     });
 
+    console.log('Call created successfully:', call.sid);
     res.json({ success: true, callSid: call.sid });
   } catch (error) {
     console.error('Error making outbound call:', error);

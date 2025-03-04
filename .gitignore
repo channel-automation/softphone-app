@@ -31,8 +31,6 @@ obj/
 # Logs
 logs
 *.log
-elmah_logs/
-**/elmah_logs/
 
 # Build output
 dist/
@@ -42,6 +40,9 @@ out/
 # Dependency directories
 jspm_packages/
 bower_components/
+
+# Elmah logs
+**/elmah_logs/
 
 # IDE files
 .idea/
