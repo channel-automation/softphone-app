@@ -1025,9 +1025,9 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
     // Create access token with Voice grant using username as identity
     const token = new AccessToken(
       config.twilio_account_sid,
-      config.twilio_api_key,     // Use API Key from workspace
-      config.twilio_api_secret,  // Use API Secret from workspace
-      { identity: user.username }  // Use username as identity
+      config.twilio_account_sid,     // Use Account SID as API Key
+      config.twilio_auth_token,      // Use Auth Token as API Secret
+      { identity: user.username }     // Use username as identity
     );
 
     // Add Voice grant to token
