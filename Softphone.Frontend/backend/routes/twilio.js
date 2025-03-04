@@ -1029,10 +1029,30 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
   }
 });
 
-// Call endpoint for outbound calls
+// Handle outbound calls
 router.post('/call', async (req, res) => {
   try {
-    const { workspaceId, to } = req.body;
+    const { To, From } = req.body;
+    
+    // Generate TwiML for outbound call
+    const twiml = new twilio.twiml.VoiceResponse();
+    twiml.dial({
+      callerId: From
+    }, To);
+    
+    res.type('text/xml');
+    res.send(twiml.toString());
+  } catch (error) {
+    console.error('Error handling outbound call:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Call endpoint for outbound calls
+router.post('/call/:workspaceId', async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+    const { to } = req.body;
     
     // Get workspace's Twilio credentials
     const { data: config, error: configError } = await supabase
