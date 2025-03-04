@@ -1,0 +1,159 @@
+﻿<error errorId="233c30c8-3c3d-4435-87e5-e55251cbca74" application="Softphone.Frontend" host="MacBookPro" type="HTTP" message="NotFound" detail="# caller: @C:\Sources\ElmahCore\ElmahCore\ElmahCore\Internal$\CallerInfo.cs:9&#xA;ElmahCore.HttpException: NotFound" user="benjie" time="2025-03-03T14:52:04.4590850Z" statusCode="404">
+  <serverVariables>
+    <item name="RequestTimedOut">
+      <value string="False" />
+    </item>
+    <item name="MinResponseDataRate">
+      <value string="Bytes per second: 240, Grace Period: 00:00:05" />
+    </item>
+    <item name="ConnectionIdFeature">
+      <value string="0HNAQASKE6HFI" />
+    </item>
+    <item name="HasStartedConsumingRequestBody">
+      <value string="False" />
+    </item>
+    <item name="MaxRequestBodySize">
+      <value string="30000000" />
+    </item>
+    <item name="MinRequestBodyDataRate">
+      <value string="Bytes per second: 240, Grace Period: 00:00:05" />
+    </item>
+    <item name="AllowSynchronousIO">
+      <value string="False" />
+    </item>
+    <item name="TraceIdentifier">
+      <value string="0HNAQASKE6HFI:00000024" />
+    </item>
+    <item name="IsUpgradableRequest">
+      <value string="False" />
+    </item>
+    <item name="IsUpgraded">
+      <value string="False" />
+    </item>
+    <item name="RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="RemotePort">
+      <value string="52526" />
+    </item>
+    <item name="LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="LocalPort">
+      <value string="7245" />
+    </item>
+    <item name="Scheme">
+      <value string="https" />
+    </item>
+    <item name="Method">
+      <value string="Get" />
+    </item>
+    <item name="MethodText">
+      <value string="GET" />
+    </item>
+    <item name="Path">
+      <value string="/lib/bootstrap/js/bootstrap.bundle.min.js.map" />
+    </item>
+    <item name="QueryString">
+      <value string="" />
+    </item>
+    <item name="RawTarget">
+      <value string="/lib/bootstrap/js/bootstrap.bundle.min.js.map" />
+    </item>
+    <item name="HttpVersion">
+      <value string="HTTP/1.1" />
+    </item>
+    <item name="Header_Connection">
+      <value string="keep-alive" />
+    </item>
+    <item name="Header_Host">
+      <value string="localhost:7245" />
+    </item>
+    <item name="Header_User-Agent">
+      <value string="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0" />
+    </item>
+    <item name="Header_Accept-Encoding">
+      <value string="gzip, deflate, br, zstd" />
+    </item>
+    <item name="Header_Accept-Language">
+      <value string="en-AU,en-GB;q=0.9,en;q=0.8,en-US;q=0.7" />
+    </item>
+    <item name="Header_Cookie">
+      <value string="__clerk_db_jwt_VJYxooTe=dvb_2qzELwGuZyOt3x1Khf1nTzZvytM; __clerk_db_jwt=dvb_2qzELwGuZyOt3x1Khf1nTzZvytM; __client_uat_VJYxooTe=0; __client_uat=0; ajs_anonymous_id=5b39c1e5-ac10-47c2-b9fe-302f9abbaa2f; .AspNetCore.Antiforgery.Iurz_WNRkCY=CfDJ8DQmb9f2FrNPhfOZYlqPY5J56W7GWQur5UPd-MDH4ECAy1-MI8cb4zcWhCs4VGuy6mp3YFn74Sd_68xfx1Kl8XudIi3-09svbjRKciuYo3BkY37LSWFdAtQKSJKfsd_oULRK1aKla3RyczfPGGO1UV4; .AspNetCore.Antiforgery.33L0OiAzZxk=CfDJ8DQmb9f2FrNPhfOZYlqPY5JZI0XmF3bsa2ETCIpYuSWAEO69EBGTCQ8Mptxzux-Ia7cj4NxuXUnkbT7k3aJXGX44OL610jesiEjdPZwBQzvftqIqsR6AyVXaGA93DGxavi5fDoNdHJ5E_swsP_vy1uA; .AspNetCore.Antiforgery.ZJO3N3a8NZk=CfDJ8DQmb9f2FrNPhfOZYlqPY5IGWSSnc57Vj8NMnDrXfyQi7pzwxiQyIWWU2uXqKfbB6j8yNL-nH39e6qkJ1jLM09o2leUx1QociUta2rHJuXRG9R5GTFMt6ECmEWG5jvypnWkOf5I_p2tpk9YLEQmjtsc; .AspNetCore.Antiforgery.mX3Xv12Sa9c=CfDJ8DQmb9f2FrNPhfOZYlqPY5L3S7NQWsbcZ5sSKet5Zu1GrrRfErbnbI4otA0cGwfboRtJhXXNDH-4bJoAPHOSxyOmaNVF3WqhLFJ9tcEGvs0ISrmnGuQRcBTnaZ65KQ60zV0q5qiL5dKXXq0YXSM-dNc; .AspNetCore.Cookies=CfDJ8DQmb9f2FrNPhfOZYlqPY5LqIFb7FqsQN5EKIDfjvtFoH-FI61cDBtmT9vO2i7I75qy9aii8OuVqN70RcWeCpsnR6lofS3H1vlF62Ut0iW-ey0jw4hBmDrB1SzEt5u_MbIV8yP9SApVK9lPu9CiNaZxXfhrUrwa48NMfdXrWauMN533c7qb7J5zb_EKX-uAo1qij-Nj_XP-dcRITqEgRELDcqm82YYIcDNPIQUYNbKcOkKVBiQfLHPqVjkr8RJal5taLKtyeJHU0pzSL7Sv4DVChdB5K5GxjF1H_iEKHRQXMTJxXmDLdKpyiT1Lhe0X443KYZllDmLpVul8y2H1LxXt_svXrhtZy9eU_85cRcmXQ-xw2jYDmC5sVcsuCzCWV5Wx7tcHQO3HXXrqUPcp4ElY" />
+    </item>
+    <item name="Header_Sec-Fetch-Site">
+      <value string="same-origin" />
+    </item>
+    <item name="Header_Sec-Fetch-Mode">
+      <value string="no-cors" />
+    </item>
+    <item name="Header_Sec-Fetch-Dest">
+      <value string="empty" />
+    </item>
+    <item name="RequestTrailersAvailable">
+      <value string="True" />
+    </item>
+    <item name="StatusCode">
+      <value string="404" />
+    </item>
+    <item name="HasResponseStarted">
+      <value string="False" />
+    </item>
+    <item name="HasFlushedHeaders">
+      <value string="False" />
+    </item>
+    <item name="HasResponseCompleted">
+      <value string="False" />
+    </item>
+    <item name="Connection_Id">
+      <value string="0HNAQASKE6HFI" />
+    </item>
+    <item name="Connection_RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_RemotePort">
+      <value string="52526" />
+    </item>
+    <item name="Connection_LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_LocalPort">
+      <value string="7245" />
+    </item>
+    <item name="HttpStatusCode">
+      <value string="404" />
+    </item>
+  </serverVariables>
+  <cookies>
+    <item name="__clerk_db_jwt_VJYxooTe">
+      <value string="dvb_2qzELwGuZyOt3x1Khf1nTzZvytM" />
+    </item>
+    <item name="__clerk_db_jwt">
+      <value string="dvb_2qzELwGuZyOt3x1Khf1nTzZvytM" />
+    </item>
+    <item name="__client_uat_VJYxooTe">
+      <value string="0" />
+    </item>
+    <item name="__client_uat">
+      <value string="0" />
+    </item>
+    <item name="ajs_anonymous_id">
+      <value string="5b39c1e5-ac10-47c2-b9fe-302f9abbaa2f" />
+    </item>
+    <item name=".AspNetCore.Antiforgery.Iurz_WNRkCY">
+      <value string="CfDJ8DQmb9f2FrNPhfOZYlqPY5J56W7GWQur5UPd-MDH4ECAy1-MI8cb4zcWhCs4VGuy6mp3YFn74Sd_68xfx1Kl8XudIi3-09svbjRKciuYo3BkY37LSWFdAtQKSJKfsd_oULRK1aKla3RyczfPGGO1UV4" />
+    </item>
+    <item name=".AspNetCore.Antiforgery.33L0OiAzZxk">
+      <value string="CfDJ8DQmb9f2FrNPhfOZYlqPY5JZI0XmF3bsa2ETCIpYuSWAEO69EBGTCQ8Mptxzux-Ia7cj4NxuXUnkbT7k3aJXGX44OL610jesiEjdPZwBQzvftqIqsR6AyVXaGA93DGxavi5fDoNdHJ5E_swsP_vy1uA" />
+    </item>
+    <item name=".AspNetCore.Antiforgery.ZJO3N3a8NZk">
+      <value string="CfDJ8DQmb9f2FrNPhfOZYlqPY5IGWSSnc57Vj8NMnDrXfyQi7pzwxiQyIWWU2uXqKfbB6j8yNL-nH39e6qkJ1jLM09o2leUx1QociUta2rHJuXRG9R5GTFMt6ECmEWG5jvypnWkOf5I_p2tpk9YLEQmjtsc" />
+    </item>
+    <item name=".AspNetCore.Antiforgery.mX3Xv12Sa9c">
+      <value string="CfDJ8DQmb9f2FrNPhfOZYlqPY5L3S7NQWsbcZ5sSKet5Zu1GrrRfErbnbI4otA0cGwfboRtJhXXNDH-4bJoAPHOSxyOmaNVF3WqhLFJ9tcEGvs0ISrmnGuQRcBTnaZ65KQ60zV0q5qiL5dKXXq0YXSM-dNc" />
+    </item>
+    <item name=".AspNetCore.Cookies">
+      <value string="CfDJ8DQmb9f2FrNPhfOZYlqPY5LqIFb7FqsQN5EKIDfjvtFoH-FI61cDBtmT9vO2i7I75qy9aii8OuVqN70RcWeCpsnR6lofS3H1vlF62Ut0iW-ey0jw4hBmDrB1SzEt5u_MbIV8yP9SApVK9lPu9CiNaZxXfhrUrwa48NMfdXrWauMN533c7qb7J5zb_EKX-uAo1qij-Nj_XP-dcRITqEgRELDcqm82YYIcDNPIQUYNbKcOkKVBiQfLHPqVjkr8RJal5taLKtyeJHU0pzSL7Sv4DVChdB5K5GxjF1H_iEKHRQXMTJxXmDLdKpyiT1Lhe0X443KYZllDmLpVul8y2H1LxXt_svXrhtZy9eU_85cRcmXQ-xw2jYDmC5sVcsuCzCWV5Wx7tcHQO3HXXrqUPcp4ElY" />
+    </item>
+  </cookies>
+</error>

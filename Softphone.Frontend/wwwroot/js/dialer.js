@@ -59,26 +59,29 @@
         const workspaceId = globalWorkspaceId;
         
         $.ajax({
-            url: `${config.backendUrl}/api/twilio/voice-token/${workspaceId}`,
+            url: `${config.backendUrl}${config.endpoints.token}/${workspaceId}`,
             type: "post", 
             dataType: "json",
-            data: JSON.stringify({ userId: globalUserId || 'anonymous' }),  
-            xhrFields: {
-                withCredentials: true
-            },
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
             success: function (response) {
-                if (response.token) {
-                    if (!device) setupDevice(response.token);
-                    else device.updateToken(response.token);
+                console.log('Token response:', response);
+                if (response && response.token) {
+                    if (!device) {
+                        console.log('Setting up new device');
+                        setupDevice(response.token);
+                    } else {
+                        console.log('Updating existing device token');
+                        device.updateToken(response.token);
+                    }
                     
                     // Schedule token refresh in 1 hour (tokens typically expire in 1 hour)
                     setTimeout(getAccessToken, 3600000 - 60000); // 1 hour minus 1 minute
                     console.log("Token updated.");
                 } else {
+                    console.error('Invalid token response:', response);
                     toastr.error(response.error || "Failed to get access token", "Error!");
                     // Retry after delay if failed
                     if (tokenRetryTimeout) clearTimeout(tokenRetryTimeout);
@@ -97,6 +100,7 @@
 
     function setupDevice(token) {
         try {
+            console.log('Initializing device with token:', token);
             device = new Twilio.Device(token, {
                 closeProtection: true,
                 enableRingingState: true,
@@ -177,6 +181,11 @@
         }
 
         try {
+            // Resume audio context if needed
+            if (Twilio.Device.audio?.audioContext?.state === 'suspended') {
+                await Twilio.Device.audio.audioContext.resume();
+            }
+            
             // Call the deviceConnect function which uses our backend API
             deviceConnect();
         } catch (error) {
@@ -290,35 +299,24 @@
         let to = `+1${divDialer.find("input").inputmask("unmaskedvalue")}`;
         let from = divDialer.find("select").val();
         
-        // Use the backend API for making calls
-        const workspaceId = globalWorkspaceId;
-        const identity = $("#hdnUsername").val(); // Assuming username is stored in a hidden field
-        
-        // Set up parameters for the call
-        const params = { 
-            To: to, 
-            From: from,
-            WorkspaceId: workspaceId,
-            identity: identity
-        };
-        
         try {
-            // Make the API call to initiate the outbound call
-            $.ajax({
-                url: `${config.backendUrl}${config.endpoints.call}`,
-                type: "POST",
-                data: params,
-                success: function(response) {
-                    console.log("Call initiated successfully:", response);
-                    divDialer.hide();
-                    divCalling.show();
-                    setCallingInfo(to, false);
-                },
-                error: function(xhr, status, error) {
-                    console.error("Failed to initiate call:", error);
-                    toastr.error("Failed to connect call. Please check your Twilio configuration.", "Error");
-                }
-            });
+            // Resume audio context if needed
+            if (Twilio.Device.audio?.audioContext?.state === 'suspended') {
+                await Twilio.Device.audio.audioContext.resume();
+            }
+
+            // Make the call using Twilio Device
+            const params = {
+                To: to,
+                From: from
+            };
+            console.log('Making call with params:', params);
+            
+            const call = await device.connect({ params });
+            console.log('Call connected:', call);
+            
+            // Set up handlers for the call
+            setupOutboundCallHandlers(call, to);
         } catch (error) {
             console.error("Failed to connect call:", error);
             toastr.error("Failed to connect call. Please check your Twilio configuration.", "Error");
