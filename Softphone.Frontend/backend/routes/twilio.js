@@ -1082,11 +1082,11 @@ router.post('/call', async (req, res) => {
     const twiml = new twilio.twiml.VoiceResponse();
     
     // Create a simple direct connection between parties
-    const dial = twiml.dial({
+    twiml.dial({
       callerId: from,
-      answerOnBridge: true // This ensures media streams are connected before the call is answered
-    });
-    dial.number(to);
+      answerOnBridge: true, // This ensures media streams are connected before the call is answered
+      record: 'record-from-answer' // Start recording when the call is answered
+    }).number(to);
 
     console.log('Using TwiML:', twiml.toString());
     console.log('Twilio credentials:', {
@@ -1143,11 +1143,11 @@ router.post('/call/:workspaceId', async (req, res) => {
     const twiml = new twilio.twiml.VoiceResponse();
     
     // Create a simple direct connection between parties
-    const dial = twiml.dial({
+    twiml.dial({
       callerId: from,
-      answerOnBridge: true // This ensures media streams are connected before the call is answered
-    });
-    dial.number(to);
+      answerOnBridge: true, // This ensures media streams are connected before the call is answered
+      record: 'record-from-answer' // Start recording when the call is answered
+    }).number(to);
 
     console.log('Using TwiML:', twiml.toString());
     console.log('Twilio credentials:', {
