@@ -977,11 +977,11 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
   try {
     const { workspaceId } = req.params;
     
-    // Get workspace's Twilio credentials
+    // Get workspace's Twilio credentials from workspace table
     const { data: config, error: configError } = await supabase
-      .from('workspace_twilio_config')
-      .select('account_sid, auth_token, twiml_app_sid')
-      .eq('workspace_id', workspaceId)
+      .from('workspaces')
+      .select('twilio_account_sid, twilio_auth_token, twilio_twiml_app_sid')
+      .eq('id', workspaceId)
       .single();
 
     if (configError) {
@@ -993,7 +993,7 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
       return res.status(404).json({ error: 'Twilio configuration not found' });
     }
 
-    if (!config.twiml_app_sid) {
+    if (!config.twilio_twiml_app_sid) {
       return res.status(400).json({ error: 'TwiML App SID not configured' });
     }
 
@@ -1003,15 +1003,15 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
 
     // Create Voice grant
     const voiceGrant = new VoiceGrant({
-      outgoingApplicationSid: config.twiml_app_sid,
+      outgoingApplicationSid: config.twilio_twiml_app_sid,
       incomingAllow: true
     });
 
     // Create access token with Voice grant
     const token = new AccessToken(
-      config.account_sid,
-      config.account_sid,
-      config.auth_token
+      config.twilio_account_sid,
+      config.twilio_account_sid,
+      config.twilio_auth_token
     );
 
     // Add Voice grant to token
