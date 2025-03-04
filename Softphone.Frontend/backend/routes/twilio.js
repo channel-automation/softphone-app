@@ -1010,7 +1010,8 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
     const token = new AccessToken(
       config.twilio_account_sid,
       config.twilio_auth_token,
-      config.twilio_twiml_app_sid
+      config.twilio_twiml_app_sid,
+      { identity: 'softphone-user' }  // Use a simple default identity
     );
 
     // Add Voice grant to token
