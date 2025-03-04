@@ -2,7 +2,8 @@ const express = require('express');
 const { getIO } = require('../io');
 const supabase = require('../supabase'); 
 const twilio = require('twilio');
-
+const VoiceResponse = twilio.twiml.VoiceResponse;
+const config = require('../config');
 const router = express.Router();
 
 // Handle CORS preflight requests for all routes
