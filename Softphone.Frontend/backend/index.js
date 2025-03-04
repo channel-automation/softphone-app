@@ -12,7 +12,7 @@ const server = http.createServer(app);
 // Configure CORS
 const corsOrigins = process.env.CORS_ORIGIN 
   ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-  : ['https://beta.sofphone.channelautomation.com', 'https://localhost:7245', 'http://localhost:7245'];
+  : ['https://beta.sofphone.channelautomation.com', 'https://localhost:7245', 'https://localhost:7246', 'http://localhost:7245', 'http://localhost:7246'];
 
 console.log('⚙️ CORS Origins:', corsOrigins);
 
