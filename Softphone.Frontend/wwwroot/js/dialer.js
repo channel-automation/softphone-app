@@ -1,4 +1,4 @@
-﻿(function ($) {
+(function ($) {
     "use strict"
     let device; //Twilio Device object
     let expiry; //Access Token expiration time
@@ -57,31 +57,40 @@
     function getAccessToken() {
         // Get the workspace ID from the global variable
         const workspaceId = globalWorkspaceId;
-        const identity = $("#hdnUsername").val(); // Assuming username is stored in a hidden field
         
         $.ajax({
-            url: `${config.backendUrl}${config.endpoints.token}`,
+            url: `${config.backendUrl}/api/twilio/voice-token/${workspaceId}`,
             type: "post", 
             dataType: "json",
-            data: {
-                workspaceId: workspaceId,
-                identity: identity
+            data: JSON.stringify({ userId: globalUserId || 'anonymous' }),  
+            xhrFields: {
+                withCredentials: true
+            },
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             success: function (response) {
-                if (response.success) {
+                if (response.token) {
                     if (!device) setupDevice(response.token);
                     else device.updateToken(response.token);
-                    expiry = new Date(response.expires);
-                    const sched = expiry - Date.now() - 60000; //-> 1 Minute before expiration
-                    setTimeout(getAccessToken, sched);
+                    
+                    // Schedule token refresh in 1 hour (tokens typically expire in 1 hour)
+                    setTimeout(getAccessToken, 3600000 - 60000); // 1 hour minus 1 minute
                     console.log("Token updated.");
                 } else {
                     toastr.error(response.error || "Failed to get access token", "Error!");
+                    // Retry after delay if failed
+                    if (tokenRetryTimeout) clearTimeout(tokenRetryTimeout);
+                    tokenRetryTimeout = setTimeout(getAccessToken, TOKEN_RETRY_INTERVAL);
                 }
             },
             error: (xhr) => {
                 console.error("Token error:", xhr);
                 toastr.error("Failed to communicate with backend service.", "Error!");
+                // Retry after delay
+                if (tokenRetryTimeout) clearTimeout(tokenRetryTimeout);
+                tokenRetryTimeout = setTimeout(getAccessToken, TOKEN_RETRY_INTERVAL);
             }
         });
     }

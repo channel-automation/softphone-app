@@ -976,6 +976,7 @@ router.post('/clear-configuration', async (req, res) => {
 router.post('/voice-token/:workspaceId', async (req, res) => {
   try {
     const { workspaceId } = req.params;
+    const { userId = 'anonymous' } = req.body;  // Get userId from request body, default to 'anonymous'
     
     // Get workspace's Twilio credentials from workspace table
     const { data: config, error: configError } = await supabase
@@ -1012,7 +1013,7 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
       config.twilio_account_sid,
       config.twilio_account_sid,
       config.twilio_auth_token,
-      { identity: workspaceId.toString() }  // Set identity in the token options
+      { identity: userId }  // Use userId as the identity
     );
 
     // Add Voice grant to token
