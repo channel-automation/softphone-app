@@ -12,19 +12,12 @@ const server = http.createServer(app);
 // Configure CORS
 const corsOrigins = process.env.CORS_ORIGIN 
   ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-  : ['https://beta.sofphone.channelautomation.com', 'https://localhost:7245'];
+  : ['https://beta.sofphone.channelautomation.com', 'https://localhost:7245', 'http://localhost:7245'];
 
 console.log('⚙️ CORS Origins:', corsOrigins);
 
 const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || corsOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('❌ Blocked by CORS:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: corsOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
     'Content-Type',
@@ -42,17 +35,8 @@ const corsOptions = {
   maxAge: 86400 // 24 hours
 };
 
+// Apply CORS middleware first
 app.use(cors(corsOptions));
-
-// Add content type and CORS headers middleware
-app.use((req, res, next) => {
-  res.set({
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Credentials': 'true',
-    'Access-Control-Allow-Origin': req.headers.origin || '*'
-  });
-  next();
-});
 
 // Body parsing middleware
 app.use(express.json());
