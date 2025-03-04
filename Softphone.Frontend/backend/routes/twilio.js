@@ -1081,12 +1081,19 @@ router.post('/call', async (req, res) => {
     // Create TwiML for outbound call
     const twiml = new twilio.twiml.VoiceResponse();
     
-    // Create a simple direct connection between parties
+    // Add a brief wait message while the call connects
+    twiml.say('Please wait while we connect your call.');
+    
+    // Create a direct connection between parties with proper bridging
     twiml.dial({
       callerId: from,
-      answerOnBridge: true, // This ensures media streams are connected before the call is answered
-      record: 'record-from-answer' // Start recording when the call is answered
-    }).number(to);
+      answerOnBridge: true,
+      record: 'record-from-answer',
+      timeout: 20 // Give enough time for the call to be answered
+    }).number({
+      statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+      statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
+    }, to);
 
     console.log('Using TwiML:', twiml.toString());
     console.log('Twilio credentials:', {
@@ -1142,12 +1149,19 @@ router.post('/call/:workspaceId', async (req, res) => {
     // Create TwiML for outbound call
     const twiml = new twilio.twiml.VoiceResponse();
     
-    // Create a simple direct connection between parties
+    // Add a brief wait message while the call connects
+    twiml.say('Please wait while we connect your call.');
+    
+    // Create a direct connection between parties with proper bridging
     twiml.dial({
       callerId: from,
-      answerOnBridge: true, // This ensures media streams are connected before the call is answered
-      record: 'record-from-answer' // Start recording when the call is answered
-    }).number(to);
+      answerOnBridge: true,
+      record: 'record-from-answer',
+      timeout: 20 // Give enough time for the call to be answered
+    }).number({
+      statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+      statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
+    }, to);
 
     console.log('Using TwiML:', twiml.toString());
     console.log('Twilio credentials:', {
