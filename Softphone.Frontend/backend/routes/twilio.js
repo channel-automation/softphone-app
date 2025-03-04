@@ -593,6 +593,19 @@ router.post('/send/:workspaceId', async (req, res) => {
       });
     }
 
+    // Verify the from number belongs to this workspace
+    const { data: agentPhone, error: phoneError2 } = await supabase
+      .from('agent_phone')
+      .select('phone_number')
+      .eq('workspace_id', workspaceId)
+      .eq('phone_number', phoneNumber.twilio_number)
+      .single();
+      
+    if (phoneError2 || !agentPhone) {
+      console.error('Invalid from phone number:', phoneError2 || 'Phone not found');
+      return res.status(400).json({ error: 'Invalid from phone number for this workspace' });
+    }
+
     // Format phone numbers for Twilio
     const formattedTo = normalizePhone(to);
     const formattedFrom = normalizePhone(phoneNumber.twilio_number);
@@ -986,7 +999,20 @@ router.post('/call/:workspaceId', async (req, res) => {
     const { workspaceId } = req.params;
     const { to, from } = req.body;
     
-    console.log(`📞 Making outbound call to ${to} from workspace ${workspaceId} - phone ${from}`);
+    // Verify the from number belongs to this workspace
+    const { data: agentPhone, error: phoneError } = await supabase
+      .from('agent_phone')
+      .select('phone_number')
+      .eq('workspace_id', workspaceId)
+      .eq('phone_number', from)
+      .single();
+      
+    if (phoneError || !agentPhone) {
+      console.error('Invalid from phone number:', phoneError || 'Phone not found');
+      return res.status(400).json({ error: 'Invalid from phone number for this workspace' });
+    }
+    
+    console.log(`📞 Making outbound call to ${to} from workspace ${workspaceId} - phone ${agentPhone.phone_number}`);
     
     // Get workspace's Twilio credentials
     const { data: config, error: configError } = await supabase
