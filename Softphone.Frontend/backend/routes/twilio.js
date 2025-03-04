@@ -986,7 +986,7 @@ router.post('/call/:workspaceId', async (req, res) => {
     const { workspaceId } = req.params;
     const { to, from } = req.body;
     
-    console.log(`📞 Making outbound call to ${to} from workspace ${workspaceId}`);
+    console.log(`📞 Making outbound call to ${to} from workspace ${workspaceId} - phone ${from}`);
     
     // Get workspace's Twilio credentials
     const { data: config, error: configError } = await supabase
@@ -1234,9 +1234,10 @@ router.post('/call', async (req, res) => {
     // Create a direct connection between parties with proper bridging
     const dialParams = {
       callerId: from,
-      answerOnBridge: true,
+      answerOnBridge: true, // This ensures no hold music
       record: 'record-from-answer',
       timeout: 20,
+      hangupOnStar: true, // Allow ending call by pressing *
       action: `${req.protocol}://${req.get('host')}/api/twilio/dial-status`,
       method: 'POST'
     };
