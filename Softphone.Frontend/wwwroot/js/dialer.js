@@ -13,68 +13,95 @@
     const TOKEN_RETRY_INTERVAL = 5000; // 5 seconds
 
     $(function () {
-        requestAudioPermission();
-        initializeDialer();
-    });
-
-    function initializeDialer() {
+        // Initialize UI first
         divDialer = $("#divDialer");
         divCalling = $("#divCalling");
         initializeFormControls(divDialer);
+        
+        // Set up event handlers
         divDialer.find("input").on("keyup", checkDialer);
         divDialer.find("input").on("paste", checkDialer);
         divDialer.find("input").on("cut", checkDialer);
         divDialer.find("select").on("change", checkDialer);
         divDialer.find("button").on("click", handleOutboundCall);
         divCalling.find("button").on("click", deviceDisconnect);
+        
+        // Initial check
         checkDialer();
-        getAccessToken();
+        
+        // Request permissions and initialize device
+        initializeDeviceWithPermissions();
+    });
+
+    async function initializeDeviceWithPermissions() {
+        try {
+            // First request audio permission
+            console.log('Requesting audio permission...');
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            console.log('Audio permission granted');
+            stream.getTracks().forEach(track => track.stop());
+
+            // Then get access token and set up device
+            console.log('Getting access token...');
+            await getAccessToken();
+        } catch (error) {
+            console.error('Error initializing device:', error);
+            toastr.error('Please allow microphone access to make calls.', 'Permission Required');
+        }
     }
 
-    async function requestAudioPermission() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            console.log("Audio permission granted");
-            const tracks = stream.getTracks();
-            tracks.forEach(track => track.stop());
-        } catch (error) {
-            console.error("Audio permission denied or error occurred:", error);
-            toastr.error("Please allow microphone access to make calls.", "Microphone Access Required");
-        }
+    function initializeFormControls(divDialer) {
+        // Initialize form controls first
     }
 
     function checkDialer() {
-        let to = divDialer.find("input").inputmask("unmaskedvalue");
-        let from = divDialer.find("select").val();
-        if (from !== null) {
-            let mask = new Inputmask("(999) 999-9999");
-            divDialer.find("small").text(mask.format(from.replaceAll("+1", "")));
+        const to = divDialer.find("input").val()?.replace(/\D/g, '') || '';
+        const from = divDialer.find("select").val();
+        
+        console.log('Dialer check - to:', to, 'from:', from, 'isDeviceReady:', isDeviceReady);
+        
+        // Disable button if any condition is not met
+        const isValid = to.length === 10 && from !== null && isDeviceReady;
+        divDialer.find("button").prop("disabled", !isValid);
+        
+        // Show helpful message about what's missing
+        let message = '';
+        if (!isDeviceReady) {
+            message = 'Waiting for phone system to initialize...';
+        } else if (to.length !== 10) {
+            message = 'Please enter a valid 10-digit phone number';
+        } else if (from === null) {
+            message = 'Please select a "From" number';
         }
-        // Disable the button if no numbers or device not ready
-        divDialer.find("button").prop("disabled", (to.length !== 10 || from === null || !isDeviceReady));
+        
+        divDialer.find("small").text(message);
     }
 
-    function getAccessToken() {
+    async function getAccessToken() {
+        // Clear any existing retry timeout
+        if (tokenRetryTimeout) clearTimeout(tokenRetryTimeout);
+
         // Get the workspace ID from the global variable
         const workspaceId = globalWorkspaceId;
         
+        console.log('Fetching access token...');
         $.ajax({
-            url: `${config.backendUrl}${config.endpoints.token}/${workspaceId}`,
-            type: "post", 
+            url: `${config.backendUrl}/api/twilio/token/${workspaceId}`,
+            type: "post",
             dataType: "json",
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            success: function (response) {
+            success: async (response) => {
                 console.log('Token response:', response);
                 if (response && response.token) {
                     if (!device) {
                         console.log('Setting up new device');
-                        setupDevice(response.token);
+                        await setupDevice(response.token);
                     } else {
                         console.log('Updating existing device token');
-                        device.updateToken(response.token);
+                        await device.updateToken(response.token);
                     }
                     
                     // Schedule token refresh in 1 hour (tokens typically expire in 1 hour)
@@ -84,7 +111,6 @@
                     console.error('Invalid token response:', response);
                     toastr.error(response.error || "Failed to get access token", "Error!");
                     // Retry after delay if failed
-                    if (tokenRetryTimeout) clearTimeout(tokenRetryTimeout);
                     tokenRetryTimeout = setTimeout(getAccessToken, TOKEN_RETRY_INTERVAL);
                 }
             },
@@ -92,48 +118,75 @@
                 console.error("Token error:", xhr);
                 toastr.error("Failed to communicate with backend service.", "Error!");
                 // Retry after delay
-                if (tokenRetryTimeout) clearTimeout(tokenRetryTimeout);
                 tokenRetryTimeout = setTimeout(getAccessToken, TOKEN_RETRY_INTERVAL);
             }
         });
     }
 
-    function setupDevice(token) {
+    async function setupDevice(token) {
         try {
-            console.log('Initializing device with token:', token);
+            console.log('Starting device setup...');
+            
+            // Create a temporary audio context to ensure it's ready
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioContext.state === 'suspended') {
+                console.log('Audio context suspended, waiting for user interaction...');
+                
+                // Wait for first user interaction
+                await new Promise(resolve => {
+                    const handleInteraction = async () => {
+                        console.log('User interaction detected, resuming audio context...');
+                        await audioContext.resume();
+                        document.removeEventListener('click', handleInteraction);
+                        document.removeEventListener('touchstart', handleInteraction);
+                        resolve();
+                    };
+                    document.addEventListener('click', handleInteraction);
+                    document.addEventListener('touchstart', handleInteraction);
+                });
+            }
+            
+            console.log('Audio context ready, creating Twilio device...');
+            
+            // Now create and set up the device
             device = new Twilio.Device(token, {
                 closeProtection: true,
                 enableRingingState: true,
                 edge: ['ashburn', 'sydney', 'dublin', 'frankfurt']
             });
 
-            device.register();
-            device.audio.incoming(true);
-            device.audio.disconnect(true);
-
-            device.on("ready", () => {
-                console.log("Device is ready.");
+            // Set up event handlers
+            device.on("ready", function() {
+                console.log("Device is ready, setting isDeviceReady = true");
                 isDeviceReady = true;
                 checkDialer();
                 toastr.success("Phone system initialized successfully.", "Ready");
             });
 
-            device.on("offline", () => {
-                console.log('Device is offline.');
+            device.on("offline", function() {
+                console.log('Device is offline, setting isDeviceReady = false');
                 isDeviceReady = false;
                 checkDialer();
                 toastr.warning("Phone system is offline. Attempting to reconnect...", "Offline");
                 getAccessToken();
             });
 
-            device.on("error", (error) => {
-                console.error(`Device Error:`, error);
+            device.on("error", function(error) {
+                console.error(`Device Error: ${error.message || error}`, error);
                 isDeviceReady = false;
                 checkDialer();
                 toastr.error("Phone system encountered an error. Please refresh the page.", "Error");
             });
 
             device.on("incoming", handleIncomingCall);
+
+            // Finally register the device
+            console.log('Registering device...');
+            await device.register();
+            device.audio.incoming(true);
+            device.audio.disconnect(true);
+
+            console.log('Device setup complete, waiting for ready event...');
         } catch (error) {
             console.error("Error setting up Twilio device:", error);
             toastr.error("Failed to initialize phone system. Please refresh the page.", "Setup Error");
@@ -175,19 +228,26 @@
     }
 
     async function handleOutboundCall() {
-        if (!isDeviceReady || !device) {
-            toastr.error("Phone system is not ready. Please wait a moment and try again.", "Not Ready");
-            return;
-        }
-
+        console.log('handleOutboundCall triggered');
+        
         try {
-            // Resume audio context if needed
+            // First, ensure audio context is resumed
             if (Twilio.Device.audio?.audioContext?.state === 'suspended') {
+                console.log('Resuming audio context');
                 await Twilio.Device.audio.audioContext.resume();
+                console.log('Audio context resumed');
+            }
+
+            // Now check device ready state
+            if (!isDeviceReady || !device) {
+                console.log('Device not ready - isDeviceReady:', isDeviceReady, 'device:', !!device);
+                toastr.error("Phone system is not ready. Please wait a moment and try again.", "Not Ready");
+                return;
             }
             
             // Call the deviceConnect function which uses our backend API
-            deviceConnect();
+            console.log('Calling deviceConnect');
+            await deviceConnect();
         } catch (error) {
             console.error("Error making outbound call:", error);
             toastr.error("Failed to place call. Please try again.", "Call Error");

@@ -5,8 +5,8 @@ const config = {
     
     // API endpoints
     endpoints: {
-        token: "/api/twilio/voice-token",  // Updated to new voice token endpoint
-        call: "/api/twilio/call",          // Updated to Twilio route
+        token: "/api/twilio/voice-token",  // Voice token endpoint
+        call: "/api/twilio/call",          // Call endpoint
         incomingWebhook: "/api/twilio/incoming",
         statusCallback: "/api/twilio/status"
     }

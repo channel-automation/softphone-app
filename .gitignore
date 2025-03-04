@@ -31,6 +31,8 @@ obj/
 # Logs
 logs
 *.log
+elmah_logs/
+**/elmah_logs/
 
 # Build output
 dist/
