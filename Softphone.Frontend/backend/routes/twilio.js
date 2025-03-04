@@ -979,7 +979,7 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
     
     // Get workspace's Twilio credentials from workspace table
     const { data: config, error: configError } = await supabase
-      .from('workspaces')
+      .from('workspace')
       .select('twilio_account_sid, twilio_auth_token, twilio_twiml_app_sid')
       .eq('id', workspaceId)
       .single();
