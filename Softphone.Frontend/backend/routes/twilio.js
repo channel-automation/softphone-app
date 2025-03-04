@@ -1011,14 +1011,12 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
     const token = new AccessToken(
       config.twilio_account_sid,
       config.twilio_account_sid,
-      config.twilio_auth_token
+      config.twilio_auth_token,
+      { identity: workspaceId.toString() }  // Set identity in the token options
     );
 
     // Add Voice grant to token
     token.addGrant(voiceGrant);
-
-    // Set identity (using workspace ID for now)
-    token.identity = workspaceId;
 
     // Generate the token with 1 hour expiry
     token.ttl = 3600;
