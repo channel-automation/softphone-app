@@ -517,25 +517,24 @@ router.get('/phone-numbers/:workspaceId', async (req, res) => {
     const { workspaceId } = req.params;
     
     // Get phone numbers for this workspace
-    const { data: agents, error } = await supabase
-      .from('agent')
-      .select('username, full_name, twilio_number')
-      .eq('workspace_id', workspaceId)
-      .not('twilio_number', 'is', null);
+    const { data: phones, error } = await supabase
+      .from('agent_phone')
+      .select('twilio_number, full_name, username')
+      .eq('workspace_id', workspaceId);
       
     if (error) {
       console.error('Error fetching phone numbers:', error);
       return res.status(500).json({ error: 'Failed to fetch phone numbers' });
     }
     
-    if (!agents || agents.length === 0) {
+    if (!phones || phones.length === 0) {
       return res.status(404).json({ error: 'No phone numbers found for workspace' });
     }
     
     // Format the response
-    const formattedPhones = agents.map(agent => ({
-      phone_number: agent.twilio_number,
-      friendly_name: `${agent.full_name} (${agent.username})`
+    const formattedPhones = phones.map(phone => ({
+      phone_number: phone.twilio_number,
+      friendly_name: `${phone.full_name} (${phone.username})`
     }));
     
     res.json({ phones: formattedPhones });
@@ -614,7 +613,7 @@ router.post('/send/:workspaceId', async (req, res) => {
     // Get all phone numbers for this workspace
     const { data: agentPhones, error: phoneError2 } = await supabase
       .from('agent_phone')
-      .select('phone_number')
+      .select('twilio_number')
       .eq('workspace_id', workspaceId);
       
     if (phoneError2) {
@@ -623,19 +622,19 @@ router.post('/send/:workspaceId', async (req, res) => {
     }
     
     // Find a matching phone number (comparing normalized versions)
-    const validPhone = agentPhones.find(p => normalizePhone(p.phone_number) === normalizedFrom);
+    const validPhone = agentPhones.find(p => normalizePhone(p.twilio_number) === normalizedFrom);
     
     if (!validPhone) {
       console.error(`Invalid from phone number: ${phoneNumber.twilio_number} (normalized: ${normalizedFrom})`);
-      console.error('Available phones:', agentPhones.map(p => `${p.phone_number} (${normalizePhone(p.phone_number)})`));
+      console.error('Available phones:', agentPhones.map(p => `${p.twilio_number} (${normalizePhone(p.twilio_number)})`));
       return res.status(400).json({ error: 'Invalid from phone number for this workspace' });
     }
     
-    console.log(`📱 Sending from ${validPhone.phone_number} to ${to}`);
+    console.log(`📱 Sending from ${validPhone.twilio_number} to ${to}`);
 
     // Format phone numbers for Twilio
     const formattedTo = normalizePhone(to);
-    const formattedFrom = normalizePhone(validPhone.phone_number);
+    const formattedFrom = normalizePhone(validPhone.twilio_number);
     
     console.log(`📱 Sending from ${formattedFrom} to ${formattedTo}`);
 
@@ -1026,21 +1025,28 @@ router.post('/call/:workspaceId', async (req, res) => {
     const { workspaceId } = req.params;
     const { to, from } = req.body;
     
+    console.log(`Validating from number ${from} for workspace ${workspaceId}`);
+    
     // Verify the from number belongs to this workspace
-    const { data: agent, error: phoneError } = await supabase
-      .from('agent')
-      .select('username, full_name, twilio_number')
+    const { data: phone, error: phoneError } = await supabase
+      .from('agent_phone')
+      .select('twilio_number, full_name, username')
       .eq('workspace_id', workspaceId)
       .eq('twilio_number', from)
       .single();
       
-    if (phoneError || !agent) {
-      console.error('Invalid from phone number:', phoneError || 'Phone not found');
-      console.error(`Attempted to use number ${from} in workspace ${workspaceId}`);
+    if (phoneError) {
+      console.error('Error checking phone number:', phoneError);
+      return res.status(500).json({ error: 'Failed to validate phone number' });
+    }
+    
+    if (!phone) {
+      console.error(`No agent found with number ${from} in workspace ${workspaceId}`);
       return res.status(400).json({ error: 'Invalid from phone number for this workspace' });
     }
     
-    console.log(`📞 Making outbound call to ${to} from workspace ${workspaceId} - ${agent.full_name} (${agent.username}) using ${agent.twilio_number}`);
+    console.log(`📞 Making outbound call from ${phone.full_name} (${phone.username}) using ${phone.twilio_number}`);
+    console.log(`   To: ${to}`);
     
     // Get workspace's Twilio credentials
     const { data: config, error: configError } = await supabase
