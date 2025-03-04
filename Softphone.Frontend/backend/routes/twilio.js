@@ -593,22 +593,34 @@ router.post('/send/:workspaceId', async (req, res) => {
       });
     }
 
-    // Verify the from number belongs to this workspace
-    const { data: agentPhone, error: phoneError2 } = await supabase
+    // Normalize the from number for comparison
+    const normalizedFrom = normalizePhone(phoneNumber.twilio_number);
+    
+    // Get all phone numbers for this workspace
+    const { data: agentPhones, error: phoneError2 } = await supabase
       .from('agent_phone')
       .select('phone_number')
-      .eq('workspace_id', workspaceId)
-      .eq('phone_number', phoneNumber.twilio_number)
-      .single();
+      .eq('workspace_id', workspaceId);
       
-    if (phoneError2 || !agentPhone) {
-      console.error('Invalid from phone number:', phoneError2 || 'Phone not found');
+    if (phoneError2) {
+      console.error('Error fetching workspace phone numbers:', phoneError2);
+      return res.status(500).json({ error: 'Failed to validate phone number' });
+    }
+    
+    // Find a matching phone number (comparing normalized versions)
+    const validPhone = agentPhones.find(p => normalizePhone(p.phone_number) === normalizedFrom);
+    
+    if (!validPhone) {
+      console.error(`Invalid from phone number: ${phoneNumber.twilio_number} (normalized: ${normalizedFrom})`);
+      console.error('Available phones:', agentPhones.map(p => `${p.phone_number} (${normalizePhone(p.phone_number)})`));
       return res.status(400).json({ error: 'Invalid from phone number for this workspace' });
     }
+    
+    console.log(`📱 Sending from ${validPhone.phone_number} to ${to}`);
 
     // Format phone numbers for Twilio
     const formattedTo = normalizePhone(to);
-    const formattedFrom = normalizePhone(phoneNumber.twilio_number);
+    const formattedFrom = normalizePhone(validPhone.phone_number);
     
     console.log(`📱 Sending from ${formattedFrom} to ${formattedTo}`);
 
@@ -999,20 +1011,30 @@ router.post('/call/:workspaceId', async (req, res) => {
     const { workspaceId } = req.params;
     const { to, from } = req.body;
     
-    // Verify the from number belongs to this workspace
-    const { data: agentPhone, error: phoneError } = await supabase
+    // Normalize the from number for comparison
+    const normalizedFrom = normalizePhone(from);
+    
+    // Get all phone numbers for this workspace
+    const { data: agentPhones, error: phoneError } = await supabase
       .from('agent_phone')
       .select('phone_number')
-      .eq('workspace_id', workspaceId)
-      .eq('phone_number', from)
-      .single();
+      .eq('workspace_id', workspaceId);
       
-    if (phoneError || !agentPhone) {
-      console.error('Invalid from phone number:', phoneError || 'Phone not found');
+    if (phoneError) {
+      console.error('Error fetching workspace phone numbers:', phoneError);
+      return res.status(500).json({ error: 'Failed to validate phone number' });
+    }
+    
+    // Find a matching phone number (comparing normalized versions)
+    const validPhone = agentPhones.find(p => normalizePhone(p.phone_number) === normalizedFrom);
+    
+    if (!validPhone) {
+      console.error(`Invalid from phone number: ${from} (normalized: ${normalizedFrom})`);
+      console.error('Available phones:', agentPhones.map(p => `${p.phone_number} (${normalizePhone(p.phone_number)})`));
       return res.status(400).json({ error: 'Invalid from phone number for this workspace' });
     }
     
-    console.log(`📞 Making outbound call to ${to} from workspace ${workspaceId} - phone ${agentPhone.phone_number}`);
+    console.log(`📞 Making outbound call to ${to} from workspace ${workspaceId} - phone ${validPhone.phone_number}`);
     
     // Get workspace's Twilio credentials
     const { data: config, error: configError } = await supabase
