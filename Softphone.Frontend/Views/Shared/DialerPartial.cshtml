@@ -1,8 +1,8 @@
 <div class="card card-purple elevation-2" id="divDialer">
-	<div class="card-header">
+    <div class="card-header">
         <h3 class="card-title">Dialer</h3>
-	</div>
-	<div class="card-body p-4">
+    </div>
+    <div class="card-body p-4">
         <input type="hidden" id="hdnUsername" value="@ViewBag.LoggedUser.Username" />
         <input type="hidden" id="hdnWorkspaceId" value="@ViewBag.LoggedUser.WorkspaceId" />
         <label class="text-purple"><i class="fas fa-mobile-retro"></i> To:</label>
@@ -12,11 +12,98 @@
         </div>
         <label class="text-purple"><i class="fas fa-user-tie"></i> From:</label>
         <select class="form-control select2-agentphone"></select>
-        <small class="text-purple"></small>
-	</div>
+        <small class="text-purple call-status"></small>
+    </div>
     <div class="card-footer">
-        <button type="button" class="btn bg-gradient-purple btn-block">
+        <button type="button" class="btn bg-gradient-purple btn-block btn-call">
             <i class="fas fa-phone"></i> Place Call
+        </button>
+        <button type="button" class="btn bg-gradient-danger btn-block btn-end-call" style="display: none;">
+            <i class="fas fa-phone-slash"></i> End Call
         </button>
     </div>
 </div>
+
+<script>
+    $(function() {
+        let currentCallSid = null;
+        let callStatus = 'idle';
+
+        // Socket.IO event handler for call status updates
+        socket.on('call_status_update', function(data) {
+            console.log(' Call status update:', data);
+            
+            if (data.callSid === currentCallSid) {
+                updateCallStatus(data.status);
+                
+                // If the call has ended, reset the UI
+                if (data.status === 'ended') {
+                    resetDialer();
+                }
+            }
+        });
+
+        function updateCallStatus(status) {
+            callStatus = status;
+            const $status = $('.call-status');
+            const $callBtn = $('.btn-call');
+            const $endCallBtn = $('.btn-end-call');
+            
+            switch (status) {
+                case 'initiated':
+                    $status.text('Initiating call...');
+                    $callBtn.hide();
+                    $endCallBtn.show();
+                    break;
+                case 'ringing':
+                    $status.text('Ringing...');
+                    break;
+                case 'in-progress':
+                    $status.text('Call in progress');
+                    break;
+                case 'ended':
+                    $status.text('Call ended');
+                    resetDialer();
+                    break;
+                default:
+                    $status.text('');
+                    resetDialer();
+            }
+        }
+
+        function resetDialer() {
+            currentCallSid = null;
+            callStatus = 'idle';
+            $('.btn-call').show();
+            $('.btn-end-call').hide();
+            $('.call-status').text('');
+        }
+
+        // End call button handler
+        $('.btn-end-call').on('click', function() {
+            if (currentCallSid) {
+                $.ajax({
+                    url: '/api/twilio/end-call/' + currentCallSid,
+                    method: 'POST',
+                    data: {
+                        workspaceId: $('#hdnWorkspaceId').val()
+                    },
+                    success: function(response) {
+                        console.log('Call ended successfully');
+                        resetDialer();
+                    },
+                    error: function(error) {
+                        console.error('Error ending call:', error);
+                        alert('Failed to end call. Please try again.');
+                    }
+                });
+            }
+        });
+
+        // Store call SID when call is initiated
+        $(document).on('callInitiated', function(e, data) {
+            currentCallSid = data.callSid;
+            updateCallStatus('initiated');
+        });
+    });
+</script>
