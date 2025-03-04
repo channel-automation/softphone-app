@@ -288,15 +288,21 @@ router.post('/configure-from-credentials', async (req, res) => {
     
     // 2. Save the Twilio config
     console.log('💾 Saving Twilio configuration...');
+    
+    // First, create an API key
+    console.log('🔑 Creating Twilio API key...');
+    const apiKey = await client.newKeys.create({friendlyName: `Softphone App - ${workspaceId}`});
+    console.log('✅ API key created successfully');
+
     const { error: configError } = await supabase
-      .from('workspace_twilio_config')
-      .upsert({
-        workspace_id: workspaceId,
-        account_sid: accountSid,
-        auth_token: authToken
-      }, {
-        onConflict: 'workspace_id'
-      });
+      .from('workspace')
+      .update({
+        twilio_account_sid: accountSid,
+        twilio_auth_token: authToken,
+        twilio_api_key: apiKey.sid,
+        twilio_api_secret: apiKey.secret
+      })
+      .eq('id', workspaceId);
 
     if (configError) {
       console.error('❌ Error saving Twilio configuration:', configError);
@@ -994,6 +1000,16 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
       return res.status(404).json({ error: 'Twilio configuration not found' });
     }
 
+    // Validate required credentials
+    if (!config.twilio_api_key || !config.twilio_api_secret) {
+      console.error('Missing API key or secret');
+      return res.status(400).json({ error: 'Twilio API key not configured. Please reconfigure Twilio credentials.' });
+    }
+
+    if (!config.twilio_twiml_app_sid) {
+      return res.status(400).json({ error: 'TwiML App SID not configured' });
+    }
+
     // Get user info from user table
     const { data: user, error: userError } = await supabase
       .from('user')
@@ -1010,10 +1026,6 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (!config.twilio_twiml_app_sid) {
-      return res.status(400).json({ error: 'TwiML App SID not configured' });
-    }
-
     // Create an access token
     const AccessToken = twilio.jwt.AccessToken;
     const VoiceGrant = AccessToken.VoiceGrant;
@@ -1026,8 +1038,8 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
     // Create access token with Voice grant using username as identity
     const token = new AccessToken(
       config.twilio_account_sid,
-      config.twilio_account_sid,     // Use Account SID as API Key
-      config.twilio_auth_token,      // Use Auth Token as API Secret
+      config.twilio_api_key,         // Use API Key
+      config.twilio_api_secret,      // Use API Secret
       { identity: user.username }     // Use username as identity
     );
 
