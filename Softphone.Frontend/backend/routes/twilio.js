@@ -1080,22 +1080,33 @@ router.post('/call', async (req, res) => {
     
     // Create TwiML for outbound call
     const twiml = new twilio.twiml.VoiceResponse();
-    twiml.dial({ callerId: from }, to);
+    twiml.dial().conference({
+      startConferenceOnEnter: true,
+      endConferenceOnExit: true,
+      waitUrl: null, // Don't play hold music
+      beep: false // Don't play beep sound
+    }, `call_${Date.now()}`); // Unique conference name
+
+    console.log('Using TwiML:', twiml.toString());
+    console.log('Twilio credentials:', {
+      accountSid: workspace.twilio_account_sid,
+      authToken: '***' // Don't log the actual auth token
+    });
 
     // Make the call
     const call = await client.calls.create({
-      to: to,
-      from: from,
+      to: normalizePhone(to),
+      from: from || workspace.twilio_account_sid, // Use from if provided, otherwise use first Twilio number
       twiml: twiml.toString(),
-      statusCallback: `${config.backendUrl}/api/twilio/status`,
-      statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed']
+      statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
+      statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+      statusCallbackMethod: 'POST'
     });
 
-    console.log(`✅ Call initiated with SID: ${call.sid}`);
-    res.type('text/xml');
-    res.send(twiml.toString());
+    console.log('Call created successfully:', call.sid);
+    res.json({ success: true, callSid: call.sid });
   } catch (error) {
-    console.error('❌ Error making outbound call:', error);
+    console.error('Error making outbound call:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -1129,9 +1140,12 @@ router.post('/call/:workspaceId', async (req, res) => {
 
     // Create TwiML for outbound call
     const twiml = new twilio.twiml.VoiceResponse();
-    twiml.dial({
-      callerId: from || to // Use from if provided, otherwise use to as the caller ID
-    }, to);
+    twiml.dial().conference({
+      startConferenceOnEnter: true,
+      endConferenceOnExit: true,
+      waitUrl: null, // Don't play hold music
+      beep: false // Don't play beep sound
+    }, `call_${Date.now()}`); // Unique conference name
 
     console.log('Using TwiML:', twiml.toString());
     console.log('Twilio credentials:', {
