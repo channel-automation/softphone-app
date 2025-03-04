@@ -976,7 +976,6 @@ router.post('/clear-configuration', async (req, res) => {
 router.post('/voice-token/:workspaceId', async (req, res) => {
   try {
     const { workspaceId } = req.params;
-    const { userId = 'anonymous' } = req.body;  // Get userId from request body, default to 'anonymous'
     
     // Get workspace's Twilio credentials from workspace table
     const { data: config, error: configError } = await supabase
@@ -1004,23 +1003,18 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
 
     // Create Voice grant
     const voiceGrant = new VoiceGrant({
-      outgoingApplicationSid: config.twilio_twiml_app_sid,
-      incomingAllow: true
+      outgoingApplicationSid: config.twilio_twiml_app_sid
     });
 
     // Create access token with Voice grant
     const token = new AccessToken(
       config.twilio_account_sid,
-      config.twilio_account_sid,
       config.twilio_auth_token,
-      { identity: userId }  // Use userId as the identity
+      config.twilio_twiml_app_sid
     );
 
     // Add Voice grant to token
     token.addGrant(voiceGrant);
-
-    // Generate the token with 1 hour expiry
-    token.ttl = 3600;
     
     res.json({ token: token.toJwt() });
   } catch (error) {
