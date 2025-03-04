@@ -26,8 +26,8 @@ builder.Services.AddScoped<Client>(_ =>
         new SupabaseOptions { AutoRefreshToken = true, AutoConnectRealtime = true }
     ));
 
-builder.Services.AddTransient<IWorkspaceService, WorkspaceService>();
-builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
