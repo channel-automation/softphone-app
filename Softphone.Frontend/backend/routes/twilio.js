@@ -1080,12 +1080,13 @@ router.post('/call', async (req, res) => {
     
     // Create TwiML for outbound call
     const twiml = new twilio.twiml.VoiceResponse();
-    twiml.dial().conference({
-      startConferenceOnEnter: true,
-      endConferenceOnExit: true,
-      waitUrl: null, // Don't play hold music
-      beep: false // Don't play beep sound
-    }, `call_${Date.now()}`); // Unique conference name
+    
+    // Create a simple direct connection between parties
+    const dial = twiml.dial({
+      callerId: from,
+      answerOnBridge: true // This ensures media streams are connected before the call is answered
+    });
+    dial.number(to);
 
     console.log('Using TwiML:', twiml.toString());
     console.log('Twilio credentials:', {
@@ -1140,12 +1141,13 @@ router.post('/call/:workspaceId', async (req, res) => {
 
     // Create TwiML for outbound call
     const twiml = new twilio.twiml.VoiceResponse();
-    twiml.dial().conference({
-      startConferenceOnEnter: true,
-      endConferenceOnExit: true,
-      waitUrl: null, // Don't play hold music
-      beep: false // Don't play beep sound
-    }, `call_${Date.now()}`); // Unique conference name
+    
+    // Create a simple direct connection between parties
+    const dial = twiml.dial({
+      callerId: from,
+      answerOnBridge: true // This ensures media streams are connected before the call is answered
+    });
+    dial.number(to);
 
     console.log('Using TwiML:', twiml.toString());
     console.log('Twilio credentials:', {
