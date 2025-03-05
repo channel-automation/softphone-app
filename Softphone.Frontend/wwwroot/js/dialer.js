@@ -388,7 +388,20 @@
     async function deviceConnect() {
         try {
             const phoneInput = $('#txtPhoneNumber');
-            const rawNumber = phoneInput.inputmask("unmaskedvalue").toString().replace(/\D/g, '');
+            if (!phoneInput.length) {
+                console.error('Phone input not found');
+                toastr.error('Phone input not found');
+                return;
+            }
+
+            const unmaskedValue = phoneInput.inputmask("unmaskedvalue");
+            if (!unmaskedValue) {
+                console.error('No phone number entered');
+                toastr.error('Please enter a phone number');
+                return;
+            }
+
+            const rawNumber = unmaskedValue.toString().replace(/\D/g, '');
             console.log('Raw number before formatting:', rawNumber);
             
             // Ensure we have exactly 10 digits
@@ -420,41 +433,23 @@
                 // Update UI to show we're initiating the call
                 setCallingInfo(to, true);
                 
-                // If device isn't ready yet, try to make a direct API call instead
+                // Always use device.connect() for consistent behavior
                 if (!isDeviceReady || !device) {
-                    console.log('Device not ready, attempting direct API call');
-                    
-                    console.log(`Making direct API call to ${config.backendUrl}${config.endpoints.call}/${workspaceId}`);
-                    
-                    // Make a direct call to the backend API
-                    $.ajax({
-                        url: `${config.backendUrl}${config.endpoints.call}/${workspaceId}`,
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify({ 
-                            to: to,
-                            from: from
-                        }),
-                        success: (data) => {
-                            console.log('Call initiated via API:', data);
-                            toastr.success("Call initiated successfully", "Call Connected");
-                        },
-                        error: (xhr) => {
-                            console.error('Failed to initiate call via API:', xhr);
-                            console.error('Status:', xhr.status, 'Response:', xhr.responseText);
-                            throw new Error(xhr.responseJSON?.error || xhr.statusText || "Unknown error");
-                        }
-                    });
+                    console.error('Device not ready');
+                    toastr.error('Phone system not ready. Please try again.');
+                    setCallingInfo(null, false);
                     return;
                 }
                 
                 // Create params for the call
                 const params = {
                     To: to,
-                    From: from
+                    From: from,
+                    workspaceId: workspaceId // Pass workspace ID to TwiML endpoint
                 };
                 console.log('Call params:', params);
                 
+                // Connect using device
                 device.connect(params);
             } catch (error) {
                 console.error('Error connecting device:', error);

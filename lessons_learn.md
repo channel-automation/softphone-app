@@ -561,7 +561,7 @@ The key lessons:
 1. **Add Phone Numbers to Database Tables**:
    - Added phone numbers to the `agent_phone` table with the correct workspace_id
    - Added phone numbers to the `workspace_twilio_number` table for consistency
-   - Ensured the phone numbers were in E.164 format (e.g., +16573857999)
+   - Ensured the phone numbers were in E.164 format (e.g., "+14128445018")
 
 2. **Update TwiML App SID**:
    - Updated the `twilio_twiml_app_sid` field in the `workspace` table with a valid TwiML App SID
@@ -579,7 +579,7 @@ The key lessons:
 5. **Token Parameters**: The token endpoint requires both `workspaceId` and `identity` parameters to generate a valid token.
 
 ### Implementation Notes
-- When adding phone numbers to the database, ensure they are in E.164 format (e.g., +16573857999)
+- When adding phone numbers to the database, ensure they are in E.164 format (e.g., "+14128445018")
 - The `agent_phone` table structure includes: id, workspace_id, full_name, twilio_number, username
 - The `workspace_twilio_number` table structure includes: id, workspace_id, twilio_number, friendly_name
 - The TwiML App SID should be in the format 'APxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
@@ -632,3 +632,52 @@ The key lessons:
 - Implement fallback mechanisms when the primary approach fails
 - For example, if the Twilio Device isn't ready, make a direct API call to the backend
 - This ensures the user can still make calls even if the browser-based device initialization fails
+
+## Preventing Duplicate Calls in Twilio Integration
+
+When implementing outbound calling functionality with Twilio, we encountered and resolved several important issues:
+
+### Problem: Duplicate Call Creation
+The initial implementation was creating duplicate calls because:
+1. TwiML generation and call creation were combined in a single endpoint
+2. Status callbacks could trigger additional call attempts
+3. The call flow wasn't properly separated between call initiation and TwiML response
+
+### Solution
+1. **Separated Call Creation from TwiML Generation**:
+   - Created dedicated endpoint `/call/:workspaceId` for call creation
+   - Created separate endpoint `/outbound-twiml` for TwiML generation
+   - Call creation endpoint only handles the initial request
+   - TwiML endpoint only generates the call instructions
+
+2. **Improved Call Parameters**:
+   - Added `answerOnBridge: true` for better call quality
+   - Set appropriate timeouts and status callbacks
+   - Added `hangupOnStar: true` for easy call termination
+   - Implemented proper error handling and logging
+
+3. **Enhanced Status Tracking**:
+   - Added comprehensive status callback events
+   - Implemented Socket.IO for real-time status updates
+   - Added proper error handling for failed calls
+
+### Key Takeaways
+1. Keep call creation and TwiML generation separate
+2. Use proper call parameters for better call quality
+3. Implement comprehensive status tracking
+4. Add detailed logging for debugging
+5. Handle errors gracefully at each step
+6. Test the full call flow, not just individual components
+
+## Phone Number Validation
+
+When validating phone numbers for outbound calls:
+
+1. **Use Direct Table Relationships**: Phone numbers are directly stored in the `agent` table with the `twilio_number` field, not in a separate mapping table. This keeps the data model simpler and reduces joins.
+
+2. **User Context**: Each phone number is associated with a specific agent, including their username and full name. This helps with:
+   - Clear identification in the UI (showing who owns each number)
+   - Proper logging and debugging (knowing which agent made each call)
+   - Security (ensuring agents can only use their assigned numbers)
+
+3. **Data Consistency**: Phone numbers in the database are already normalized to the E.164 format (e.g., "+14128445018"), which is what Twilio expects. This eliminates the need for additional normalization when comparing numbers.

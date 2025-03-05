@@ -1090,16 +1090,27 @@ router.post('/call/:workspaceId', async (req, res) => {
 // TwiML endpoint for outbound calls
 router.post('/outbound-twiml', async (req, res) => {
   try {
+    const { To, From, workspaceId } = req.body;
+    console.log('Generating TwiML for outbound call:', { To, From, workspaceId });
+    
+    // Create TwiML response
     const twiml = new twilio.twiml.VoiceResponse();
     
     // Create a direct connection between parties with proper bridging
     const dial = twiml.dial({
+      callerId: From,
       answerOnBridge: true, // This ensures better call quality
-      callerId: req.body.From
+      timeout: 30
     });
     
     // Add the destination number
-    dial.number(req.body.To);
+    dial.number({
+      statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+      statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
+      statusCallbackMethod: 'POST'
+    }, To);
+    
+    console.log('Generated TwiML:', twiml.toString());
     
     res.type('text/xml');
     res.send(twiml.toString());
