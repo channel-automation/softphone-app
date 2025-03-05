@@ -511,7 +511,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get workspace phone numbers
+// Get phone numbers for workspace
 router.get('/phone-numbers/:workspaceId', async (req, res) => {
   try {
     const { workspaceId } = req.params;
@@ -519,7 +519,7 @@ router.get('/phone-numbers/:workspaceId', async (req, res) => {
     // Get phone numbers for this workspace
     const { data: phones, error } = await supabase
       .from('agent_phone')
-      .select('twilio_number, full_name, username')
+      .select('twilio_number, username, full_name')  
       .eq('workspace_id', workspaceId);
       
     if (error) {
@@ -530,14 +530,14 @@ router.get('/phone-numbers/:workspaceId', async (req, res) => {
     if (!phones || phones.length === 0) {
       return res.status(404).json({ error: 'No phone numbers found for workspace' });
     }
-    
-    // Format the response
-    const formattedPhones = phones.map(phone => ({
-      phone_number: phone.twilio_number,
-      friendly_name: `${phone.full_name} (${phone.username})`
+
+    // Format the response to match what frontend expects
+    const numbers = phones.map(phone => ({
+      phone_number: phone.twilio_number,  
+      friendly_name: `${phone.full_name} (${phone.username})`  
     }));
     
-    res.json({ phones: formattedPhones });
+    res.json({ numbers });
   } catch (error) {
     console.error('Error in phone-numbers endpoint:', error);
     res.status(500).json({ error: error.message });
@@ -1168,7 +1168,7 @@ router.post('/status', async (req, res) => {
     res.sendStatus(200);
   } catch (error) {
     console.error('Error handling status update:', error);
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ error: error.message });
   }
 });
 
@@ -1283,8 +1283,18 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
     }
 
     if (!config) {
-      return res.status(404).json({ error: 'Twilio configuration not found' });
+      return res.status(404).json({ error: 'Twilio configuration not found for workspace' });
     }
+
+    // Log config for debugging (safely)
+    console.log('Workspace config:', {
+      hasSid: !!config.twilio_account_sid,
+      hasToken: !!config.twilio_auth_token,
+      hasApiKey: !!config.twilio_api_key,
+      hasApiSecret: !!config.twilio_api_secret,
+      hasAppSid: !!config.twilio_twiml_app_sid,
+      workspaceId
+    });
 
     // Validate required credentials
     if (!config.twilio_api_key || !config.twilio_api_secret) {
@@ -1318,7 +1328,8 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
 
     // Create Voice grant
     const voiceGrant = new VoiceGrant({
-      outgoingApplicationSid: config.twilio_twiml_app_sid
+      outgoingApplicationSid: config.twilio_twiml_app_sid,
+      incomingAllow: true // Allow incoming calls
     });
 
     // Create access token with Voice grant using username as identity
@@ -1326,13 +1337,16 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
       config.twilio_account_sid,
       config.twilio_api_key,
       config.twilio_api_secret,
-      { identity: user.username }
+      { 
+        identity: user.username,
+        ttl: 3600 // Token valid for 1 hour
+      }
     );
 
     // Add Voice grant to token
     token.addGrant(voiceGrant);
     
-    console.log('✅ Voice token generated successfully');
+    console.log('✅ Voice token generated successfully for user:', user.username);
     res.json({ token: token.toJwt() });
   } catch (error) {
     console.error('❌ Error generating voice token:', error);
@@ -1370,10 +1384,10 @@ router.post('/call', async (req, res) => {
     const dialParams = {
       callerId: from,
       answerOnBridge: true, // This ensures no hold music
-      record: 'record-from-answer',
+      record: 'record-from-answer', // Start recording when the call is answered
       timeout: 20,
       hangupOnStar: true, // Allow ending call by pressing *
-      action: `${req.protocol}://${req.get('host')}/api/twilio/dial-status`,
+      action: `${req.protocol}://${req.get('host')}/api/twilio/dial-complete`,
       method: 'POST'
     };
     
