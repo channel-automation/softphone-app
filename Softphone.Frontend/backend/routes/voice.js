@@ -439,13 +439,13 @@ router.post('/inbound', async (req, res) => {
     });
 
     // Find the workspace for this number
-    const { data: twilioNumber, error: numberError } = await supabase
-      .from('workspace_twilio_number')
+    const { data: phoneData, error: numberError } = await supabase
+      .from('agent_phone')
       .select('workspace_id')
-      .eq('twilio_number', req.body.To)
+      .eq('phone_number', req.body.To)
       .single();
 
-    if (numberError || !twilioNumber) {
+    if (numberError || !phoneData) {
       console.error('❌ No workspace found for number:', req.body.To);
       const twiml = new twilio.twiml.VoiceResponse();
       twiml.say('This number is not currently in service. Please try again later.');
@@ -457,14 +457,13 @@ router.post('/inbound', async (req, res) => {
     // Find an available user in this workspace
     const { data: user, error: userError } = await supabase
       .from('user')
-      .select('id, identity')
-      .eq('workspace_id', twilioNumber.workspace_id)
-      .eq('status', 'available')  // Assuming we track user status
+      .select('id, username')
+      .eq('workspace_id', phoneData.workspace_id)
       .limit(1)
       .single();
 
     if (userError || !user) {
-      console.error('❌ No available users found:', userError);
+      console.error('❌ No users found:', userError);
       const twiml = new twilio.twiml.VoiceResponse();
       twiml.say('All agents are currently busy. Please try again later.');
       twiml.hangup();
@@ -481,17 +480,17 @@ router.post('/inbound', async (req, res) => {
       action: '/api/voice/handle-dial-status',
       method: 'POST'
     });
-    dial.client(user.identity);
+    dial.client(user.username);
 
     // Emit socket event for incoming call
     const io = getIO();
-    io.to(user.identity).emit('incomingCall', {
+    io.to(user.username).emit('incomingCall', {
       from: req.body.From,
       to: req.body.To,
       callSid: req.body.CallSid
     });
 
-    console.log('✅ Connecting call to user:', user.identity);
+    console.log('✅ Connecting call to user:', user.username);
     res.type('text/xml');
     res.send(twiml.toString());
 
