@@ -347,26 +347,24 @@
 
     async function getAccessToken() {
         try {
-            const workspaceId = $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val();
-            const identity = $('#hdnUserName').val();
-            
-            if (!workspaceId || !identity) {
-                throw new Error('Missing required parameters: workspaceId or identity');
-            }
-            
+            console.log('🔑 Getting access token for:', {
+                username: window.username,
+                workspaceId: window.workspaceId
+            });
             const response = await fetch(`${config.backendUrl}${config.endpoints.token}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    workspaceId,
-                    identity
+                    identity: window.username,
+                    workspaceId: window.workspaceId
                 })
             });
             
             if (!response.ok) {
-                throw new Error('Failed to fetch token');
+                const errorData = await response.json();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
             }
             
             const data = await response.json();
@@ -383,6 +381,9 @@
                 clearTimeout(tokenRetryTimeout);
                 tokenRetryTimeout = null;
             }
+            
+            // Initialize socket with username
+            initializeSocket(window.username);
             
         } catch (error) {
             console.error('Failed to get access token:', error);
@@ -681,42 +682,6 @@
                 // Rejoin room
                 socket.emit('join_user', { username });
             });
-        }
-    }
-
-    async function getAccessToken() {
-        try {
-            const response = await fetch(`${config.backendUrl}/api/voice/token`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    username: window.username,
-                    workspaceId: window.workspaceId
-                })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            if (data.success && data.token) {
-                console.log('✅ Got new access token');
-                setupDevice(data.token);
-                // Initialize socket with username
-                initializeSocket(window.username);
-                return;
-            }
-            
-            throw new Error('Invalid token response');
-        } catch (error) {
-            console.error('Failed to get access token:', error);
-            toastr.error("Failed to connect to phone system. Retrying...", "Connection Error");
-            
-            // Schedule retry
-            tokenRetryTimeout = setTimeout(getAccessToken, TOKEN_RETRY_INTERVAL);
         }
     }
 

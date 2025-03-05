@@ -5,9 +5,9 @@ const config = {
     
     // API endpoints
     endpoints: {
-        token: "/api/twilio/voice-token/{workspaceId}", // Voice token endpoint
-        call: "/api/twilio/call/{workspaceId}", // Call endpoint
-        status: "/api/twilio/status" // Call status endpoint
+        token: "/api/voice/token", // Voice token endpoint
+        call: "/api/voice/outbound", // Call endpoint
+        status: "/api/voice/status" // Call status endpoint
     },
     
     // Debug settings
