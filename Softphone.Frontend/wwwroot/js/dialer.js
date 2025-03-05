@@ -15,6 +15,10 @@
     let tokenRetryTimeout;
     
     // Constants
+    const config = {
+        backendUrl: 'https://backend-production-3d08.up.railway.app'
+    };
+    
     const TOKEN_RETRY_INTERVAL = 5000; // 5 seconds
     const CALL_STATES = {
         IDLE: 'idle',
@@ -40,221 +44,154 @@
                 currentCall = null;
                 isCallInProgress = false;
                 break;
+                
             case CALL_STATES.CONNECTING:
             case CALL_STATES.RINGING:
                 divDialer.hide();
                 divCalling.show();
+                $('#callStatus').text(newState === CALL_STATES.CONNECTING ? 'Connecting...' : 'Ringing...');
                 break;
+                
             case CALL_STATES.IN_PROGRESS:
+                $('#callStatus').text('Connected');
                 startCallTimer();
                 isCallInProgress = true;
                 break;
+                
             case CALL_STATES.COMPLETED:
             case CALL_STATES.FAILED:
-                endCall();
+                divDialer.show();
+                divCalling.hide();
+                stopCallTimer();
                 break;
         }
+        
+        // Enable/disable buttons based on state
+        checkDialer();
     }
 
     function setupDevice(token) {
-        try {
-            console.log('Initializing device with token:', token);
-            
-            // First, check if we need to handle AudioContext initialization
-            const needsAudioContextInit = !Twilio.Device.audio?.audioContext || 
-                Twilio.Device.audio.audioContext.state === 'suspended';
-                
-            if (needsAudioContextInit) {
-                console.log('Audio context needs initialization. Adding initialization handler...');
-                
-                // Add a one-time click handler to initialize audio
-                $(document).one('click', function() {
-                    console.log('User clicked. Initializing AudioContext...');
-                    
-                    // Try to resume existing context if it exists
-                    if (Twilio.Device.audio?.audioContext?.state === 'suspended') {
-                        console.log('Resuming suspended AudioContext...');
-                        Twilio.Device.audio.audioContext.resume()
-                            .then(() => {
-                                console.log('AudioContext resumed successfully');
-                                if (device) {
-                                    console.log('Refreshing device registration after AudioContext resume');
-                                    device.register();
-                                }
-                            })
-                            .catch(err => console.error('Error resuming AudioContext:', err));
-                    }
-                });
-                
-                toastr.info("Please click anywhere on the page to activate the phone system", "Audio Activation Required");
-            }
-            
-            // Create device with all options
-            device = new Twilio.Device(token, {
-                closeProtection: true,
-                enableRingingState: true,
-                debug: true,
-                edge: ['ashburn', 'sydney', 'dublin', 'frankfurt'],
-                codecPreferences: ['opus', 'pcmu']
-            });
-            
-            console.log('Device created with token. Setting up event handlers...');
-
-            // Register all event handlers
-            device.on("ready", function() {
-                console.log("✅ Device is ready! Setting isDeviceReady = true");
-                isDeviceReady = true;
-                updateCallState(CALL_STATES.IDLE);
-                checkDialer();
-                toastr.success("Phone system initialized successfully.", "Ready");
-            });
-
-            device.on("offline", function() {
-                console.log('❌ Device is offline! Setting isDeviceReady = false');
-                isDeviceReady = false;
-                updateCallState(CALL_STATES.FAILED);
-                checkDialer();
-                toastr.warning("Phone system is offline. Attempting to reconnect...", "Offline");
-                getAccessToken();
-            });
-
-            device.on("error", function(error) {
-                console.error(`❌ Device Error: ${error.message || error}`, error);
-                isDeviceReady = false;
-                updateCallState(CALL_STATES.FAILED);
-                checkDialer();
-                toastr.error(`Phone system error: ${error.message || "Unknown error"}`, "Error");
-            });
-
-            device.on("disconnect", function(call) {
-                console.log("Call disconnected");
-                updateCallState(CALL_STATES.COMPLETED);
-            });
-
-            device.on("cancel", function(call) {
-                console.log("Call canceled");
-                updateCallState(CALL_STATES.COMPLETED);
-            });
-
-            device.on("incoming", handleIncomingCall);
-
-            // Register the device
-            console.log('Registering device...');
-            device.register();
-            
-            // Set up audio options
-            device.audio.incoming(true);
-            device.audio.disconnect(true);
-            
-            // Enable high-quality audio
-            device.audio.setInputDevice('default');
-            device.audio.setOutputDevice('default');
-
-            console.log('Device setup complete, waiting for ready event...');
-        } catch (error) {
-            console.error("Error setting up Twilio device:", error);
-            toastr.error(`Failed to initialize phone system: ${error.message}`, "Setup Error");
-            isDeviceReady = false;
-            updateCallState(CALL_STATES.FAILED);
-            checkDialer();
+        console.log('Setting up device...');
+        
+        // Clean up existing device if any
+        if (device) {
+            console.log('Destroying existing device');
+            device.destroy();
+            device = null;
         }
-    }
-
-    async function deviceConnect() {
-        try {
-            // Prevent rapid repeated calls
-            const now = Date.now();
-            if (now - lastCallTime < CALL_DEBOUNCE_TIME) {
-                console.log('Preventing duplicate call - too soon after last call');
-                return;
-            }
-            lastCallTime = now;
-
-            const phoneInput = $('#txtPhoneNumber');
-            if (!phoneInput.length) {
-                console.error('Phone input not found');
-                toastr.error('Phone input not found');
-                return;
-            }
-
-            // Check if a call is already in progress
-            if (isCallInProgress || currentCall) {
-                console.log('Call already in progress');
-                toastr.warning('A call is already in progress');
-                return;
-            }
-
-            const unmaskedValue = phoneInput.inputmask("unmaskedvalue");
-            if (!unmaskedValue) {
-                console.error('No phone number entered');
-                toastr.error('Please enter a phone number');
-                return;
-            }
-
-            const rawNumber = unmaskedValue.toString().replace(/\D/g, '');
-            console.log('Raw number before formatting:', rawNumber);
+        
+        // Create new device
+        device = new Twilio.Device(token, {
+            codecPreferences: ['opus', 'pcmu'],
+            fakeLocalDTMF: true,
+            enableRingingState: true,
+            debug: true // Enable debug mode for better error logging
+        });
+        
+        // Setup device event handlers
+        device.on('ready', async () => {
+            console.log('✅ Device is ready');
             
-            // Ensure we have exactly 10 digits
-            if (rawNumber.length !== 10) {
-                console.error('Invalid phone number length:', rawNumber.length);
-                toastr.error('Please enter a valid 10-digit phone number');
-                return;
-            }
-            
-            // Get the workspace ID
-            const workspaceId = $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val();
-            
-            if (!workspaceId) {
-                throw new Error("No workspace ID found");
-            }
-            
-            // Get the selected "from" number from the dropdown
-            const from = $('#ddlFromNumber').val();
-            if (!from) {
-                toastr.error('Please select a phone number to call from');
-                return;
-            }
-            
-            let to = `+1${rawNumber}`;
-            
-            console.log(`Making call from ${from} to ${to}`);
-            
-            try {
-                updateCallState(CALL_STATES.CONNECTING);
-                
-                if (!isDeviceReady || !device) {
-                    console.error('Device not ready');
-                    toastr.error('Phone system not ready. Please try again.');
-                    updateCallState(CALL_STATES.FAILED);
-                    return;
+            // Resume AudioContext if it exists
+            if (Twilio.Device.audio && Twilio.Device.audio.audioContext) {
+                try {
+                    await Twilio.Device.audio.audioContext.resume();
+                    console.log('✅ AudioContext resumed');
+                } catch (error) {
+                    console.error('❌ Failed to resume AudioContext:', error);
                 }
-                
-                // Create params for the call
-                const params = {
-                    To: to,
-                    From: from,
-                    workspaceId: workspaceId
-                };
-                console.log('Call params:', params);
-                
-                // Connect using device
-                currentCall = await device.connect(params);
-                
-                // Set up call event handlers
-                currentCall.on('ringing', () => updateCallState(CALL_STATES.RINGING));
-                currentCall.on('accept', () => updateCallState(CALL_STATES.IN_PROGRESS));
-                currentCall.on('disconnect', () => updateCallState(CALL_STATES.COMPLETED));
-                currentCall.on('cancel', () => updateCallState(CALL_STATES.COMPLETED));
-                currentCall.on('error', () => updateCallState(CALL_STATES.FAILED));
-                
-            } catch (error) {
-                console.error('Error connecting device:', error);
-                toastr.error(error.message || "Failed to connect call");
-                updateCallState(CALL_STATES.FAILED);
             }
+            
+            isDeviceReady = true;
+            checkDialer();
+            toastr.success('Phone system is ready', 'Connected');
+        });
+        
+        device.on('error', (error) => {
+            console.error('❌ Device error:', error);
+            toastr.error(`Phone system error: ${error.message}`, "Device Error");
+            isDeviceReady = false;
+            checkDialer();
+            
+            // Try to get a new token
+            getAccessToken();
+        });
+        
+        device.on('disconnect', () => {
+            console.log('Device disconnected');
+            isDeviceReady = false;
+            checkDialer();
+        });
+        
+        // Register device
+        console.log('Registering device...');
+        device.register()
+            .then(() => {
+                console.log('Device registered successfully');
+                // Ensure device is ready after registration
+                isDeviceReady = true;
+                checkDialer();
+            })
+            .catch(error => {
+                console.error('Failed to register device:', error);
+                toastr.error('Failed to register device. Please refresh the page.', 'Registration Error');
+                isDeviceReady = false;
+                checkDialer();
+            });
+    }
+    
+    async function deviceConnect() {
+        if (!device || !isDeviceReady) {
+            console.error('Device not ready');
+            toastr.error("Phone system is not ready. Please wait a moment and try again.", "Connection Error");
+            return;
+        }
+        
+        // Get the raw phone number
+        const phoneInput = divDialer.find("input.inputmask-usphone");
+        const rawNumber = phoneInput.inputmask("unmaskedvalue").toString();
+        console.log('Raw number before formatting:', rawNumber);
+        
+        if (!rawNumber || rawNumber.length !== 10) {
+            console.error('Invalid phone number');
+            toastr.error("Please enter a valid 10-digit phone number.", "Validation Error");
+            return;
+        }
+        
+        // Get the from number (already has +1 from database)
+        const fromNumber = $('#ddlFromNumber').val();
+        if (!fromNumber) {
+            console.error('No from number selected');
+            toastr.error("Please select a phone number to call from.", "Validation Error");
+            return;
+        }
+        
+        // Format TO number to E.164 by adding +1
+        const toNumber = `+1${rawNumber}`;
+        
+        console.log(`Making call from ${fromNumber} to ${toNumber}`);
+        
+        try {
+            // Update UI state first
+            updateCallState(CALL_STATES.CONNECTING);
+            
+            // Connect the call and wait for it to be established
+            currentCall = await device.connect({
+                params: {
+                    To: toNumber,
+                    From: fromNumber,  // Already has +1 from database
+                    workspaceId: $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val()
+                }
+            });
+            
+            console.log('Call connected successfully, setting up handlers');
+            // Setup call event handlers after call is connected
+            setupOutboundCallHandlers(currentCall);
+            
         } catch (error) {
-            console.error('Error in deviceConnect:', error);
-            toastr.error(error.message || "Error making call");
+            console.error('Failed to connect call:', error);
+            toastr.error("Failed to initiate call. Please try again.", "Call Error");
+            currentCall = null;
             updateCallState(CALL_STATES.FAILED);
         }
     }
@@ -284,7 +221,7 @@
         console.log('Initializing dialer...');
         
         // First request audio permission (required for browsers)
-        requestAudioPermission();
+        // requestAudioPermission();
         
         // Then initialize the dialer UI
         initializeDialer();
@@ -297,57 +234,74 @@
         divDialer = $("#divDialer");
         divCalling = $("#divCalling");
         
-        // Initialize form controls first
-        initializeFormControls(divDialer);
+        // Initialize phone input mask
+        divDialer.find("input.inputmask-usphone").inputmask("(999) 999-9999");
         
-        // Then set up event handlers
-        divDialer.find("input").on("keyup", checkDialer);
-        divDialer.find("input").on("paste", checkDialer);
-        divDialer.find("input").on("cut", checkDialer);
-        divDialer.find("select").on("change", checkDialer);
-        divDialer.find("button").on("click", handleOutboundCall);
-        divCalling.find("button").on("click", deviceDisconnect);
+        // Button event handlers
+        divDialer.find('.btn-call').on("click", async () => {
+            console.log('Call button clicked');
+            // Request audio permission first
+            await requestAudioPermission();
+            // Then try to connect
+            deviceConnect();
+        });
         
-        // Initial check and get token
-        checkDialer();
+        divDialer.find('.btn-end-call').on("click", () => {
+            deviceDisconnect();
+        });
+        
+        // Load phone numbers and initialize device
+        loadPhoneNumbers();
         getAccessToken();
+        
+        // Monitor input changes
+        divDialer.find("input.inputmask-usphone").on("input", checkDialer);
+        $('#ddlFromNumber').on('change', checkDialer);
     }
 
     async function requestAudioPermission() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            console.log("Audio permission granted");
-            const tracks = stream.getTracks();
-            tracks.forEach(track => track.stop());
+            console.log("✅ Audio permission granted");
+            
+            // Start AudioContext after user gesture
+            if (Twilio.Device.audio) {
+                await Twilio.Device.audio.audioContext.resume();
+            }
+            
+            // Stop the tracks after getting permission
+            stream.getTracks().forEach(track => track.stop());
+            
+            // Set device ready after audio permission
+            isDeviceReady = true;
+            checkDialer();
+            
         } catch (error) {
-            console.error("Audio permission denied or error occurred:", error);
+            console.error("❌ Audio permission denied:", error);
             toastr.error("Please allow microphone access to make calls.", "Microphone Access Required");
+            isDeviceReady = false;
+            checkDialer();
         }
     }
 
     function checkDialer() {
-        // Get the current phone number without formatting
         const phoneInput = divDialer.find("input.inputmask-usphone");
         const phoneNumber = phoneInput.inputmask("unmaskedvalue").toString();
-        console.log('Raw phone number:', phoneNumber, 'Length:', phoneNumber.length);
+        const hasFromNumber = $('#ddlFromNumber').val() !== null && $('#ddlFromNumber').val() !== '';
+        const isPhoneValid = phoneNumber.length === 10;
         
-        // Check if we have a valid phone number (10 digits)
-        const isPhoneValid = phoneNumber && phoneNumber.replace(/\D/g, '').length === 10;
-        console.log('Phone number valid:', isPhoneValid);
+        // Update button state
+        const canMakeCall = isPhoneValid && hasFromNumber && isDeviceReady;
+        divDialer.find('.btn-call').prop('disabled', !canMakeCall);
         
-        // Check if we have a from number selected
-        const hasFromNumber = true; // We're now hardcoding the from number
-        
-        // Update UI based on validation
-        const canMakeCall = (isPhoneValid || bypassValidation) && (isDeviceReady || bypassValidation);
-        const callButton = divDialer.find("button");
-        callButton.prop('disabled', !canMakeCall);
-        
-        console.log(`Checking dialer status - To: ${phoneNumber.length}/10 digits, From: ${hasFromNumber ? 'selected' : 'not selected'}, Device Ready: ${isDeviceReady}`);
-        
-        if (!isPhoneValid && !bypassValidation) {
-            console.log('Dialer validation bypassed. Would normally require: Enter a complete 10-digit number, Waiting for phone system to initialize');
-        }
+        const status = {
+            phoneNumber,
+            isPhoneValid,
+            hasFromNumber,
+            isDeviceReady,
+            canMakeCall
+        };
+        console.log('Dialer status:', status);
         
         return canMakeCall;
     }
@@ -366,32 +320,26 @@
             return;
         }
         
-        console.log(`Getting token for workspace: ${workspaceId}`);
+        console.log('Getting token for workspace:', workspaceId);
         
+        // Get token from backend
         $.ajax({
-            url: `${config.backendUrl}${config.endpoints.token}/${workspaceId}`,
-            type: "POST",
-            contentType: "application/json",
-            success: (data) => {
-                console.log('✅ Token received successfully');
-                
-                // Clean up any existing device
-                if (device) {
-                    console.log('Destroying existing device before setting up a new one');
-                    device.destroy();
-                    device = null;
-                }
-                
-                // Setup device with the new token
+            url: `${config.backendUrl}/api/twilio/voice-token/${workspaceId}`,
+            type: 'POST',
+            success: function(data) {
+                console.log('✅ Got token from backend');
                 setupDevice(data.token);
             },
-            error: (xhr) => {
+            error: function(xhr) {
                 console.error('❌ Failed to get token:', xhr);
-                console.error('Status:', xhr.status, 'Response:', xhr.responseText);
                 const errorMessage = xhr.responseJSON?.error || xhr.statusText || "Unknown error";
-                toastr.error(`Failed to initialize phone system: ${errorMessage}`, "Token Error");
-                isDeviceReady = false;
-                checkDialer();
+                toastr.error(`Failed to initialize phone system: ${errorMessage}`, "Connection Error");
+                
+                // Retry after delay
+                if (tokenRetryTimeout) {
+                    clearTimeout(tokenRetryTimeout);
+                }
+                tokenRetryTimeout = setTimeout(getAccessToken, TOKEN_RETRY_INTERVAL);
             }
         });
     }
@@ -428,91 +376,152 @@
         });
     }
 
-    async function handleOutboundCall() {
-        console.log('handleOutboundCall triggered');
-        
+    async function requestAudioPermission() {
         try {
-            // First ensure we have a valid phone number and "from" number
-            const to = divDialer.find("input.inputmask-usphone").inputmask("unmaskedvalue").toString().replace(/\D/g, '');
-            const from = divDialer.find("select").val();
-            
-            // TEMPORARY: Log validation warnings but proceed anyway
-            if (to.length !== 10) {
-                console.warn("Phone number should be 10 digits but continuing anyway");
-            }
-            
-            if (!from) {
-                console.warn("From number is missing but continuing anyway");
-            }
-            
-            if (!isDeviceReady || !device) {
-                console.warn("Device not ready but continuing anyway");
-            }
-            
-            // Hide dialer and show calling UI
-            divDialer.hide();
-            divCalling.show();
-            
-            // Call the deviceConnect function which uses our backend API
-            console.log('Calling deviceConnect');
-            await deviceConnect();
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            console.log("Audio permission granted");
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
         } catch (error) {
-            console.error("Error making outbound call:", error);
-            toastr.error("Failed to place call. Please try again.", "Call Error");
-            divDialer.show();
-            divCalling.hide();
+            console.error("Audio permission denied or error occurred:", error);
+            toastr.error("Please allow microphone access to make calls.", "Microphone Access Required");
         }
     }
 
-    function setupOutboundCallHandlers(call, phoneNumber) {
-        console.log('Setting up handlers for outbound call to:', phoneNumber);
+    // Load phone numbers into dropdown
+    async function loadPhoneNumbers() {
+        try {
+            const workspaceId = $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val();
+            if (!workspaceId) {
+                console.error('❌ No workspace ID found');
+                toastr.error('Failed to load phone numbers: Workspace ID not found');
+                return;
+            }
+            
+            console.log('📞 Loading phone numbers for workspace:', workspaceId);
+            const response = await $.get(`${config.backendUrl}/api/twilio/phone-numbers/${workspaceId}`);
+            
+            if (!response || !response.numbers) {
+                console.error('❌ Invalid response format:', response);
+                toastr.error('Failed to load phone numbers: Invalid response from server');
+                return;
+            }
+            
+            console.log('📱 Found numbers:', response.numbers);
+            
+            const $select = $('#ddlFromNumber');
+            $select.empty();
+            
+            // Add placeholder option
+            $select.append($('<option></option>')
+                .attr('value', '')
+                .text('Select a number...'));
+            
+            // Add phone numbers
+            response.numbers.forEach(number => {
+                $select.append($('<option></option>')
+                    .attr('value', number.phone_number)
+                    .text(number.friendly_name || number.phone_number));
+            });
+            
+            // Initialize select2 with search
+            $select.select2({
+                placeholder: 'Select a phone number',
+                allowClear: true,
+                theme: 'bootstrap4',
+                width: '100%'
+            });
+            
+            // Check dialer state after loading numbers
+            checkDialer();
+            
+        } catch (error) {
+            console.error('❌ Error loading phone numbers:', error);
+            toastr.error('Failed to load phone numbers. Please refresh the page.');
+        }
+    }
+
+    function handleOutboundCall() {
+        try {
+            const toNumber = divDialer.find("input.inputmask-usphone").inputmask("unmaskedvalue").toString();
+            const fromNumber = $('#ddlFromNumber').val();
+            
+            if (!toNumber || !fromNumber) {
+                toastr.error("Please enter a valid phone number and select a 'from' number");
+                return;
+            }
+            
+            // Format number for Twilio
+            const formattedToNumber = '+1' + toNumber;
+            
+            console.log('Making call from', fromNumber, 'to', formattedToNumber);
+            
+            // Make the call
+            const call = device.connect({
+                params: {
+                    To: formattedToNumber,
+                    From: fromNumber
+                }
+            });
+            
+            // Set up call handlers
+            call.on('ringing', () => updateCallStatus('ringing'));
+            call.on('accept', () => updateCallStatus('in-progress'));
+            call.on('disconnect', () => updateCallStatus('ended'));
+            call.on('error', (error) => {
+                console.error('Call error:', error);
+                toastr.error(error.message || 'Error during call');
+                updateCallStatus('ended');
+            });
+            
+            // Update UI
+            updateCallStatus('initiated');
+            
+        } catch (error) {
+            console.error('Error making call:', error);
+            toastr.error(error.message || 'Failed to place call');
+            updateCallStatus('ended');
+        }
+    }
+
+    function setupOutboundCallHandlers(call) {
+        if (!call) return;
         
-        // Set up disconnection handler
-        call.on('disconnect', function() {
-            console.log('Call has been disconnected');
-            endCall();
+        // Update UI to show call is connecting
+        updateCallState(CALL_STATES.CONNECTING);
+        
+        call.on('ringing', () => {
+            console.log('Call is ringing');
+            updateCallState(CALL_STATES.RINGING);
         });
         
-        // Set up accept handler (when the other party accepts)
-        call.on('accept', function() {
-            console.log('Call has been accepted');
-            setCallingInfo(phoneNumber, false);
+        call.on('accept', () => {
+            console.log('Call was accepted');
+            updateCallState(CALL_STATES.IN_PROGRESS);
+            startCallTimer();
         });
         
-        // Set up error handler
-        call.on('error', function(error) {
-            console.error('Call error:', error);
-            toastr.error(`Call error: ${error.message || "Unknown error"}`, "Call Error");
-            endCall();
+        call.on('disconnect', () => {
+            console.log('Call disconnected');
+            updateCallState(CALL_STATES.COMPLETED);
+            stopCallTimer();
+            currentCall = null;
         });
         
-        // Set up cancel handler (when user cancels before connected)
-        call.on('cancel', function() {
+        call.on('cancel', () => {
             console.log('Call was canceled');
-            endCall();
+            updateCallState(CALL_STATES.COMPLETED);
+            stopCallTimer();
+            currentCall = null;
         });
         
-        // Mute button handler
-        $("#mute-call").on("click", function() {
-            if (call) {
-                const isMuted = !call.isMuted();
-                call.mute(isMuted);
-                $(this).text(isMuted ? "Unmute" : "Mute");
-                console.log(`Call ${isMuted ? 'muted' : 'unmuted'}`);
-            }
+        call.on('error', (error) => {
+            console.error('Call error:', error);
+            toastr.error(`Call error: ${error.message}`, "Call Error");
+            updateCallState(CALL_STATES.FAILED);
+            stopCallTimer();
+            currentCall = null;
         });
-        
-        // Hang up button handler
-        $("#hang-up").on("click", function() {
-            if (call) {
-                console.log('User initiated hang up');
-                call.disconnect();
-            }
-            endCall();
-        });
-        
-        // Update UI
-        setCallingInfo(phoneNumber, true);
     }
 
     function incomingPopup(call) {
@@ -557,116 +566,6 @@
 
     function pad(number) {
         return number < 10 ? '0' + number : number;
-    }
-
-    async function deviceConnect() {
-        try {
-            const phoneInput = $('#txtPhoneNumber');
-            if (!phoneInput.length) {
-                console.error('Phone input not found');
-                toastr.error('Phone input not found');
-                return;
-            }
-
-            const unmaskedValue = phoneInput.inputmask("unmaskedvalue");
-            if (!unmaskedValue) {
-                console.error('No phone number entered');
-                toastr.error('Please enter a phone number');
-                return;
-            }
-
-            const rawNumber = unmaskedValue.toString().replace(/\D/g, '');
-            console.log('Raw number before formatting:', rawNumber);
-            
-            // Ensure we have exactly 10 digits
-            if (rawNumber.length !== 10) {
-                console.error('Invalid phone number length:', rawNumber.length);
-                toastr.error('Please enter a valid 10-digit phone number');
-                return;
-            }
-            
-            // Get the workspace ID
-            const workspaceId = $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val();
-            
-            if (!workspaceId) {
-                throw new Error("No workspace ID found");
-            }
-            
-            // Get the selected "from" number from the dropdown
-            const from = $('#ddlFromNumber').val();
-            if (!from) {
-                toastr.error('Please select a phone number to call from');
-                return;
-            }
-            
-            let to = `+1${rawNumber}`;
-            
-            console.log(`Making call from ${from} to ${to}`);
-            
-            try {
-                // Update UI to show we're initiating the call
-                setCallingInfo(to, true);
-                
-                // Always use device.connect() for consistent behavior
-                if (!isDeviceReady || !device) {
-                    console.error('Device not ready');
-                    toastr.error('Phone system not ready. Please try again.');
-                    setCallingInfo(null, false);
-                    return;
-                }
-                
-                // Create params for the call
-                const params = {
-                    To: to,
-                    From: from,
-                    workspaceId: workspaceId // Pass workspace ID to TwiML endpoint
-                };
-                console.log('Call params:', params);
-                
-                // Connect using device
-                device.connect(params);
-            } catch (error) {
-                console.error('Error connecting device:', error);
-                toastr.error(error.message || "Failed to connect call");
-                setCallingInfo(null, false);
-            }
-        } catch (error) {
-            console.error('Error in deviceConnect:', error);
-            toastr.error(error.message || "Error making call");
-            setCallingInfo(null, false);
-        }
-    }
-
-    // Function to load phone numbers into dropdown
-    async function loadPhoneNumbers() {
-        try {
-            const workspaceId = $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val();
-            
-            if (!workspaceId) {
-                throw new Error("No workspace ID found");
-            }
-            
-            const response = await $.get(`${config.backendUrl}/api/twilio/phone-numbers/${workspaceId}`);
-            const phones = response.phones;
-            
-            if (!phones || phones.length === 0) {
-                toastr.warning('No phone numbers available for this workspace');
-                return;
-            }
-            
-            const ddl = $('#ddlFromNumber');
-            ddl.empty();
-            ddl.append($('<option></option>').val('').text('Select a number...'));
-            
-            phones.forEach(phone => {
-                ddl.append($('<option></option>')
-                    .val(phone.phone_number)
-                    .text(phone.friendly_name || phone.phone_number));
-            });
-        } catch (error) {
-            console.error('Error loading phone numbers:', error);
-            toastr.error('Failed to load available phone numbers');
-        }
     }
 
     // Call loadPhoneNumbers when the page loads

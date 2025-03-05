@@ -1,4 +1,4 @@
-﻿using Softphone.Frontend.Models;
+using Softphone.Frontend.Models;
 using Supabase;
 using static Supabase.Postgrest.Constants;
 
