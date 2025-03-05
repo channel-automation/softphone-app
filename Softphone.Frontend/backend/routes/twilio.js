@@ -1067,36 +1067,13 @@ router.post('/call/:workspaceId', async (req, res) => {
     // Create Twilio client
     const client = twilio(config.twilio_account_sid, config.twilio_auth_token);
 
-    // Create TwiML for outbound call
-    const twiml = new twilio.twiml.VoiceResponse();
-    
     console.log('🔄 Starting outbound call flow...');
     
-    // Create a direct connection between parties with proper bridging
-    const dial = twiml.dial({
-      callerId: from,
-      answerOnBridge: true, // This ensures no hold music
-      timeout: 30,
-      hangupOnStar: true, // Allow ending call by pressing *
-      action: `${req.protocol}://${req.get('host')}/api/twilio/dial-complete`,
-      method: 'POST'
-    });
-
-    // Add number with status callbacks
-    dial.number({
-      statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
-      statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
-      statusCallbackMethod: 'POST'
-    }, to);
-
-    const twimlString = twiml.toString();
-    console.log('📜 Generated TwiML:', twimlString);
-    
-    // Make the call
+    // Make the call using the TwiML App instead of direct TwiML
     const call = await client.calls.create({
       to: normalizePhone(to),
       from: from,
-      twiml: twimlString,
+      applicationSid: config.twilio_twiml_app_sid, // Use TwiML App for call handling
       statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
       statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
       statusCallbackMethod: 'POST'
@@ -1113,25 +1090,22 @@ router.post('/call/:workspaceId', async (req, res) => {
 // TwiML endpoint for outbound calls
 router.post('/outbound-twiml', async (req, res) => {
   try {
-    const { To, From } = req.body;
-    
-    // Create TwiML for outbound call
     const twiml = new twilio.twiml.VoiceResponse();
     
     // Create a direct connection between parties with proper bridging
-    twiml.dial({
-      callerId: From,
-      answerOnBridge: true  // This is important as noted in the memory
-    }, To);
-
+    const dial = twiml.dial({
+      answerOnBridge: true, // This ensures better call quality
+      callerId: req.body.From
+    });
+    
+    // Add the destination number
+    dial.number(req.body.To);
+    
     res.type('text/xml');
     res.send(twiml.toString());
   } catch (error) {
-    console.error('Error generating outbound TwiML:', error);
-    const twiml = new twilio.twiml.VoiceResponse();
-    twiml.say('We are unable to process your call at this time. Please try again later.');
-    res.type('text/xml');
-    res.send(twiml.toString());
+    console.error('Error generating TwiML:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
