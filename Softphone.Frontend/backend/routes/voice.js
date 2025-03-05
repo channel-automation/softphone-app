@@ -442,11 +442,11 @@ router.post('/inbound', async (req, res) => {
     const { data: phoneData, error: numberError } = await supabase
       .from('agent_phone')
       .select('workspace_id')
-      .eq('phone_number', req.body.To)
+      .eq('phone_number', normalizePhone(req.body.To))
       .single();
 
     if (numberError || !phoneData) {
-      console.error('❌ No workspace found for number:', req.body.To);
+      console.error('❌ No workspace found for number:', req.body.To, 'normalized:', normalizePhone(req.body.To));
       const twiml = new twilio.twiml.VoiceResponse();
       twiml.say('This number is not currently in service. Please try again later.');
       twiml.hangup();
