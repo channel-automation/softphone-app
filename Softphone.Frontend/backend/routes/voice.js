@@ -441,30 +441,32 @@ router.post('/inbound', async (req, res) => {
     // Find the workspace for this number
     const { data: twilioNumber, error: numberError } = await supabase
       .from('workspace_twilio_number')
-      .select('workspace_id, user_id')
+      .select('workspace_id')
       .eq('twilio_number', req.body.To)
       .single();
 
     if (numberError || !twilioNumber) {
       console.error('❌ No workspace found for number:', req.body.To);
       const twiml = new twilio.twiml.VoiceResponse();
-      twiml.say('We could not find a user for this number. Please try again later.');
+      twiml.say('This number is not currently in service. Please try again later.');
       twiml.hangup();
       res.type('text/xml');
       return res.send(twiml.toString());
     }
 
-    // Get the user's identity
-    const { data: user, error: userError } = await supabase
-      .from('users')
+    // Find an available agent in this workspace
+    const { data: agent, error: agentError } = await supabase
+      .from('agent')
       .select('identity')
-      .eq('id', twilioNumber.user_id)
+      .eq('workspace_id', twilioNumber.workspace_id)
+      .eq('status', 'available')  // Assuming we track agent status
+      .limit(1)
       .single();
 
-    if (userError || !user) {
-      console.error('❌ No user found:', userError);
+    if (agentError || !agent) {
+      console.error('❌ No available agents found:', agentError);
       const twiml = new twilio.twiml.VoiceResponse();
-      twiml.say('We could not find an available agent. Please try again later.');
+      twiml.say('All agents are currently busy. Please try again later.');
       twiml.hangup();
       res.type('text/xml');
       return res.send(twiml.toString());
@@ -472,24 +474,24 @@ router.post('/inbound', async (req, res) => {
 
     const twiml = new twilio.twiml.VoiceResponse();
     
-    // Connect the caller to the client using their identity
+    // Connect the caller to the available agent
     const dial = twiml.dial({
       answerOnBridge: true,
       callerId: req.body.From,
       action: '/api/voice/handle-dial-status',
       method: 'POST'
     });
-    dial.client(user.identity);
+    dial.client(agent.identity);
 
     // Emit socket event for incoming call
     const io = getIO();
-    io.to(user.identity).emit('incomingCall', {
+    io.to(agent.identity).emit('incomingCall', {
       from: req.body.From,
       to: req.body.To,
       callSid: req.body.CallSid
     });
 
-    console.log('✅ Connecting call to client:', user.identity);
+    console.log('✅ Connecting call to agent:', agent.identity);
     res.type('text/xml');
     res.send(twiml.toString());
 
