@@ -113,6 +113,7 @@
             console.log('Destroying existing device');
             device.destroy();
             device = null;
+            isDeviceReady = false;
         }
         
         // Create new device
@@ -148,8 +149,8 @@
             isDeviceReady = false;
             checkDialer();
             
-            // Try to get a new token
-            getAccessToken();
+            // Try to get a new token after a delay
+            setTimeout(getAccessToken, 5000);
         });
         
         device.on('disconnect', () => {
@@ -178,6 +179,9 @@
                 toastr.error('Failed to register device. Please refresh the page.', 'Registration Error');
                 isDeviceReady = false;
                 checkDialer();
+                
+                // Try to get a new token after a delay
+                setTimeout(getAccessToken, 5000);
             });
     }
     
@@ -277,11 +281,24 @@
         divDialer.find("input.inputmask-usphone").inputmask("(999) 999-9999");
         
         // Button event handlers
-        divDialer.find('.btn-call').on("click", async () => {
+        divDialer.find('.btn-call').on("click", async (e) => {
+            e.preventDefault();
             console.log('Call button clicked');
-            // Request audio permission first
-            await requestAudioPermission();
-            // Then try to connect
+            
+            if (!isDeviceReady) {
+                console.log('Device not ready, requesting audio permission...');
+                await requestAudioPermission();
+                await getAccessToken();
+            }
+            
+            // Check if device is ready after potential initialization
+            if (!isDeviceReady) {
+                console.error('Device still not ready after initialization');
+                toastr.error("Phone system is not ready. Please wait a moment and try again.", "Connection Error");
+                return;
+            }
+            
+            // Try to make the call
             deviceConnect();
         });
         
