@@ -2,6 +2,7 @@ const express = require('express');
 const twilio = require('twilio');
 const { getIO } = require('../io');
 const supabase = require('../supabase');
+const config = require('../config'); // Assuming config is in a separate file
 
 const router = express.Router();
 
@@ -377,14 +378,18 @@ router.post('/outbound', async (req, res) => {
     }
     
     // Connect to the phone number
-    const dial = twiml.dial({ callerId });
+    const dial = twiml.dial({
+        callerId,
+        action: `${config.backendUrl}/voice/handle-dial-status`,
+        method: 'POST'
+    });
     
     if (To.match(/^\+\d+$/)) {
-      // If To is a phone number, call it directly
-      dial.number(To);
+        // If To is a phone number, call it directly
+        dial.number(To);
     } else {
-      // If To is a client identifier, call the client
-      dial.client(To);
+        // If To is a client identifier, call the client
+        dial.client(To);
     }
     
     // Add hangup handler
@@ -406,6 +411,22 @@ router.post('/outbound', async (req, res) => {
     res.type('text/xml');
     res.send(twiml.toString());
   }
+});
+
+// Handle dial status callback
+router.post('/handle-dial-status', (req, res) => {
+    const twiml = new twilio.twiml.VoiceResponse();
+    const { DialCallStatus } = req.body;
+
+    if (DialCallStatus === 'completed' || DialCallStatus === 'answered') {
+        twiml.say('Thank you for using our service. Goodbye!');
+    } else {
+        twiml.say('We were unable to connect your call. Please try again.');
+    }
+    twiml.hangup();
+
+    res.type('text/xml');
+    res.send(twiml.toString());
 });
 
 // Handle inbound calls

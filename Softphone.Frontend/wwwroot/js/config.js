@@ -5,9 +5,10 @@ const config = {
     
     // API endpoints
     endpoints: {
-        token: "/twilio/voice-token",  // Voice token endpoint
-        call: "/twilio/call",          // Call endpoint
-        sms: "/twilio/send"
+        token: "/twilio/voice/token",       // Voice token endpoint
+        outbound: "/twilio/outbound-twiml", // Outbound call endpoint
+        status: "/twilio/voice/status",     // Call status endpoint
+        sms: "/twilio/send"                 // SMS endpoint
     },
     
     // Debug settings

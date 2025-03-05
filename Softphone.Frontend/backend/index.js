@@ -199,7 +199,7 @@ async function handleInboundMessage({ twilioSid, contactId, workspaceId, directi
 
 // Import routes
 const twilioRoutes = require('./routes/twilio');
-const voiceRoutes = require('./routes/voice');
+const voiceRoutes = require('./src/routes/voice');
 
 // Mount routes
 app.use('/api/twilio', twilioRoutes);
@@ -441,7 +441,7 @@ io.on('connection', (socket) => {
 });
 
 // Twilio configuration endpoint
-app.get('/config/twilio', (req, res) => {
+app.post('/api/twilio/config', (req, res) => {
   try {
     // Only expose the phone number, not the credentials
     res.json({
@@ -458,7 +458,7 @@ app.get('/config/twilio', (req, res) => {
 });
 
 // Twilio webhook endpoint with workspace ID in URL
-app.post('/twilio/:workspaceId', async (req, res) => {
+app.post('/api/twilio/webhook/:workspaceId', async (req, res) => {
   try {
     const { workspaceId } = req.params;
     const { MessageSid, From, To, Body } = req.body;
@@ -592,7 +592,7 @@ app.post('/twilio/:workspaceId', async (req, res) => {
 });
 
 // Original Twilio webhook endpoint (for backward compatibility)
-app.post('/twilio', async (req, res) => {
+app.post('/api/twilio/webhook', async (req, res) => {
   try {
     const { MessageSid, From, To, Body } = req.body;
     console.log('📱 Received webhook:', { MessageSid, From, To, Body });
@@ -781,7 +781,7 @@ app.get('/messages/:contactId', async (req, res) => {
 });
 
 // Send SMS endpoint for quick messages
-app.post('/send-sms', async (req, res) => {
+app.post('/api/twilio/send-sms', async (req, res) => {
   try {
     const { to, message, workspaceId } = req.body;
     console.log('Sending SMS to:', to, 'Message:', message, 'Workspace:', workspaceId);
@@ -881,7 +881,7 @@ app.post('/send-sms', async (req, res) => {
 });
 
 // Test endpoint for message insertion
-app.post('/test-message-insert', async (req, res) => {
+app.post('/api/twilio/test-message-insert', async (req, res) => {
   try {
     const { contactId, workspaceId, message } = req.body;
     

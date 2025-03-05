@@ -16,7 +16,10 @@
     
     // Constants
     const config = {
-        backendUrl: 'https://backend-production-3d08.up.railway.app'
+        backendUrl: 'https://backend-production-3d08.up.railway.app',
+        endpoints: {
+            token: '/api/twilio/voice-token'
+        }
     };
     
     const TOKEN_RETRY_INTERVAL = 5000; // 5 seconds
@@ -30,6 +33,37 @@
     };
     
     let currentCallState = CALL_STATES.IDLE;
+
+    // Call timer functions
+    function startCallTimer() {
+        callTimerStartTime = Date.now();
+        updateCallTimer();
+        callTimerInterval = setInterval(updateCallTimer, 1000);
+    }
+
+    function stopCallTimer() {
+        if (callTimerInterval) {
+            clearInterval(callTimerInterval);
+            callTimerInterval = null;
+        }
+        $('#callTimer').text('');
+    }
+
+    function updateCallTimer() {
+        if (!callTimerStartTime) return;
+        
+        const now = Date.now();
+        const diff = now - callTimerStartTime;
+        const seconds = Math.floor(diff / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        
+        const displayHours = hours.toString().padStart(2, '0');
+        const displayMinutes = (minutes % 60).toString().padStart(2, '0');
+        const displaySeconds = (seconds % 60).toString().padStart(2, '0');
+        
+        $('#callTimer').text(`${displayHours}:${displayMinutes}:${displaySeconds}`);
+    }
 
     function updateCallState(newState) {
         console.log(`Call state changing from ${currentCallState} to ${newState}`);
@@ -172,26 +206,24 @@
         console.log(`Making call from ${fromNumber} to ${toNumber}`);
         
         try {
-            // Update UI state first
-            updateCallState(CALL_STATES.CONNECTING);
-            
-            // Connect the call and wait for it to be established
+            // Initiate the call
             currentCall = await device.connect({
                 params: {
                     To: toNumber,
-                    From: fromNumber,  // Already has +1 from database
+                    From: fromNumber,
                     workspaceId: $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val()
                 }
             });
             
-            console.log('Call connected successfully, setting up handlers');
-            // Setup call event handlers after call is connected
+            // Setup call handlers
             setupOutboundCallHandlers(currentCall);
+            
+            // Update UI state
+            updateCallState(CALL_STATES.CONNECTING);
             
         } catch (error) {
             console.error('Failed to connect call:', error);
-            toastr.error("Failed to initiate call. Please try again.", "Call Error");
-            currentCall = null;
+            toastr.error("Failed to connect call. Please try again.", "Call Error");
             updateCallState(CALL_STATES.FAILED);
         }
     }
@@ -306,42 +338,52 @@
         return canMakeCall;
     }
 
-    // Get a token from the backend
-    function getAccessToken() {
-        console.log('Getting access token...');
-        isDeviceReady = false;
-        
-        // Try to get the workspace ID from different possible sources
-        const workspaceId = $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val();
-        
-        if (!workspaceId) {
-            console.error('❌ No workspace ID found');
-            toastr.error("Cannot initialize the phone system: Workspace ID not found in the page.", "Configuration Error");
-            return;
-        }
-        
-        console.log('Getting token for workspace:', workspaceId);
-        
-        // Get token from backend
-        $.ajax({
-            url: `${config.backendUrl}/api/twilio/voice-token/${workspaceId}`,
-            type: 'POST',
-            success: function(data) {
-                console.log('✅ Got token from backend');
-                setupDevice(data.token);
-            },
-            error: function(xhr) {
-                console.error('❌ Failed to get token:', xhr);
-                const errorMessage = xhr.responseJSON?.error || xhr.statusText || "Unknown error";
-                toastr.error(`Failed to initialize phone system: ${errorMessage}`, "Connection Error");
-                
-                // Retry after delay
-                if (tokenRetryTimeout) {
-                    clearTimeout(tokenRetryTimeout);
-                }
-                tokenRetryTimeout = setTimeout(getAccessToken, TOKEN_RETRY_INTERVAL);
+    async function getAccessToken() {
+        try {
+            const workspaceId = $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val();
+            const identity = $('#hdnUserName').val();
+            
+            if (!workspaceId || !identity) {
+                throw new Error('Missing required parameters: workspaceId or identity');
             }
-        });
+            
+            const response = await fetch(`${config.backendUrl}${config.endpoints.token}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    workspaceId,
+                    identity
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch token');
+            }
+            
+            const data = await response.json();
+            
+            if (!data.success || !data.token) {
+                throw new Error(data.error || 'Invalid token response');
+            }
+            
+            // Setup device with new token
+            setupDevice(data.token);
+            
+            // Clear any existing retry timeout
+            if (tokenRetryTimeout) {
+                clearTimeout(tokenRetryTimeout);
+                tokenRetryTimeout = null;
+            }
+            
+        } catch (error) {
+            console.error('Failed to get access token:', error);
+            toastr.error("Failed to connect to phone system. Retrying...", "Connection Error");
+            
+            // Schedule retry
+            tokenRetryTimeout = setTimeout(getAccessToken, TOKEN_RETRY_INTERVAL);
+        }
     }
 
     function handleIncomingCall(call) {

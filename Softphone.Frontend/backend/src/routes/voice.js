@@ -106,9 +106,9 @@ router.post('/configure-twiml-app', async (req, res) => {
     // Get Twilio client for workspace
     const client = await getTwilioClientForWorkspace(workspaceId);
     
-    // Voice URLs
-    const voiceUrl = `${baseUrl}/api/voice/outbound`;
-    const statusCallbackUrl = `${baseUrl}/api/voice/status`;
+    // Voice URLs - update to match TwiML app configuration
+    const voiceUrl = `${baseUrl}/api/twilio/voice/outbound`;
+    const statusCallbackUrl = `${baseUrl}/api/twilio/voice/status`;
     
     // Check if TwiML app already exists
     const apps = await client.applications.list({ friendlyName: `Softphone-${workspaceId}` });
@@ -235,7 +235,14 @@ router.post('/outbound', async (req, res) => {
     }
     
     // Connect to the phone number
-    const dial = twiml.dial({ callerId });
+    const dial = twiml.dial({ 
+        callerId,
+        answerOnBridge: true,  // Better call quality
+        timeout: 30,  // 30 seconds ring time
+        statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+        statusCallback: `${req.protocol}://${req.get('host')}/api/voice/status`,
+        statusCallbackMethod: 'POST'
+    });
     
     if (To.match(/^\+\d+$/)) {
       // If To is a phone number, call it directly
@@ -316,6 +323,14 @@ router.post('/status', async (req, res) => {
     
     console.log(`📞 Call ${CallSid} from ${From} to ${To} is now ${CallStatus}`);
     
+    // Create TwiML response for completed calls
+    const twiml = new twilio.twiml.VoiceResponse();
+    
+    if (CallStatus === 'completed') {
+      twiml.say('Thank you for using our service. Goodbye!');
+      twiml.hangup();
+    }
+    
     // Notify connected clients about call status
     const io = getIO();
     if (io) {
@@ -327,11 +342,34 @@ router.post('/status', async (req, res) => {
       });
     }
     
-    res.sendStatus(200);
+    res.type('text/xml');
+    res.send(twiml.toString());
   } catch (error) {
     console.error('❌ Error handling call status:', error);
-    res.sendStatus(500);
+    const twiml = new twilio.twiml.VoiceResponse();
+    twiml.say('An error occurred. Please try again later.');
+    twiml.hangup();
+    res.type('text/xml');
+    res.send(twiml.toString());
   }
+});
+
+// Handle dial status
+router.post('/handle-dial-status', (req, res) => {
+    const twiml = new twilio.twiml.VoiceResponse();
+    const { DialCallStatus } = req.body;
+
+    console.log('📞 Handling dial status:', DialCallStatus);
+
+    if (DialCallStatus === 'completed' || DialCallStatus === 'answered') {
+        twiml.say('Thank you for using our service. Goodbye!');
+    } else {
+        twiml.say('We were unable to connect your call. Please try again.');
+    }
+    twiml.hangup();
+
+    res.type('text/xml');
+    res.send(twiml.toString());
 });
 
 module.exports = router;
