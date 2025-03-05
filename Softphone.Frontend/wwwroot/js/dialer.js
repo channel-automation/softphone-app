@@ -365,7 +365,7 @@
     async function getAccessToken() {
         try {
             const workspaceId = $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val();
-            const identity = $('#hdnUserName').val();
+            const identity = $('#hdnUsername').val();
             
             console.log('🔑 Getting access token for:', {
                 identity,
@@ -373,6 +373,14 @@
             });
 
             if (!workspaceId || !identity) {
+                console.error('❌ Missing parameters:', {
+                    workspaceId: !!workspaceId,
+                    identity: !!identity,
+                    foundElements: {
+                        workspaceId: $('#hdnWorkspaceId').length,
+                        username: $('#hdnUsername').length
+                    }
+                });
                 throw new Error('Missing required parameters: workspaceId or identity');
             }
             
