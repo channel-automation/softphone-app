@@ -199,11 +199,11 @@ async function handleInboundMessage({ twilioSid, contactId, workspaceId, directi
 
 // Import routes
 const twilioRoutes = require('./routes/twilio');
-const voiceRoutes = require('./src/routes/voice');
+const voiceRoutes = require('./routes/voice');
 
 // Mount routes
 app.use('/api/twilio', twilioRoutes);
-app.use('/voice', voiceRoutes);
+app.use('/api/voice', voiceRoutes);
 
 // Configure Socket.IO
 const socketCorsOrigins = process.env.SOCKET_CORS_ORIGIN 
