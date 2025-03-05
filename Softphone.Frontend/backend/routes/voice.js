@@ -484,6 +484,12 @@ router.post('/inbound', async (req, res) => {
 
     // Emit socket event for incoming call
     const io = getIO();
+    console.log('📞 Emitting incomingCall event to user:', {
+      username: user.username,
+      from: req.body.From,
+      to: req.body.To,
+      callSid: req.body.CallSid
+    });
     io.to(user.username).emit('incomingCall', {
       from: req.body.From,
       to: req.body.To,

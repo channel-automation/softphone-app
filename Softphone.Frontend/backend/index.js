@@ -253,15 +253,26 @@ io.on('connection', (socket) => {
   socket.on('join_user', (data) => {
     try {
       const { username } = data;
+      console.log('🚪 Join user request:', { socketId: socket.id, username });
+
       if (!username) {
         console.error('❌ Missing username in join_user event');
         socket.emit('error', { message: 'Missing username' });
         return;
       }
 
+      // Leave previous rooms
+      const rooms = [...socket.rooms];
+      rooms.forEach(room => {
+        if (room !== socket.id) {
+          console.log('🚪 Leaving room:', room);
+          socket.leave(room);
+        }
+      });
+
       // Join room with username
       socket.join(username);
-      console.log('✅ Client joined user room:', username);
+      console.log('✅ Client joined user room:', { socketId: socket.id, username, rooms: [...socket.rooms] });
     } catch (error) {
       console.error('❌ Error joining user room:', error);
       socket.emit('error', { message: 'Failed to join room' });

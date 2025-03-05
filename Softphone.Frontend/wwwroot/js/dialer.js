@@ -639,12 +639,16 @@
     // Initialize socket.io
     function initializeSocket(username) {
         if (!socket) {
-            console.log('Initializing socket.io connection...');
+            console.log('🔌 Initializing socket.io connection...', {
+                url: config.backendUrl,
+                username: username
+            });
             socket = io(config.backendUrl);
             
             socket.on('connect', () => {
-                console.log('✅ Socket connected');
+                console.log('✅ Socket connected with id:', socket.id);
                 // Join room with username
+                console.log('🚪 Joining room for user:', username);
                 socket.emit('join_user', { username });
             });
             
@@ -664,7 +668,18 @@
             });
             
             socket.on('disconnect', () => {
-                console.log('Socket disconnected');
+                console.log('🔌 Socket disconnected');
+                // Try to reconnect
+                setTimeout(() => {
+                    console.log('🔄 Attempting to reconnect socket...');
+                    initializeSocket(username);
+                }, 5000);
+            });
+
+            socket.on('reconnect', () => {
+                console.log('✅ Socket reconnected');
+                // Rejoin room
+                socket.emit('join_user', { username });
             });
         }
     }
