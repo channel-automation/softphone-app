@@ -347,23 +347,31 @@
 
     async function getAccessToken() {
         try {
+            const workspaceId = $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val();
+            const identity = $('#hdnUserName').val();
+            
             console.log('🔑 Getting access token for:', {
-                username: window.username,
-                workspaceId: window.workspaceId
+                identity,
+                workspaceId
             });
+
+            if (!workspaceId || !identity) {
+                throw new Error('Missing required parameters: workspaceId or identity');
+            }
+            
             const response = await fetch(`${config.backendUrl}${config.endpoints.token}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    identity: window.username,
-                    workspaceId: window.workspaceId
+                    identity,
+                    workspaceId
                 })
             });
             
             if (!response.ok) {
-                const errorData = await response.json();
+                const errorData = await response.json().catch(() => ({}));
                 throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
             }
             
@@ -383,7 +391,11 @@
             }
             
             // Initialize socket with username
-            initializeSocket(window.username);
+            initializeSocket(identity);
+            
+            // Store values in window for future use
+            window.username = identity;
+            window.workspaceId = workspaceId;
             
         } catch (error) {
             console.error('Failed to get access token:', error);
