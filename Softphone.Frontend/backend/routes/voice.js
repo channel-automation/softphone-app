@@ -442,7 +442,7 @@ router.post('/inbound', async (req, res) => {
     const { data: twilioNumber, error: numberError } = await supabase
       .from('workspace_twilio_number')
       .select('workspace_id, user_id')
-      .eq('phone_number', req.body.To)
+      .eq('twilio_number', req.body.To)
       .single();
 
     if (numberError || !twilioNumber) {
