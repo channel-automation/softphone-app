@@ -387,6 +387,9 @@ router.post('/outbound', async (req, res) => {
       dial.client(To);
     }
     
+    // Add hangup handler
+    twiml.hangup();
+    
     // Return TwiML
     res.type('text/xml');
     res.send(twiml.toString());
@@ -398,7 +401,8 @@ router.post('/outbound', async (req, res) => {
 📚 Stack: ${error.stack}
 =================================`);
     const twiml = new twilio.twiml.VoiceResponse();
-    twiml.say('An error occurred. Please try again later.');
+    twiml.say('Thank you for using our service. The call has ended.');
+    twiml.hangup();
     res.type('text/xml');
     res.send(twiml.toString());
   }
