@@ -438,28 +438,73 @@ router.post('/inbound', async (req, res) => {
       callSid: req.body.CallSid
     });
 
+    // Find the workspace for this number
+    const { data: twilioNumber, error: numberError } = await supabase
+      .from('workspace_twilio_number')
+      .select('workspace_id, user_id')
+      .eq('phone_number', req.body.To)
+      .single();
+
+    if (numberError || !twilioNumber) {
+      console.error('❌ No workspace found for number:', req.body.To);
+      const twiml = new twilio.twiml.VoiceResponse();
+      twiml.say('We could not find a user for this number. Please try again later.');
+      twiml.hangup();
+      res.type('text/xml');
+      return res.send(twiml.toString());
+    }
+
+    // Get the user's identity
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('identity')
+      .eq('id', twilioNumber.user_id)
+      .single();
+
+    if (userError || !user) {
+      console.error('❌ No user found:', userError);
+      const twiml = new twilio.twiml.VoiceResponse();
+      twiml.say('We could not find an available agent. Please try again later.');
+      twiml.hangup();
+      res.type('text/xml');
+      return res.send(twiml.toString());
+    }
+
     const twiml = new twilio.twiml.VoiceResponse();
     
-    // Create a client name from the phone number
-    const clientName = req.body.To.replace(/[^\d]/g, '');
-    
-    // Connect the caller to the client
+    // Connect the caller to the client using their identity
     const dial = twiml.dial({
       answerOnBridge: true,
-      callerId: req.body.From
+      callerId: req.body.From,
+      action: '/api/voice/handle-dial-status',
+      method: 'POST'
     });
-    dial.client(clientName);
+    dial.client(user.identity);
 
-    // Set response headers
-    res.set('Content-Type', 'text/xml');
+    // Emit socket event for incoming call
+    const io = getIO();
+    io.to(user.identity).emit('incomingCall', {
+      from: req.body.From,
+      to: req.body.To,
+      callSid: req.body.CallSid
+    });
+
+    console.log('✅ Connecting call to client:', user.identity);
+    res.type('text/xml');
     res.send(twiml.toString());
 
   } catch (error) {
-    console.error('❌ Error handling inbound call:', error);
+    console.error(`
+❌ ===== INBOUND CALL ERROR =====
+🕒 Timestamp: ${new Date().toISOString()}
+🛑 Error: ${error.message}
+📚 Stack: ${error.stack}
+====================================`);
+    
     const twiml = new twilio.twiml.VoiceResponse();
-    twiml.say('An error occurred. Please try your call again later.');
+    twiml.say('We encountered an error connecting your call. Please try again later.');
     twiml.hangup();
-    res.set('Content-Type', 'text/xml');
+    res.type('text/xml');
     res.send(twiml.toString());
   }
 });
@@ -485,73 +530,6 @@ router.post('/status', async (req, res) => {
   } catch (error) {
     console.error('❌ Error handling call status:', error);
     res.sendStatus(500);
-  }
-});
-
-// Handle inbound calls
-router.post('/inbound', async (req, res) => {
-  try {
-    const { To, From, CallSid } = req.body;
-    
-    // Log the inbound call with timestamp and detailed information
-    const timestamp = new Date().toISOString();
-    console.log(`
-📞 ===== INBOUND CALL RECEIVED =====
-🕒 Timestamp: ${timestamp}
-📱 From: ${From || 'Not provided'} 
-📞 To: ${To || 'Not provided'}
-🆔 Call SID: ${CallSid || 'Not provided'}
-📝 Request body: ${JSON.stringify(req.body)}
-📥 Headers: ${JSON.stringify(req.headers['user-agent'])}
-====================================`);
-    
-    // Find the workspace for this number
-    const { data: twilioNumber, error } = await supabase
-      .from('workspace_twilio_number')
-      .select('workspace_id')
-      .eq('twilio_number', To)
-      .single();
-    
-    if (error || !twilioNumber) {
-      throw new Error('No workspace found for this number');
-    }
-    
-    // Find an available agent for this workspace
-    const { data: agent, error: agentError } = await supabase
-      .from('agent')
-      .select('username')
-      .eq('workspace_id', twilioNumber.workspace_id)
-      .limit(1)
-      .single();
-    
-    // Create TwiML response
-    const twiml = new twilio.twiml.VoiceResponse();
-    
-    if (agentError || !agent) {
-      // No agent available, play a message
-      twiml.say('Thank you for calling. No agents are available at this time. Please try again later.');
-      twiml.hangup();
-    } else {
-      // Connect to the agent's client
-      twiml.say('Connecting you to an agent. Please wait.');
-      const dial = twiml.dial();
-      dial.client(agent.username);
-    }
-    
-    // Return TwiML
-    res.type('text/xml');
-    res.send(twiml.toString());
-  } catch (error) {
-    console.error(`
-❌ ===== INBOUND CALL ERROR =====
-🕒 Timestamp: ${new Date().toISOString()}
-🛑 Error: ${error.message}
-📚 Stack: ${error.stack}
-=================================`);
-    const twiml = new twilio.twiml.VoiceResponse();
-    twiml.say('An error occurred. Please try again later.');
-    res.type('text/xml');
-    res.send(twiml.toString());
   }
 });
 
