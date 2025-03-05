@@ -156,6 +156,12 @@
             isDeviceReady = false;
             checkDialer();
         });
+
+        // Handle incoming calls
+        device.on('incoming', (call) => {
+            console.log('📞 Incoming call', call);
+            handleIncomingCall(call);
+        });
         
         // Register device
         console.log('Registering device...');

@@ -432,6 +432,65 @@ router.post('/handle-dial-status', (req, res) => {
 // Handle inbound calls
 router.post('/inbound', async (req, res) => {
   try {
+    console.log('📞 Inbound call received:', {
+      from: req.body.From,
+      to: req.body.To,
+      callSid: req.body.CallSid
+    });
+
+    const twiml = new twilio.twiml.VoiceResponse();
+    
+    // Create a client name from the phone number
+    const clientName = req.body.To.replace(/[^\d]/g, '');
+    
+    // Connect the caller to the client
+    const dial = twiml.dial({
+      answerOnBridge: true,
+      callerId: req.body.From
+    });
+    dial.client(clientName);
+
+    // Set response headers
+    res.set('Content-Type', 'text/xml');
+    res.send(twiml.toString());
+
+  } catch (error) {
+    console.error('❌ Error handling inbound call:', error);
+    const twiml = new twilio.twiml.VoiceResponse();
+    twiml.say('An error occurred. Please try your call again later.');
+    twiml.hangup();
+    res.set('Content-Type', 'text/xml');
+    res.send(twiml.toString());
+  }
+});
+
+// Handle call status updates
+router.post('/status', async (req, res) => {
+  try {
+    const { CallSid, CallStatus, From, To } = req.body;
+    console.log('📱 Call status update:', { CallSid, CallStatus, From, To });
+    
+    // Get the Socket.IO instance
+    const io = getIO();
+    
+    // Emit status update to all connected clients
+    io.emit('call_status_update', {
+      callSid: CallSid,
+      status: CallStatus.toLowerCase(),
+      from: From,
+      to: To
+    });
+    
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('❌ Error handling call status:', error);
+    res.sendStatus(500);
+  }
+});
+
+// Handle inbound calls
+router.post('/inbound', async (req, res) => {
+  try {
     const { To, From, CallSid } = req.body;
     
     // Log the inbound call with timestamp and detailed information

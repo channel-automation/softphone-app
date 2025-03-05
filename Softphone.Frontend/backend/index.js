@@ -203,7 +203,7 @@ const voiceRoutes = require('./src/routes/voice');
 
 // Mount routes
 app.use('/api/twilio', twilioRoutes);
-app.use('/api/voice', voiceRoutes);
+app.use('/voice', voiceRoutes);
 
 // Configure Socket.IO
 const socketCorsOrigins = process.env.SOCKET_CORS_ORIGIN 
