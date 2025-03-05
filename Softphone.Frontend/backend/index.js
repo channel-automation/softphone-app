@@ -250,6 +250,24 @@ const socketRooms = new Map();
 io.on('connection', (socket) => {
   console.log('🔌 Client connected:', socket.id);
 
+  socket.on('join_user', (data) => {
+    try {
+      const { username } = data;
+      if (!username) {
+        console.error('❌ Missing username in join_user event');
+        socket.emit('error', { message: 'Missing username' });
+        return;
+      }
+
+      // Join room with username
+      socket.join(username);
+      console.log('✅ Client joined user room:', username);
+    } catch (error) {
+      console.error('❌ Error joining user room:', error);
+      socket.emit('error', { message: 'Failed to join room' });
+    }
+  });
+
   socket.on('join', async (data) => {
     try {
       const { phoneNumber, contactId, workspaceId } = data;

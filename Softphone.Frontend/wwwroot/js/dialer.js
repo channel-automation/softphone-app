@@ -6,6 +6,7 @@
     let isCallInProgress = false; // Track call state
     let lastCallTime = 0; // For debouncing
     const CALL_DEBOUNCE_TIME = 2000; // 2 seconds
+    let socket; // Socket.io client
 
     let divDialer;
     let divCalling;
@@ -576,7 +577,7 @@
         let img = `<img src='https://backend-production-3d08.up.railway.app/caller.png' class='img img-circle mb-2' style='width:115px' />`;
         Swal.fire({
             title: "Incoming Call..",
-            html: `${img}<br />${call.parameters.From}`,
+            html: `${img}<br />${call.from}`,
             showCancelButton: true,
             confirmButtonText: "<i class='fas fa-phone-volume'></i> Accept",
             cancelButtonText: "<i class='fas fa-phone-slash'></i> Reject",
@@ -633,6 +634,75 @@
         $("#mute-call").text("Mute");
         
         console.log('Call ended, UI reset');
+    }
+
+    // Initialize socket.io
+    function initializeSocket(username) {
+        if (!socket) {
+            console.log('Initializing socket.io connection...');
+            socket = io(config.backendUrl);
+            
+            socket.on('connect', () => {
+                console.log('✅ Socket connected');
+                // Join room with username
+                socket.emit('join_user', { username });
+            });
+            
+            socket.on('incomingCall', (data) => {
+                console.log('📞 Incoming call via socket:', data);
+                // Show incoming call popup
+                incomingPopup({
+                    from: data.from,
+                    to: data.to,
+                    callSid: data.callSid
+                });
+            });
+            
+            socket.on('error', (error) => {
+                console.error('❌ Socket error:', error);
+                toastr.error('Connection error. Please refresh the page.', 'Socket Error');
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('Socket disconnected');
+            });
+        }
+    }
+
+    async function getAccessToken() {
+        try {
+            const response = await fetch(`${config.backendUrl}/api/voice/token`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: window.username,
+                    workspaceId: window.workspaceId
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            if (data.success && data.token) {
+                console.log('✅ Got new access token');
+                setupDevice(data.token);
+                // Initialize socket with username
+                initializeSocket(window.username);
+                return;
+            }
+            
+            throw new Error('Invalid token response');
+        } catch (error) {
+            console.error('Failed to get access token:', error);
+            toastr.error("Failed to connect to phone system. Retrying...", "Connection Error");
+            
+            // Schedule retry
+            tokenRetryTimeout = setTimeout(getAccessToken, TOKEN_RETRY_INTERVAL);
+        }
     }
 
 })(jQuery);
