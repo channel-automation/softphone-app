@@ -1100,10 +1100,15 @@ router.post('/outbound-twiml', async (req, res) => {
     const dial = twiml.dial({
       callerId: From,
       answerOnBridge: true, // This ensures better call quality
-      timeout: 30
+      timeout: 30,
+      record: 'record-from-answer', // Start recording when the call is answered
+      recordingStatusCallback: `${req.protocol}://${req.get('host')}/api/twilio/recording-status`,
+      recordingStatusCallbackMethod: 'POST',
+      action: `${req.protocol}://${req.get('host')}/api/twilio/dial-complete`,
+      method: 'POST'
     });
     
-    // Add the destination number
+    // Add the destination number with status callbacks
     dial.number({
       statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
       statusCallback: `${req.protocol}://${req.get('host')}/api/twilio/status`,
@@ -1116,6 +1121,66 @@ router.post('/outbound-twiml', async (req, res) => {
     res.send(twiml.toString());
   } catch (error) {
     console.error('Error generating TwiML:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Handle dial completion
+router.post('/dial-complete', async (req, res) => {
+  try {
+    const { CallSid, DialCallStatus } = req.body;
+    console.log('Dial completed:', { CallSid, DialCallStatus });
+    
+    // Create TwiML response
+    const twiml = new twilio.twiml.VoiceResponse();
+    
+    // If the call failed, hang up
+    if (DialCallStatus !== 'completed' && DialCallStatus !== 'answered') {
+      twiml.hangup();
+    }
+    
+    res.type('text/xml');
+    res.send(twiml.toString());
+  } catch (error) {
+    console.error('Error handling dial complete:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Handle call status updates
+router.post('/status', async (req, res) => {
+  try {
+    const { CallSid, CallStatus, From, To } = req.body;
+    console.log('Call status update:', { CallSid, CallStatus, From, To });
+    
+    // Get IO instance
+    const io = getIO();
+    
+    // Emit status update to connected clients
+    io.emit('call_status', {
+      callSid: CallSid,
+      status: CallStatus,
+      from: From,
+      to: To,
+      timestamp: new Date().toISOString()
+    });
+    
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Error handling status update:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Handle recording status updates
+router.post('/recording-status', async (req, res) => {
+  try {
+    const { RecordingSid, RecordingStatus, RecordingUrl } = req.body;
+    console.log('Recording status update:', { RecordingSid, RecordingStatus, RecordingUrl });
+    
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Error handling recording status:', error);
     res.status(500).json({ error: error.message });
   }
 });

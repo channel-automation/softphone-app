@@ -2,6 +2,10 @@
     "use strict"
     let device; // Twilio Device object
     let isDeviceReady = false;
+    let currentCall = null; // Track current active call
+    let isCallInProgress = false; // Track call state
+    let lastCallTime = 0; // For debouncing
+    const CALL_DEBOUNCE_TIME = 2000; // 2 seconds
 
     let divDialer;
     let divCalling;
@@ -12,7 +16,270 @@
     
     // Constants
     const TOKEN_RETRY_INTERVAL = 5000; // 5 seconds
+    const CALL_STATES = {
+        IDLE: 'idle',
+        CONNECTING: 'connecting',
+        RINGING: 'ringing',
+        IN_PROGRESS: 'in-progress',
+        COMPLETED: 'completed',
+        FAILED: 'failed'
+    };
     
+    let currentCallState = CALL_STATES.IDLE;
+
+    function updateCallState(newState) {
+        console.log(`Call state changing from ${currentCallState} to ${newState}`);
+        currentCallState = newState;
+        
+        // Update UI based on state
+        switch(newState) {
+            case CALL_STATES.IDLE:
+                divDialer.show();
+                divCalling.hide();
+                stopCallTimer();
+                currentCall = null;
+                isCallInProgress = false;
+                break;
+            case CALL_STATES.CONNECTING:
+            case CALL_STATES.RINGING:
+                divDialer.hide();
+                divCalling.show();
+                break;
+            case CALL_STATES.IN_PROGRESS:
+                startCallTimer();
+                isCallInProgress = true;
+                break;
+            case CALL_STATES.COMPLETED:
+            case CALL_STATES.FAILED:
+                endCall();
+                break;
+        }
+    }
+
+    function setupDevice(token) {
+        try {
+            console.log('Initializing device with token:', token);
+            
+            // First, check if we need to handle AudioContext initialization
+            const needsAudioContextInit = !Twilio.Device.audio?.audioContext || 
+                Twilio.Device.audio.audioContext.state === 'suspended';
+                
+            if (needsAudioContextInit) {
+                console.log('Audio context needs initialization. Adding initialization handler...');
+                
+                // Add a one-time click handler to initialize audio
+                $(document).one('click', function() {
+                    console.log('User clicked. Initializing AudioContext...');
+                    
+                    // Try to resume existing context if it exists
+                    if (Twilio.Device.audio?.audioContext?.state === 'suspended') {
+                        console.log('Resuming suspended AudioContext...');
+                        Twilio.Device.audio.audioContext.resume()
+                            .then(() => {
+                                console.log('AudioContext resumed successfully');
+                                if (device) {
+                                    console.log('Refreshing device registration after AudioContext resume');
+                                    device.register();
+                                }
+                            })
+                            .catch(err => console.error('Error resuming AudioContext:', err));
+                    }
+                });
+                
+                toastr.info("Please click anywhere on the page to activate the phone system", "Audio Activation Required");
+            }
+            
+            // Create device with all options
+            device = new Twilio.Device(token, {
+                closeProtection: true,
+                enableRingingState: true,
+                debug: true,
+                edge: ['ashburn', 'sydney', 'dublin', 'frankfurt'],
+                codecPreferences: ['opus', 'pcmu']
+            });
+            
+            console.log('Device created with token. Setting up event handlers...');
+
+            // Register all event handlers
+            device.on("ready", function() {
+                console.log("✅ Device is ready! Setting isDeviceReady = true");
+                isDeviceReady = true;
+                updateCallState(CALL_STATES.IDLE);
+                checkDialer();
+                toastr.success("Phone system initialized successfully.", "Ready");
+            });
+
+            device.on("offline", function() {
+                console.log('❌ Device is offline! Setting isDeviceReady = false');
+                isDeviceReady = false;
+                updateCallState(CALL_STATES.FAILED);
+                checkDialer();
+                toastr.warning("Phone system is offline. Attempting to reconnect...", "Offline");
+                getAccessToken();
+            });
+
+            device.on("error", function(error) {
+                console.error(`❌ Device Error: ${error.message || error}`, error);
+                isDeviceReady = false;
+                updateCallState(CALL_STATES.FAILED);
+                checkDialer();
+                toastr.error(`Phone system error: ${error.message || "Unknown error"}`, "Error");
+            });
+
+            device.on("disconnect", function(call) {
+                console.log("Call disconnected");
+                updateCallState(CALL_STATES.COMPLETED);
+            });
+
+            device.on("cancel", function(call) {
+                console.log("Call canceled");
+                updateCallState(CALL_STATES.COMPLETED);
+            });
+
+            device.on("incoming", handleIncomingCall);
+
+            // Register the device
+            console.log('Registering device...');
+            device.register();
+            
+            // Set up audio options
+            device.audio.incoming(true);
+            device.audio.disconnect(true);
+            
+            // Enable high-quality audio
+            device.audio.setInputDevice('default');
+            device.audio.setOutputDevice('default');
+
+            console.log('Device setup complete, waiting for ready event...');
+        } catch (error) {
+            console.error("Error setting up Twilio device:", error);
+            toastr.error(`Failed to initialize phone system: ${error.message}`, "Setup Error");
+            isDeviceReady = false;
+            updateCallState(CALL_STATES.FAILED);
+            checkDialer();
+        }
+    }
+
+    async function deviceConnect() {
+        try {
+            // Prevent rapid repeated calls
+            const now = Date.now();
+            if (now - lastCallTime < CALL_DEBOUNCE_TIME) {
+                console.log('Preventing duplicate call - too soon after last call');
+                return;
+            }
+            lastCallTime = now;
+
+            const phoneInput = $('#txtPhoneNumber');
+            if (!phoneInput.length) {
+                console.error('Phone input not found');
+                toastr.error('Phone input not found');
+                return;
+            }
+
+            // Check if a call is already in progress
+            if (isCallInProgress || currentCall) {
+                console.log('Call already in progress');
+                toastr.warning('A call is already in progress');
+                return;
+            }
+
+            const unmaskedValue = phoneInput.inputmask("unmaskedvalue");
+            if (!unmaskedValue) {
+                console.error('No phone number entered');
+                toastr.error('Please enter a phone number');
+                return;
+            }
+
+            const rawNumber = unmaskedValue.toString().replace(/\D/g, '');
+            console.log('Raw number before formatting:', rawNumber);
+            
+            // Ensure we have exactly 10 digits
+            if (rawNumber.length !== 10) {
+                console.error('Invalid phone number length:', rawNumber.length);
+                toastr.error('Please enter a valid 10-digit phone number');
+                return;
+            }
+            
+            // Get the workspace ID
+            const workspaceId = $('#CurrentWorkspaceId').val() || $('#hdnWorkspaceId').val();
+            
+            if (!workspaceId) {
+                throw new Error("No workspace ID found");
+            }
+            
+            // Get the selected "from" number from the dropdown
+            const from = $('#ddlFromNumber').val();
+            if (!from) {
+                toastr.error('Please select a phone number to call from');
+                return;
+            }
+            
+            let to = `+1${rawNumber}`;
+            
+            console.log(`Making call from ${from} to ${to}`);
+            
+            try {
+                updateCallState(CALL_STATES.CONNECTING);
+                
+                if (!isDeviceReady || !device) {
+                    console.error('Device not ready');
+                    toastr.error('Phone system not ready. Please try again.');
+                    updateCallState(CALL_STATES.FAILED);
+                    return;
+                }
+                
+                // Create params for the call
+                const params = {
+                    To: to,
+                    From: from,
+                    workspaceId: workspaceId
+                };
+                console.log('Call params:', params);
+                
+                // Connect using device
+                currentCall = await device.connect(params);
+                
+                // Set up call event handlers
+                currentCall.on('ringing', () => updateCallState(CALL_STATES.RINGING));
+                currentCall.on('accept', () => updateCallState(CALL_STATES.IN_PROGRESS));
+                currentCall.on('disconnect', () => updateCallState(CALL_STATES.COMPLETED));
+                currentCall.on('cancel', () => updateCallState(CALL_STATES.COMPLETED));
+                currentCall.on('error', () => updateCallState(CALL_STATES.FAILED));
+                
+            } catch (error) {
+                console.error('Error connecting device:', error);
+                toastr.error(error.message || "Failed to connect call");
+                updateCallState(CALL_STATES.FAILED);
+            }
+        } catch (error) {
+            console.error('Error in deviceConnect:', error);
+            toastr.error(error.message || "Error making call");
+            updateCallState(CALL_STATES.FAILED);
+        }
+    }
+
+    function deviceDisconnect() {
+        console.log('Disconnecting call...');
+        if (currentCall) {
+            currentCall.disconnect();
+        }
+        if (device) {
+            device.disconnectAll();
+        }
+        updateCallState(CALL_STATES.COMPLETED);
+    }
+
+    function endCall() {
+        deviceDisconnect();
+        divDialer.show();
+        divCalling.hide();
+        stopCallTimer();
+        currentCall = null;
+        isCallInProgress = false;
+        updateCallState(CALL_STATES.IDLE);
+    }
+
     $(function () {
         console.log('Initializing dialer...');
         
@@ -127,92 +394,6 @@
                 checkDialer();
             }
         });
-    }
-
-    function setupDevice(token) {
-        try {
-            console.log('Initializing device with token:', token);
-            
-            // First, check if we need to handle AudioContext initialization
-            const needsAudioContextInit = !Twilio.Device.audio?.audioContext || 
-                Twilio.Device.audio.audioContext.state === 'suspended';
-                
-            if (needsAudioContextInit) {
-                console.log('Audio context needs initialization. Adding initialization handler...');
-                
-                // Add a one-time click handler to initialize audio
-                $(document).one('click', function() {
-                    console.log('User clicked. Initializing AudioContext...');
-                    
-                    // Try to resume existing context if it exists
-                    if (Twilio.Device.audio?.audioContext?.state === 'suspended') {
-                        console.log('Resuming suspended AudioContext...');
-                        Twilio.Device.audio.audioContext.resume()
-                            .then(() => {
-                                console.log('AudioContext resumed successfully');
-                                if (device) {
-                                    console.log('Refreshing device registration after AudioContext resume');
-                                    device.register();
-                                }
-                            })
-                            .catch(err => console.error('Error resuming AudioContext:', err));
-                    }
-                });
-                
-                // Show a message to the user
-                toastr.info("Please click anywhere on the page to activate the phone system", "Audio Activation Required");
-            }
-            
-            // Create device with all options
-            device = new Twilio.Device(token, {
-                closeProtection: true,
-                enableRingingState: true,
-                debug: true,
-                edge: ['ashburn', 'sydney', 'dublin', 'frankfurt']
-            });
-            
-            console.log('Device created with token. Setting up event handlers...');
-
-            // Register all event handlers
-            device.on("ready", function() {
-                console.log("✅ Device is ready! Setting isDeviceReady = true");
-                isDeviceReady = true;
-                checkDialer();
-                toastr.success("Phone system initialized successfully.", "Ready");
-            });
-
-            device.on("offline", function() {
-                console.log('❌ Device is offline! Setting isDeviceReady = false');
-                isDeviceReady = false;
-                checkDialer();
-                toastr.warning("Phone system is offline. Attempting to reconnect...", "Offline");
-                getAccessToken();
-            });
-
-            device.on("error", function(error) {
-                console.error(`❌ Device Error: ${error.message || error}`, error);
-                isDeviceReady = false;
-                checkDialer();
-                toastr.error(`Phone system error: ${error.message || "Unknown error"}`, "Error");
-            });
-
-            device.on("incoming", handleIncomingCall);
-
-            // Register the device
-            console.log('Registering device...');
-            device.register();
-            
-            // Set up audio options
-            device.audio.incoming(true);
-            device.audio.disconnect(true);
-
-            console.log('Device setup complete, waiting for ready event...');
-        } catch (error) {
-            console.error("Error setting up Twilio device:", error);
-            toastr.error(`Failed to initialize phone system: ${error.message}`, "Setup Error");
-            isDeviceReady = false;
-            checkDialer();
-        }
     }
 
     function handleIncomingCall(call) {
@@ -332,13 +513,6 @@
         
         // Update UI
         setCallingInfo(phoneNumber, true);
-    }
-
-    function deviceDisconnect() {
-        if (device) {
-            device.disconnectAll();
-        }
-        endCall();
     }
 
     function incomingPopup(call) {
