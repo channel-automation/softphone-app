@@ -1304,25 +1304,7 @@ router.post('/voice-token', async (req, res) => {
     if (!config.twilio_twiml_app_sid) {
       return res.status(400).json({ error: 'TwiML App SID not configured' });
     }
-
-    /*
-    // Get user info from user table
-    const { data: user, error: userError } = await supabase
-      .from('user')
-      .select('username')
-      .eq('workspace_id', workspaceId)
-      .single();
-
-    if (userError) {
-      console.error('Error fetching user:', userError);
-      return res.status(500).json({ error: 'Failed to fetch user information' });
-    }
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-  */
-
+    
     // Create an access token
     const AccessToken = twilio.jwt.AccessToken;
     const VoiceGrant = AccessToken.VoiceGrant;
@@ -1348,7 +1330,12 @@ router.post('/voice-token', async (req, res) => {
     token.addGrant(voiceGrant);
     
     console.log('✅ Voice token generated successfully for user:', identity);
-    res.json({ token: token.toJwt() });
+    
+    res.json({
+      token: token.toJwt(), 
+      expires: new Date(Date.now() + 3600 * 1000).toISOString()
+    });
+    
   } catch (error) {
     console.error('❌ Error generating voice token:', error);
     res.status(500).json({ error: error.message });
