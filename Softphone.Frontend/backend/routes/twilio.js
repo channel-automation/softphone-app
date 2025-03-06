@@ -1687,4 +1687,29 @@ router.post('/call/:workspaceId', async (req, res) => {
   }
 });
 
+// Voice webhook for handling incoming calls
+app.post('/api/voice', (req, res) => {
+  console.log('[Voice Webhook] Incoming call request:', {
+    direction: req.body.Direction,
+    from: req.body.From,
+    to: req.body.To
+  });
+  const twiml = new VoiceResponse();
+  // Add a small delay to ensure client is ready
+  twiml.pause({ length: 1 });
+  const dial = twiml.dial({
+    callerId: req.body.From || process.env.TWILIO_PHONE_NUMBER,
+    answerOnBridge: true,
+    timeout: 30
+  });
+  dial.client({
+    statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+    statusCallback: `${BASE_URL}/api/voice/status`,
+    statusCallbackMethod: 'POST'
+  }, 'user');
+  console.log('[Voice Webhook] Generated TwiML:', twiml.toString());
+  res.type('text/xml');
+  res.send(twiml.toString());
+});
+
 module.exports = router;
