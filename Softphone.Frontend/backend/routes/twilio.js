@@ -1267,7 +1267,7 @@ router.post('/incoming', async (req, res) => {
 router.post('/voice-token/:workspaceId', async (req, res) => {
   try {
     const { workspaceId } = req.params;
-    
+    console.log("---------- line here -------------");
     console.log(`🔑 Generating voice token for workspace ${workspaceId}`);
     
     // Get workspace's Twilio credentials and user info
