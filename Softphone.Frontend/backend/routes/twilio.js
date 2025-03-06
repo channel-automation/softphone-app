@@ -1264,10 +1264,9 @@ router.post('/incoming', async (req, res) => {
 });
 
 // Generate voice token
-router.post('/voice-token/:workspaceId', async (req, res) => {
+router.post('/voice-token', async (req, res) => {
   try {
-    const { workspaceId } = req.params;
-    console.log("---------- line here -------------");
+    const { workspaceId, identity } = req.params;
     console.log(`🔑 Generating voice token for workspace ${workspaceId}`);
     
     // Get workspace's Twilio credentials and user info
@@ -1306,6 +1305,7 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
       return res.status(400).json({ error: 'TwiML App SID not configured' });
     }
 
+    /*
     // Get user info from user table
     const { data: user, error: userError } = await supabase
       .from('user')
@@ -1321,6 +1321,7 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
+  */
 
     // Create an access token
     const AccessToken = twilio.jwt.AccessToken;
@@ -1338,7 +1339,7 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
       config.twilio_api_key,
       config.twilio_api_secret,
       { 
-        identity: user.username,
+        identity: identity,
         ttl: 3600 // Token valid for 1 hour
       }
     );
@@ -1346,7 +1347,7 @@ router.post('/voice-token/:workspaceId', async (req, res) => {
     // Add Voice grant to token
     token.addGrant(voiceGrant);
     
-    console.log('✅ Voice token generated successfully for user:', user.username);
+    console.log('✅ Voice token generated successfully for user:', identity);
     res.json({ token: token.toJwt() });
   } catch (error) {
     console.error('❌ Error generating voice token:', error);
