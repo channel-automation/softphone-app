@@ -1688,7 +1688,7 @@ router.post('/call/:workspaceId', async (req, res) => {
 });
 
 /******  Denver Append methods start here    ********/
-
+/*
 // Voice webhook for handling incoming calls
 router.post('/api/voice', (req, res) => {
   console.log('[Voice Webhook] Incoming call request:', {
@@ -1766,5 +1766,6 @@ router.post('/api/voice/recording-status', (req, res) => {
   });
   res.sendStatus(200);
 });
+*/
 
 module.exports = router;
