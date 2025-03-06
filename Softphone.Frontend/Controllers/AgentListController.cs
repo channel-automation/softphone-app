@@ -54,13 +54,11 @@ public class AgentListController : Controller
 
     public async Task<IActionResult> RemoteAgentPhone(int? page, string term, long workspaceId)
     {
-        string role = User.Claims.Where(w => w.Type == ClaimTypes.Role).First().Value;
-        string agentUsername = (role == UserRole.Agent ? User.Identity.Name : string.Empty);
-
         int size = 10;
         int skip = ((page ?? 1) - 1) * size;
 
-        var paged = await _userService.RemoteAgentPhone(skip, size, term ?? string.Empty, workspaceId, agentUsername);
+        string role = User.Claims.Where(w => w.Type == ClaimTypes.Role).First().Value;
+        var paged = await _userService.RemoteAgentPhone(skip, size, term ?? string.Empty, workspaceId, User.Identity.Name, role);
 
         var results = new List<object>();
         foreach (var phone in paged.Data)

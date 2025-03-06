@@ -19,16 +19,12 @@ namespace Softphone.Frontend.Controllers
 
         public async Task<IActionResult> Index()
         {
-            string role = User.Claims.Where(w => w.Type == ClaimTypes.Role).First().Value;
-            string agentUsername = (role == UserRole.Agent ? User.Identity.Name : string.Empty);
-
             var user = await _userService.FindByUsername(User.Identity.Name);
-            var paged = await _userService.RemoteAgentPhone(0, 1, string.Empty, user.WorkspaceId, agentUsername);
-            var selected = paged.Data.FirstOrDefault() ?? new AgentPhoneBO();
+            var paged = await _userService.RemoteAgentPhone(0, 1, string.Empty, user.WorkspaceId, user.Username, string.Empty);
+            var phone = paged.Data.FirstOrDefault();
 
             ViewBag.LoggedUser = user;
-            ViewBag.SelectedName = selected.FullName;
-            ViewBag.SelectedNumber = selected.TwilioNumber;
+            ViewBag.SelectedPhone = phone;
             return View();
         }
     }

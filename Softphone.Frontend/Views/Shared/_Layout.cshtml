@@ -1,7 +1,6 @@
 ﻿@{
     UserBO loggedUser = (UserBO)ViewBag.LoggedUser;
-    string selectedName = (string)ViewBag.SelectedName;
-    string selectedNumber = (string)ViewBag.SelectedNumber;
+    AgentPhoneBO? selectedPhone = (AgentPhoneBO?)ViewBag.SelectedPhone;
 }
 
 <!DOCTYPE html>
@@ -11,16 +10,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@ViewBag.Title | Softphone</title>
-	<link href="~/favicon.png" rel="shortcut icon" />
-	<link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
-	<link href="~/lib/toastr/toastr.min.css" rel="stylesheet" />
-	<link href="~/lib/icheck/skins/all.min.css" rel="stylesheet" />
-	<link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
-	<link href="~/lib/select2-bootstrap4-theme/dist/select2-bootstrap4.min.css" rel="stylesheet" />
-	<link href="~/lib/datatables-bs4/css/datatables.bootstrap4.min.css" rel="stylesheet" />
-	<link href="~/lib/chart/chart.min.css" rel="stylesheet" />
-	<link href="~/lib/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
-	<link href="~/lib/admin-lte/css/adminlte.min.css" rel="stylesheet" />
+    <link href="~/favicon.png" rel="shortcut icon" />
+    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="~/lib/toastr/toastr.min.css" rel="stylesheet" />
+    <link href="~/lib/icheck/skins/all.min.css" rel="stylesheet" />
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="~/lib/select2-bootstrap4-theme/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/lib/datatables-bs4/css/datatables.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/lib/chart/chart.min.css" rel="stylesheet" />
+    <link href="~/lib/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
+    <link href="~/lib/admin-lte/css/adminlte.min.css" rel="stylesheet" />
 </head>
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
     <div class="wrapper">
@@ -45,35 +44,41 @@
         <!-- Footer -->
         @{ await Html.RenderPartialAsync("FooterPartial"); }
     </div>
-	<script src="~/lib/jquery/jquery.min.js"></script>
-	<script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-	<script src="~/lib/popper/popper.min.js"></script>
-	<script src="~/lib/bootbox/bootbox.min.js"></script>
-	<script src="~/lib/toastr/toastr.min.js"></script>
-	<script src="~/lib/icheck/icheck.min.js"></script>
-	<script src="~/lib/select2/js/select2.full.min.js"></script>
-	<script src="~/lib/datatables/js/datatables.min.js"></script>
-	<script src="~/lib/datatables-bs4/js/datatables.bootstrap4.min.js"></script>
-	<script src="~/lib/moment/moment.min.js"></script>
-	<script src="~/lib/numeral/numeral.min.js"></script>
-	<script src="~/lib/inputmask/jquery.inputmask.min.js"></script>
-	<script src="~/lib/chart/chart.bundle.min.js"></script>
-	<script src="~/lib/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js"></script>
-	<script src="~/lib/sweetalert2/sweetalert2.all.min.js"></script>
-	<script src="~/lib/admin-lte/js/adminlte.min.js"></script>
-	<script src="~/lib/twilio-voice-sdk/dist/twilio.min.js"></script>
-	<script src="~/js/app.js"></script>
-	<script src="~/js/spinner.js"></script>
-	<script src="~/js/dashboard.js"></script>
-	<script src="~/js/dialer.js"></script>
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/popper/popper.min.js"></script>
+    <script src="~/lib/bootbox/bootbox.min.js"></script>
+    <script src="~/lib/toastr/toastr.min.js"></script>
+    <script src="~/lib/icheck/icheck.min.js"></script>
+    <script src="~/lib/select2/js/select2.full.min.js"></script>
+    <script src="~/lib/datatables/js/datatables.min.js"></script>
+    <script src="~/lib/datatables-bs4/js/datatables.bootstrap4.min.js"></script>
+    <script src="~/lib/moment/moment.min.js"></script>
+    <script src="~/lib/numeral/numeral.min.js"></script>
+    <script src="~/lib/inputmask/jquery.inputmask.min.js"></script>
+    <script src="~/lib/chart/chart.bundle.min.js"></script>
+    <script src="~/lib/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js"></script>
+    <script src="~/lib/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="~/lib/admin-lte/js/adminlte.min.js"></script>
+    <script src="~/lib/twilio-voice-sdk/dist/twilio.min.js"></script>
+    <script src="~/js/app.js"></script>
+    <script src="~/js/spinner.js"></script>
+    <script src="~/js/dashboard.js"></script>
+    <script src="~/js/dialer.js"></script>
+
+    @if (selectedPhone != null)
+    {
+        <script>
+            $(function () {
+                let option = new Option("@Html.Raw(selectedPhone.FullName)", "@Html.Raw(selectedPhone.TwilioNumber)", true, true);
+                $("#divDialer").find("select").append(option).trigger("change");
+            });
+        </script>
+    }
 
     <script>
         globalWorkspaceId = @loggedUser.WorkspaceId;
         globalUsername = "@loggedUser.Username";
-        $(function () {
-            let option = new Option("@Html.Raw(selectedName)", "@Html.Raw(selectedNumber)", true, true);
-            $("#divDialer").find("select").append(option).trigger("change");
-        });
 
         $(this).ajaxError(function (e, xhr) {
             // Ajax Data Error

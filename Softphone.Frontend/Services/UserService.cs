@@ -1,4 +1,5 @@
-﻿using Softphone.Frontend.Models;
+﻿using Softphone.Frontend.Helpers;
+using Softphone.Frontend.Models;
 using Supabase;
 using static Supabase.Postgrest.Constants;
 
@@ -63,7 +64,10 @@ namespace Softphone.Frontend.Services
                 .Filter(w => w.FullName, Operator.ILike, $"%{search}%")
                 .Filter(w => w.Username, Operator.ILike, $"%{search}%")
                 .Where(x => x.WorkspaceId == workspaceId)
+
+                //TODO:
                 //.Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
+                
                 .Range(skip, take)
                 .Get();
 
@@ -71,14 +75,15 @@ namespace Softphone.Frontend.Services
             return paged;
         }
 
-        public async Task<Paging<AgentPhoneBO>> RemoteAgentPhone(int skip, int take, string search, long workspaceId, string agentUsername)
+        public async Task<Paging<AgentPhoneBO>> RemoteAgentPhone(int skip, int take, string search, long workspaceId, string loggedUsername, string loggedRole)
         {
+            if (loggedRole == UserRole.Admin) loggedUsername = string.Empty;
             var paged = new Paging<AgentPhoneBO>();
 
             var response = await _client.From<AgentPhoneBO>()
                 .Filter(w => w.FullName, Operator.ILike, $"%{search}%")
                 .Filter(w => w.TwilioNumber, Operator.ILike, $"%{search}%")
-                .Filter(w => w.Username, Operator.ILike, $"%{agentUsername}%")
+                .Filter(w => w.Username, Operator.ILike, $"%{loggedUsername}%")
                 .Where(x => x.WorkspaceId == workspaceId)
                 .Get();
 
@@ -87,7 +92,7 @@ namespace Softphone.Frontend.Services
             var response2 = await _client.From<AgentPhoneBO>()
                 .Filter(w => w.FullName, Operator.ILike, $"%{search}%")
                 .Filter(w => w.TwilioNumber, Operator.ILike, $"%{search}%")
-                .Filter(w => w.Username, Operator.ILike, $"%{agentUsername}%")
+                .Filter(w => w.Username, Operator.ILike, $"%{loggedUsername}%")
                 .Where(x => x.WorkspaceId == workspaceId)
                 .Order(w => w.FullName, Ordering.Ascending)
                 .Range(skip, take)
