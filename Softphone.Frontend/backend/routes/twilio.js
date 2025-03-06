@@ -1688,7 +1688,7 @@ router.post('/call/:workspaceId', async (req, res) => {
 });
 
 // Voice webhook for handling incoming calls
-app.post('/api/voice', (req, res) => {
+router.post('/api/voice', (req, res) => {
   console.log('[Voice Webhook] Incoming call request:', {
     direction: req.body.Direction,
     from: req.body.From,
@@ -1710,6 +1710,19 @@ app.post('/api/voice', (req, res) => {
   console.log('[Voice Webhook] Generated TwiML:', twiml.toString());
   res.type('text/xml');
   res.send(twiml.toString());
+});
+
+// Status callback endpoint
+router.post('/api/voice/status', (req, res) => {
+  console.log('Call status update:', {
+    callStatus: req.body.CallStatus,
+    callSid: req.body.CallSid,
+    from: req.body.From,
+    to: req.body.To,
+    direction: req.body.Direction,
+    timestamp: new Date().toISOString()
+  });
+  res.sendStatus(200);
 });
 
 module.exports = router;
