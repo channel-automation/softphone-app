@@ -49,7 +49,8 @@
 
     function getAccessToken() {
         $.ajax({
-            url: "https://webhook.call-app.channelautomation.com/api/token",
+            //url: "https://webhook.call-app.channelautomation.com/api/token",
+            url: "https://new-backend-dynamic-production.up.railway.app/api/token?workspaceId=" + globalWorkspaceId + "&identity=" + globalUsername,
             type: "get", dataType: "json",
             success: function (response) {
                 if (!device) setupDevice(response.token);

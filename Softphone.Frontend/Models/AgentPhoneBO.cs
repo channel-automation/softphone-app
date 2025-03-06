@@ -12,6 +12,9 @@ namespace Softphone.Frontend.Models
         [Column("workspace_id")]
         public long WorkspaceId { get; set; }
 
+        [Column("workspace_name")]
+        public string WorkspaceName { get; set; }
+
         [Column("username")]
         public string Username { get; set; }
 

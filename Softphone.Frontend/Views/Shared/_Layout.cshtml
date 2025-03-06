@@ -69,6 +69,7 @@
 
     <script>
         globalWorkspaceId = @loggedUser.WorkspaceId;
+        globalUsername = "@loggedUser.Username";
         $(function () {
             let option = new Option("@Html.Raw(selectedName)", "@Html.Raw(selectedNumber)", true, true);
             $("#divDialer").find("select").append(option).trigger("change");

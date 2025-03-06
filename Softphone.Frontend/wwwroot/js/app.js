@@ -4,6 +4,7 @@ toastr.options = { "positionClass": "toast-bottom-right" };
 //Globally declared repeatedly used values.
 var baseUrl = location.protocol + "//" + location.host
 var globalWorkspaceId = 0;
+var globalUsername = "";
 
 //This function is to initialized form control js widget's configs
 function initializeFormControls(parent) {
