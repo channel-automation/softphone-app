@@ -1687,6 +1687,8 @@ router.post('/call/:workspaceId', async (req, res) => {
   }
 });
 
+/******  Denver Append methods start here    ********/
+
 // Voice webhook for handling incoming calls
 router.post('/api/voice', (req, res) => {
   console.log('[Voice Webhook] Incoming call request:', {
@@ -1720,6 +1722,46 @@ router.post('/api/voice/status', (req, res) => {
     from: req.body.From,
     to: req.body.To,
     direction: req.body.Direction,
+    timestamp: new Date().toISOString()
+  });
+  res.sendStatus(200);
+});
+
+// Separate webhook for handling outbound calls
+router.post('/api/voice/outbound', (req, res) => {
+  console.log('[Outbound Webhook] Outbound call request:', {
+    from: req.body.From,
+    to: req.body.To
+  });
+  const twiml = new VoiceResponse();
+  // Add a small delay to ensure audio setup
+  twiml.pause({ length: 1 });
+  const dial = twiml.dial({
+    callerId: req.body.From || process.env.TWILIO_PHONE_NUMBER,
+    answerOnBridge: true,
+    timeout: 30,
+    record: 'record-from-answer',
+    recordingStatusCallback: `${BASE_URL}/api/voice/recording-status`,
+    recordingStatusCallbackMethod: 'POST'
+  });
+  dial.number({
+    statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+    statusCallback: `${BASE_URL}/api/voice/status`,
+    statusCallbackMethod: 'POST'
+  }, req.body.To);
+  
+  console.log('[Outbound Webhook] Generated TwiML:', twiml.toString());
+  res.type('text/xml');
+  res.send(twiml.toString());
+});
+
+// Recording status callback endpoint
+router.post('/api/voice/recording-status', (req, res) => {
+  console.log('[Recording Status] Update:', {
+    recordingSid: req.body.RecordingSid,
+    recordingStatus: req.body.RecordingStatus,
+    recordingUrl: req.body.RecordingUrl,
+    callSid: req.body.CallSid,
     timestamp: new Date().toISOString()
   });
   res.sendStatus(200);
