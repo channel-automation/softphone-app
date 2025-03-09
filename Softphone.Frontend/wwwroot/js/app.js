@@ -63,9 +63,7 @@ function swalConfirm(title, message, callbackEvent) {
         cancelButtonText: "<i class='fas fa-times-circle'></i> No",
         allowOutsideClick: false,
         allowEscapeKey: false,
-        allowEnterKey: false,
         width: "auto",
-        height: "auto",
         customClass: {
             title: "text-lg",
         }

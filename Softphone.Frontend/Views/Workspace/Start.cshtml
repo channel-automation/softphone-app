@@ -1,0 +1,97 @@
+﻿
+<div class="float-sm-right mb-1 mr-2">
+    <button class="btn bg-gradient-purple" onclick="createWorkspace(this)" title="Add New Workspace"><i class="fas fa-plus-circle"></i> New</button>
+</div>
+<div class="mb-1 ml-2">
+    <form class="form-inline" onsubmit="return false;">
+        @Html.AntiForgeryToken()
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text bg-secondary">Search</span>
+            </div>
+            <input type="text" name="Search" class="form-control" autocomplete="off" placeholder="Type here.."/>
+            <div class="input-group-append">
+                <span class="input-group-text bg-secondary"><i class="fas fa-search"></i></span>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="table-responsive mt-2">
+    <table class="table table-bordered table-hover table-sm text-center mb-2" style="width:100%">
+        <thead class="thead-light"></thead>
+    </table>
+</div>
+
+<script>
+    $(function () {
+        var form = workspaceDialog.find("form").first();
+        var table = workspaceDialog.find("table").first();
+
+        table.DataTable({
+            processing: true,
+            serverSide: true,
+            searching: false,
+            lengthChange: false,
+            ajax: {
+                url: "@Url.Action("Search")", type: "post", datatype: "json",
+                data: function (e) {
+                    e.search = form.find("[name=Search]").val();
+                    e.__RequestVerificationToken = form.find("[name=__RequestVerificationToken]").val();
+                }
+            },
+            columns: [
+                    { data: "name", title: "Name" },
+                    { data: "twilioAccountSID", title: "Twilio Account SID" },
+                    { data: "twilioAPIKey", title: "Twilio API Key" },
+                    { data: "createdAt", title: "Date Added", render: dateTimeRender },
+                    { data: "id", orderable: false, render: actionRender }
+            ],
+            pageLength: 10,
+            order: [[0, "asc"]], //Sorted Name
+            language: { emptyTable: "No data found." },
+        });
+
+        form.find("[name=Search]").keyup(function () {
+            table.DataTable().draw();
+        });
+    });
+
+    function dateTimeRender(d) {
+        let sDate = moment(d).format("MMM DD, YYYY");
+        let sTime = moment(d).format("h:mm:ss A");
+        return  `${sDate}<br />${sTime}`;
+    }
+
+    function actionRender(d) {
+        let htm = "";
+        htm += "<button class='btn bg-gradient-purple mr-1 mb-1' onclick='editWorkspace(this, " + d + ")' title='Edit Workspace'><i class='fas fa-pencil-alt'></i></button>";
+        htm += "<button class='btn bg-gradient-purple mr-1 mb-1' onclick='deleteWorkspace(this, " + d + ")' title='Delete User'><i class='fas fa-trash'></i></button>";
+        return htm;
+    }
+
+    function createWorkspace(btn) {
+        startAjaxSpinner(btn)
+        $.get("@Url.Action("Create")", function (response) {
+            editWorkspaceDialog = bootModal("Add Workspace", response);
+        });
+    }
+
+    function editWorkspace(btn, id) {
+        startAjaxSpinner(btn)
+        $.get("@Url.Action("Edit")/" + id, function (response) {
+            editWorkspaceDialog = bootModal("Edit Workspace", response);
+        });
+    }
+
+    function deleteWorkspace(btn, id) {
+        swalConfirm("", "Delete this Workspace?", function () {
+            startAjaxSpinner(btn);
+            $.get("@Url.Action("Delete")/" + id, function (response) {
+                if (errorMessages(response.errors)) return false;
+                toastr.success("Data successfully deleted.", "Success!");
+                workspaceDialog.find("table").first().DataTable().draw();
+            });
+        });
+    }
+
+</script>

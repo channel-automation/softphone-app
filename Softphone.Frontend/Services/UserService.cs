@@ -48,9 +48,9 @@ namespace Softphone.Frontend.Services
             return response.Models.FirstOrDefault();
         }
 
-        public async Task<Paging<AgentBO>> PagingAgent(int skip, int take, string sort, string sortdir, string search, long workspaceId)
+        public async Task<Paged<AgentBO>> PagingAgent(int skip, int take, string sort, string sortdir, string search, long workspaceId)
         {
-            var paged = new Paging<AgentBO>();
+            var paged = new Paged<AgentBO>();
 
             var response = await _client.From<AgentBO>()
                 .Filter(w => w.FullName, Operator.ILike, $"%{search}%")
@@ -65,7 +65,7 @@ namespace Softphone.Frontend.Services
                 .Filter(w => w.Username, Operator.ILike, $"%{search}%")
                 .Where(x => x.WorkspaceId == workspaceId)
 
-                //TODO:
+                //TODO Sorting:
                 //.Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
                 
                 .Range(skip, take)
@@ -75,10 +75,10 @@ namespace Softphone.Frontend.Services
             return paged;
         }
 
-        public async Task<Paging<AgentPhoneBO>> RemoteAgentPhone(int skip, int take, string search, long workspaceId, string loggedUsername, string loggedRole)
+        public async Task<Paged<AgentPhoneBO>> RemoteAgentPhone(int skip, int take, string search, long workspaceId, string loggedUsername, string loggedRole)
         {
             if (loggedRole == UserRole.Admin) loggedUsername = string.Empty;
-            var paged = new Paging<AgentPhoneBO>();
+            var paged = new Paged<AgentPhoneBO>();
 
             var response = await _client.From<AgentPhoneBO>()
                 .Filter(w => w.FullName, Operator.ILike, $"%{search}%")

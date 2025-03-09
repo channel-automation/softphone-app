@@ -19,11 +19,15 @@ namespace Softphone.Frontend.Controllers
 
         public async Task<IActionResult> Index()
         {
+            string role = User.Claims.Where(w => w.Type == ClaimTypes.Role).First().Value;
+
             var user = await _userService.FindByUsername(User.Identity.Name);
             var paged = await _userService.RemoteAgentPhone(0, 1, string.Empty, user.WorkspaceId, user.Username, string.Empty);
             var phone = paged.Data.FirstOrDefault();
 
-            ViewBag.LoggedUser = user;
+            ViewBag.LoggedRole = role;
+            ViewBag.UserWorkspaceId = user.WorkspaceId;
+            ViewBag.UserFullname = $"{user.FirstName} {user.LastName}";
             ViewBag.SelectedPhone = phone;
             return View();
         }

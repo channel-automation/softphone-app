@@ -1,4 +1,6 @@
+@using Softphone.Frontend.Helpers
 @{
+    string loggedRole = (string)ViewBag.LoggedRole;
     string controller = (string)ViewContext.RouteData.Values["controller"];
 }
 
@@ -16,18 +18,36 @@
                         <i class="nav-icon fa fa-home"></i><p>Home</p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" onclick="openConfiguration(this)"
-                       class="nav-link bg-@(controller == "Configuration" ? "purple" : "light")">
-                        <i class="nav-icon fas fa-cog"></i><p>Configuration</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" onclick="openAgentList(this)"
-                       class="nav-link bg-@(controller == "AgentList" ? "purple" : "light")">
-                        <i class="nav-icon fas fa-users"></i><p>Agent List</p>
-                    </a>
-                </li>
+                @if (loggedRole == UserRole.Developer)
+                {
+                    <li class="nav-item">
+                        <a href="#" onclick="openSettings(this)"
+                           class="nav-link bg-@(controller == "Settings" ? "purple" : "light")">
+                            <i class="nav-icon fas fa-cog"></i><p>Settings</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" onclick="openWorkspace(this)"
+                           class="nav-link bg-@(controller == "Workspace" ? "purple" : "light")">
+                            <i class="nav-icon fas fa-building"></i><p>Workspaces</p>
+                        </a>
+                    </li>
+                }
+                @if (loggedRole == UserRole.Admin)
+                {
+                    <li class="nav-item">
+                        <a href="#" onclick="openConfiguration(this)"
+                           class="nav-link bg-@(controller == "Configuration" ? "purple" : "light")">
+                            <i class="nav-icon fas fa-cog"></i><p>Configuration</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" onclick="openAgentList(this)"
+                           class="nav-link bg-@(controller == "AgentList" ? "purple" : "light")">
+                            <i class="nav-icon fas fa-users"></i><p>Agent List</p>
+                        </a>
+                    </li>
+                }
                 <li class="nav-item">
                     <a asp-controller="LiveChat" asp-action="Index" onclick="startRedirectSpinner(this)"
                        class="nav-link bg-@(controller == "LiveChat" ? "purple" : "light")">

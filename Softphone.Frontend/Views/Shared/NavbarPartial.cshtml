@@ -1,5 +1,6 @@
 @{
-    UserBO loggedUser = (UserBO)ViewBag.LoggedUser;
+    string userFullname = (string)ViewBag.UserFullname;
+    string userFirstName = userFullname.Split(" ")[0];
 }
 
 <nav class="main-header navbar navbar-expand navbar-dark bg-navy">
@@ -8,20 +9,20 @@
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
         <li class="nav-item">
-            <span class="nav-link">Welcome <b>@loggedUser.FirstName</b>!</span>
+            <span class="nav-link">Welcome <b>@userFirstName</b>!</span>
         </li>
     </ul>
     <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
                 <i class="fa fa-user-circle mr-1"></i>
-                <span>@loggedUser.Username</span>
+                <span>@User.Identity.Name</span>
                 <i class="fas fa-caret-down ml-1"></i>
             </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                 <div class="dropdown-divider"></div>
                 <a href="#" class="dropdown-item disabled">
-                    <span class="font-weight-bold text-purple">@loggedUser.FirstName @loggedUser.LastName</span>
+                    <span class="font-weight-bold text-purple">@userFullname</span>
                 </a>
                 <div class="dropdown-divider"></div>
                 <a href="#" class="dropdown-item" onclick="editProfile()">

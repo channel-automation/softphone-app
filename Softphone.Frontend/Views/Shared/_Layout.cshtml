@@ -1,5 +1,7 @@
-﻿@{
-    UserBO loggedUser = (UserBO)ViewBag.LoggedUser;
+﻿@using Softphone.Frontend.Helpers
+@{
+    string loggedRole = (string)ViewBag.LoggedRole;
+    long userWorkspaceId = (long)ViewBag.UserWorkspaceId;
     AgentPhoneBO? selectedPhone = (AgentPhoneBO?)ViewBag.SelectedPhone;
 }
 
@@ -75,17 +77,52 @@
             });
         </script>
     }
+    @if (loggedRole == UserRole.Developer)
+    {
+        <script>
+            function openSettings(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Start", "Settings")", function (response) {
+                    settingsDialog = bootModal("Settings", response);
+                });
+            }
+            function openWorkspace(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Start", "Workspace")", function (response) {
+                    workspaceDialog = bootModal("Workspaces", response, "extra-large");
+                });
+            }
+        </script>
+    }
+    @if (loggedRole == UserRole.Admin)
+    {
+        <script>
+            function openConfiguration(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Start", "Configuration")", function (response) {
+                    configurationDialog = bootModal("Configuration", response);
+                });
+            }
+
+            function openAgentList(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Start", "AgentList")", function (response) {
+                    agentListDialog = bootModal("Agent List", response, "extra-large");
+                });
+            }
+        </script>
+    }
 
     <script>
-        globalWorkspaceId = @loggedUser.WorkspaceId;
-        globalUsername = "@loggedUser.Username";
+        globalWorkspaceId = @ViewBag.UserWorkspaceId;
+        globalUsername = "@User.Identity.Name";
 
         $(this).ajaxError(function (e, xhr) {
             // Ajax Data Error
-            // if (xhr.status == 418) {
-            //     let title = "<h5><i class='fas fa-exclamation-circle'></i> Data Error</h5>";
-            //     bootModal(title, xhr.responseText);
-            // }
+            if (xhr.status == 418) {
+                let title = "<h5><i class='fas fa-exclamation-circle'></i> Data Error</h5>";
+                bootModal(title, xhr.responseText);
+            }
             //Ajax Unauthorized Access Handler
             if (xhr.status == 403) {
                 let title = "<h5><i class='fas fa-ban'></i> Access Denied</h5>";
@@ -98,20 +135,6 @@
             }
         });
 
-        function openConfiguration(btn) {
-            startAjaxSpinner(btn);
-            $.get("@Url.Action("Start", "Configuration")", function (response) {
-                configurationDialog = bootModal("Configuration", response);
-            });
-        }
-
-        function openAgentList(btn) {
-            startAjaxSpinner(btn);
-            $.get("@Url.Action("Start", "AgentList")", function (response) {
-                agentListDialog = bootModal("Agent List", response, "extra-large");
-            });
-        }
-
         function changePassword(btn) {
             startAjaxSpinner(btn);
             $.get("@Url.Action("ChangePassword", "Security")", function (response) {
@@ -122,7 +145,7 @@
         function logout() {
             swalConfirm("SOFTPHONE", "Are you sure to logout?", function () {
                 location.href = "@Url.Action("Logout", "Security")";
-            });;
+            });
         }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
