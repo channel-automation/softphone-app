@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Softphone.Frontend.Services;
-using Softphone.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using Softphone.Frontend.Helpers;
 
 namespace Softphone.Frontend.Controllers;
 
@@ -28,7 +28,7 @@ public class SecurityController : Controller
         var user = await _userService.FindByUsername(username);
         string error = string.Empty;
 
-        if (user == null || !EncryptHelper.Verify(password, user.Password))
+        if (user == null || !CommonHelper.EncryptVerify(password, user.Password))
             error = "Invalid Username or Password.";
 
         else if (!user.IsActive)
@@ -68,9 +68,9 @@ public class SecurityController : Controller
     {
         string error = string.Empty;
         var user = await _userService.FindByUsername(User.Identity.Name);
-        if (EncryptHelper.Verify(currentPassword, user.Password))
+        if (CommonHelper.EncryptVerify(currentPassword, user.Password))
         {
-            user.Password = EncryptHelper.Hash(newPassword);
+            user.Password = CommonHelper.EncryptHash(newPassword);
             await _userService.Update(user, User.Identity.Name);
         }
         else error = "Incorrect Current Password.";

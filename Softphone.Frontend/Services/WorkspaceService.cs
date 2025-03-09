@@ -90,5 +90,25 @@ namespace Softphone.Frontend.Services
             paged.Data = response2.Models.ToList();
             return paged;
         }
+
+        public async Task<Paged<WorkspaceBO>> Remote(int skip, int take, string search)
+        {
+            var paged = new Paged<WorkspaceBO>();
+
+            var response = await _client.From<WorkspaceBO>()
+                .Filter(w => w.Name, Operator.ILike, $"%{search}%")
+                .Get();
+
+            paged.RecordsTotal = response.Models.Count;
+
+            var response2 = await _client.From<WorkspaceBO>()
+                .Filter(w => w.Name, Operator.ILike, $"%{search}%")
+                .Order(w => w.Name, Ordering.Ascending)
+                .Range(skip, take)
+                .Get();
+
+            paged.Data = response2.Models.ToList();
+            return paged;
+        }
     }
 }

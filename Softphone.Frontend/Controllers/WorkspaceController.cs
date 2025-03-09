@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Security;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Softphone.Frontend.Helpers;
@@ -95,6 +94,21 @@ public class WorkspaceController : Controller
         if (error != string.Empty) errors.Add(error);
 
         return Json(new { Errors = errors });
+    }
+
+    public async Task<IActionResult> Remote(int? page, string term)
+    {
+        int size = 10;
+        int skip = ((page ?? 1) - 1) * size;
+
+        var paged = await _workspaceService.Remote(skip, size, term ?? string.Empty);
+
+        var results = new List<object>();
+        foreach (var workspace in paged.Data)
+            results.Add(new { id = workspace.Id, text = workspace.Name });
+
+        var pagination = new { more = skip < paged.RecordsTotal };
+        return Json(new { results, pagination });
     }
 
     private IActionResult AjaxDataError(string message)

@@ -37,6 +37,13 @@ function initializeFormControls(parent) {
             return $(htm);
         }
     });
+    //Select2 workspace
+    $(parent).find(".select2-workspace-modal").select2({
+        dropdownParent: $(".bootbox").last(),
+        ajax: { url: baseUrl + "/Workspace/Remote" },
+        placeholder: "Select Workspace",
+        width: "100%"
+    });
     //Input Mask US Phone
     $(parent).find(".inputmask-usphone").inputmask("(999) 999-9999")
 }

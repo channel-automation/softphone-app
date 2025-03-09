@@ -48,6 +48,37 @@ namespace Softphone.Frontend.Services
             return response.Models.FirstOrDefault();
         }
 
+        public async Task<Paged<UserSearchBO>> Paging(int skip, int take, string sort, string sortdir, string search)
+        {
+            var paged = new Paged<UserSearchBO>();
+
+            var response = await _client.From<UserSearchBO>()
+                .Filter(w => w.WorkspaceName, Operator.ILike, $"%{search}%")
+                .Filter(w => w.FirstName, Operator.ILike, $"%{search}%")
+                .Filter(w => w.LastName, Operator.ILike, $"%{search}%")
+                .Filter(w => w.Username, Operator.ILike, $"%{search}%")
+                .Filter(w => w.Role, Operator.ILike, $"%{search}%")
+                .Get();
+
+            paged.RecordsTotal = response.Models.Count;
+
+            var response2 = await _client.From<UserSearchBO>()
+                .Filter(w => w.WorkspaceName, Operator.ILike, $"%{search}%")
+                .Filter(w => w.FirstName, Operator.ILike, $"%{search}%")
+                .Filter(w => w.LastName, Operator.ILike, $"%{search}%")
+                .Filter(w => w.Username, Operator.ILike, $"%{search}%")
+                .Filter(w => w.Role, Operator.ILike, $"%{search}%")
+
+                //TODO Sorting:
+                //.Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
+
+                .Range(skip, take)
+                .Get();
+
+            paged.Data = response2.Models.ToList();
+            return paged;
+        }
+
         public async Task<Paged<AgentBO>> PagingAgent(int skip, int take, string sort, string sortdir, string search, long workspaceId)
         {
             var paged = new Paged<AgentBO>();

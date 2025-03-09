@@ -11,5 +11,6 @@ namespace Softphone.Frontend.Services
         Task<WorkspaceBO?> FindById(long id);
         Task<IList<WorkspaceTwilioNumberBO>> GetTwilioNumbers(long id);
         Task<Paged<WorkspaceBO>> Paging(int skip, int take, string sort, string sortdir, string search);
+        Task<Paged<WorkspaceBO>> Remote(int skip, int take, string search);
     }
 }
