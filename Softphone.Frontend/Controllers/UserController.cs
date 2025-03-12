@@ -8,13 +8,13 @@ using Softphone.Frontend.Validators;
 namespace Softphone.Frontend.Controllers;
 
 [Authorize (Roles = UserRole.Developer)]
-public class UserAdminController : Controller
+public class UserController : Controller
 {
     private IUserService _userService;
     private IWorkspaceService _workspaceService;
     private IUserValidator _userValidator;
 
-    public UserAdminController(
+    public UserController(
         IUserService userService, 
         IWorkspaceService workspaceService,
         IUserValidator userValidator)
@@ -24,25 +24,26 @@ public class UserAdminController : Controller
         _userValidator = userValidator;
     }
 
-    public IActionResult Start()
+    public IActionResult Start(string byRole)
     {
+        ViewBag.ByRole = byRole;
         return PartialView();
     }
 
     [HttpPost]
-    public async Task<IActionResult> Search(int draw, int start, int length, string search)
+    public async Task<IActionResult> Search(int draw, int start, int length, string search, string byRole)
     {
         string sort = Request.Form["columns[" + Request.Form["order[0][column]"] + "][data]"];
         string sortdir = Request.Form["order[0][dir]"];
 
-        var result = await _userService.Paging(start, length, sort, sortdir, search ?? string.Empty, UserRole.Admin);
+        var result = await _userService.Paging(start, length, sort, sortdir, search ?? string.Empty, byRole);
         return Json(new { draw, recordsFiltered = result.RecordsTotal, result.RecordsTotal, result.Data });
     }
 
-    public IActionResult Create()
+    public IActionResult Create(string byRole)
     {
         ViewBag.WorkspaceName = string.Empty;
-        return PartialView("Edit", new UserBO { IsActive = true, Role = UserRole.Admin });
+        return PartialView("Edit", new UserBO { IsActive = true, Role = byRole });
     }
 
     public async Task<IActionResult> Edit(long id)

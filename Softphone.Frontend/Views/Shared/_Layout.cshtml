@@ -92,15 +92,21 @@
                     workspaceDialog = bootModal("Workspaces", response, "extra-large");
                 });
             }
+            function openAgentUsers(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Start", "User", new { @ByRole = UserRole.Agent })", function (response) {
+                    userDialog = bootModal("Agent Users", response, "extra-large");
+                });
+            }
             function openAdminUsers(btn) {
                 startAjaxSpinner(btn);
-                $.get("@Url.Action("Start", "UserAdmin")", function (response) {
+                $.get("@Url.Action("Start", "User", new { @ByRole = UserRole.Admin })", function (response) {
                     userDialog = bootModal("Admin Users", response, "extra-large");
                 });
             }
             function openDevsUsers(btn) {
                 startAjaxSpinner(btn);
-                $.get("@Url.Action("Start", "UserDeveloper")", function (response) {
+                $.get("@Url.Action("Start", "User", new { @ByRole = UserRole.Developer })", function (response) {
                     userDialog = bootModal("Developer Users", response, "extra-large");
                 });
             }

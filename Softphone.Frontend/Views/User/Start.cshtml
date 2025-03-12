@@ -35,6 +35,7 @@
             ajax: {
                 url: "@Url.Action("Search")", type: "post", datatype: "json",
                 data: function (e) {
+                    e.byRole = "@ViewBag.ByRole",
                     e.search = form.find("[name=Search]").val();
                     e.__RequestVerificationToken = form.find("[name=__RequestVerificationToken]").val();
                 }
@@ -79,7 +80,7 @@
 
     function createUser(btn) {
         startAjaxSpinner(btn)
-        $.get("@Url.Action("Create")", function (response) {
+        $.get("@Url.Action("Create", new { @ByRole = ViewBag.ByRole })", function (response) {
             editUserDialog = bootModal("Add User", response);
         });
     }
