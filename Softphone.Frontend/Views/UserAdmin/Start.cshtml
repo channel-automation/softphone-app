@@ -7,11 +7,11 @@
         @Html.AntiForgeryToken()
         <div class="input-group">
             <div class="input-group-prepend">
-                <span class="input-group-text bg-secondary">Search</span>
+                <span class="input-group-text bg-light">Search</span>
             </div>
             <input type="text" name="Search" class="form-control" autocomplete="off" placeholder="Type here.."/>
             <div class="input-group-append">
-                <span class="input-group-text bg-secondary"><i class="fas fa-search"></i></span>
+                <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
             </div>
         </div>
     </form>
@@ -74,7 +74,6 @@
     function actionRender(d) {
         let htm = "";
         htm += "<button class='btn bg-gradient-purple mr-1 mb-1' onclick='editUser(this, " + d + ")' title='Edit User'><i class='fas fa-pencil-alt'></i></button>";
-        //htm += "<button class='btn bg-gradient-purple mr-1 mb-1' onclick='deleteUser(this, " + d + ")' title='Delete User'><i class='fas fa-trash'></i></button>";
         return htm;
     }
 
@@ -91,16 +90,5 @@
             editUserDialog = bootModal("Edit User", response);
         });
     }
-
-    // function deleteUser(btn, id) {
-    //     swalConfirm("", "Delete this User?", function () {
-    //         startAjaxSpinner(btn);
-    //         $.get("@Url.Action("Delete")/" + id, function (response) {
-    //             if (errorMessages(response.errors)) return false;
-    //             toastr.success("Data successfully deleted.", "Success!");
-    //             userDialog.find("table").first().DataTable().draw();
-    //         });
-    //     });
-    // }
 
 </script>

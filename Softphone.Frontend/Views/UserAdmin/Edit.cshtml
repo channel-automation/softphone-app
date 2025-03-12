@@ -1,4 +1,5 @@
 ﻿@model Softphone.Frontend.Models.UserBO
+@using Softphone.Frontend.Helpers
 
 <form onsubmit="return false;">
     @Html.AntiForgeryToken()
@@ -21,23 +22,16 @@
             <input type="text" asp-for="LastName" class="form-control" />
         </div>
     </div>
-    @if (Model.Id == 0)
-    {
-        <div class="form-group row">
-            <div class="col-12">
-                <label class="text-purple">Username</label>
-                <input type="text" asp-for="Username" class="form-control" />
-            </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Username</label>
+            <input type="text" asp-for="Username" class="form-control" />
         </div>
-    }
-    else
-    {
-        @Html.HiddenFor(w => w.Username)
-    }
+    </div>
     <div class="form-group row">
         <div class="col-12">
             <label class="text-purple">Role</label>
-            <select asp-items="new SelectList(ViewBag.Roles)" asp-for="Role" class="form-control select2-common-modal"></select>
+            <input type="text" asp-for="Role" class="form-control" readonly />
         </div>
     </div>
     <div class="form-group row">
@@ -61,6 +55,15 @@
     <button class="btn bg-gradient-purple mr-2" onclick="_save(this)"><i class="fas fa-save"></i> Save</button>
     <button class="btn bg-gradient-dark" onclick="_cancel()"><i class="fas fa-times-circle"></i> Cancel</button>
 </div>
+
+@if (Model.Id != 0)
+{
+    <script>
+        $(function () {
+            editUserDialog.find("[name=Username]").attr("readonly", "readonly");
+        });
+    </script>
+}
 
 <script>
     $(function () {
@@ -100,11 +103,6 @@
         if (form.find("[name=Username]").val().trim() == "") {
             form.find("[name=Username]").focus();
             toastr.error("Username is required.", "Error..");
-            return false;
-        }
-        if (form.find("[name=Role]").val().trim() == "") {
-            form.find("[name=Role]").focus();
-            toastr.error("Role is required.", "Error..");
             return false;
         }
         //Server Processing

@@ -33,6 +33,12 @@
             <input type="text" asp-for="TwilioAPISecret" class="form-control" />
         </div>
     </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Twilio TwiML App SID</label>
+            <input type="text" asp-for="TwilioTwiMLAppSID" class="form-control" />
+        </div>
+    </div>
 </form>
 <div class="text-center mt-5 mb-1">
     <button class="btn bg-gradient-purple mr-2" onclick="_save(this)"><i class="fas fa-save"></i> Save</button>
@@ -75,6 +81,11 @@
         if (form.find("[name=TwilioAPISecret]").val().trim() == "") {
             form.find("[name=TwilioAPISecret]").focus();
             toastr.error("Twilio API Secret is required.", "Error..");
+            return false;
+        }
+        if (form.find("[name=TwilioTwiMLAppSID]").val().trim() == "") {
+            form.find("[name=TwilioTwiMLAppSID]").focus();
+            toastr.error("Twilio TwiML App SID is required.", "Error..");
             return false;
         }
         //Server Processing

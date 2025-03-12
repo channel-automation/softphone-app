@@ -74,10 +74,7 @@ public class WorkspaceController : Controller
             workspace.TwilioAuthToken = model.TwilioAuthToken;
             workspace.TwilioAPIKey = model.TwilioAPIKey;
             workspace.TwilioAPISecret = model.TwilioAPISecret;
-
-            //TODO: Need to check if "TwilioTwiMLAppSID" must be workdpace table or must be in Workspace Twilio Number table
-            //workspace.TwilioTwiMLAppSID = model.TwilioTwiMLAppSID; 
-
+            workspace.TwilioTwiMLAppSID = model.TwilioTwiMLAppSID; 
             await _workspaceService.Update(workspace, User.Identity.Name);
         }
 

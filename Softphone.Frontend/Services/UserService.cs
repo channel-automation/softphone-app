@@ -48,7 +48,7 @@ namespace Softphone.Frontend.Services
             return response.Models.FirstOrDefault();
         }
 
-        public async Task<Paged<UserSearchBO>> Paging(int skip, int take, string sort, string sortdir, string search)
+        public async Task<Paged<UserSearchBO>> Paging(int skip, int take, string sort, string sortdir, string search, string role)
         {
             var paged = new Paged<UserSearchBO>();
 
@@ -58,6 +58,7 @@ namespace Softphone.Frontend.Services
                 .Filter(w => w.LastName, Operator.ILike, $"%{search}%")
                 .Filter(w => w.Username, Operator.ILike, $"%{search}%")
                 .Filter(w => w.Role, Operator.ILike, $"%{search}%")
+                .Where(x => x.Role == role)
                 .Get();
 
             paged.RecordsTotal = response.Models.Count;
@@ -68,6 +69,7 @@ namespace Softphone.Frontend.Services
                 .Filter(w => w.LastName, Operator.ILike, $"%{search}%")
                 .Filter(w => w.Username, Operator.ILike, $"%{search}%")
                 .Filter(w => w.Role, Operator.ILike, $"%{search}%")
+                .Where(x => x.Role == role)
 
                 //TODO Sorting:
                 //.Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
@@ -132,6 +134,5 @@ namespace Softphone.Frontend.Services
             paged.Data = response2.Models.ToList();
             return paged;
         }
-
     }
 }

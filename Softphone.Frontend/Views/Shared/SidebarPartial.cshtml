@@ -22,20 +22,26 @@
                 {
                     <li class="nav-item">
                         <a href="#" onclick="openSettings(this)"
-                           class="nav-link bg-@(controller == "Settings" ? "purple" : "light")">
+                           class="nav-link bg-light">
                             <i class="nav-icon fas fa-cog"></i><p>Settings</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" onclick="openWorkspace(this)"
-                           class="nav-link bg-@(controller == "Workspace" ? "purple" : "light")">
+                           class="nav-link bg-light">
                             <i class="nav-icon fas fa-building"></i><p>Workspaces</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" onclick="openUsers(this)"
-                           class="nav-link bg-@(controller == "User" ? "purple" : "light")">
-                            <i class="nav-icon fas fa-users"></i><p>Users</p>
+                        <a href="#" onclick="openAdminUsers(this)"
+                           class="nav-link bg-light">
+                            <i class="nav-icon fas fa-users"></i><p>Admin Users</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" onclick="openDevsUsers(this)"
+                           class="nav-link bg-light">
+                            <i class="nav-icon fas fa-users"></i><p>Developer Users</p>
                         </a>
                     </li>
                 }
@@ -43,13 +49,13 @@
                 {
                     <li class="nav-item">
                         <a href="#" onclick="openConfiguration(this)"
-                           class="nav-link bg-@(controller == "Configuration" ? "purple" : "light")">
+                           class="nav-link bg-light">
                             <i class="nav-icon fas fa-cog"></i><p>Configuration</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" onclick="openAgentList(this)"
-                           class="nav-link bg-@(controller == "AgentList" ? "purple" : "light")">
+                           class="nav-link bg-light">
                             <i class="nav-icon fas fa-users"></i><p>Agent List</p>
                         </a>
                     </li>
