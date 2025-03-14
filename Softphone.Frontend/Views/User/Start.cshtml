@@ -41,13 +41,13 @@
                 }
             },
             columns: [
-                    { data: "workspaceName", title: "Workspace" },
-                    { data: "firstName", title: "First Name" },
-                    { data: "lastName", title: "Last Name" },
+                    { data: "workspace_name", title: "Workspace" },
+                    { data: "first_name", title: "First Name" },
+                    { data: "last_name", title: "Last Name" },
                     { data: "username", title: "Username" },
                     { data: "role", title: "Role" },
-                    { data: "isActive", title: "Active?", render: isActiveRender },
-                    { data: "createdAt", title: "Date Added", render: dateTimeRender },
+                    { data: "is_active", title: "Active?", render: isActiveRender },
+                    { data: "created_at", title: "Date Added", render: dateTimeRender },
                     { data: "id", orderable: false, render: actionRender }
             ],
             pageLength: 10,
@@ -63,7 +63,7 @@
     function dateTimeRender(d) {
         let sDate = moment(d).format("MMM DD, YYYY");
         let sTime = moment(d).format("h:mm:ss A");
-        return  `${sDate}<br />${sTime}`;
+        return `${sDate}<br />${sTime}`;
     }
 
     function isActiveRender(d) {

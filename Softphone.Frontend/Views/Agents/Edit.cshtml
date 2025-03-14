@@ -3,6 +3,8 @@
 <form onsubmit="return false;">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="WorkspaceId" />
+    <input type="hidden" asp-for="Role" />
     <div class="form-group row">
         <div class="col-12">
             <label class="text-purple">First Name</label>
@@ -21,11 +23,36 @@
             <input type="text" asp-for="Username" class="form-control" />
         </div>
     </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Active?</label><br />
+            @Html.CheckBoxFor(w => w.IsActive, new { @class = "icheck" })
+        </div>
+    </div>
+    @if (Model.Id != 0)
+    {
+        <div class="form-group row">
+            <div class="col-12">
+                <label class="text-purple">Reset Password?</label><br />
+                @Html.CheckBox("IsResetPassword", new { @class = "icheck" })
+                <span class="badge bg-secondary ml-3 p-1">Reset to default "123456"</span>
+            </div>
+        </div>
+    }
 </form>
 <div class="text-center mt-5 mb-1">
     <button class="btn bg-gradient-purple mr-2" onclick="_save(this)"><i class="fas fa-save"></i> Save</button>
     <button class="btn bg-gradient-dark" onclick="_cancel()"><i class="fas fa-times-circle"></i> Cancel</button>
 </div>
+
+@if (Model.Id != 0)
+{
+    <script>
+        $(function () {
+            editAgentDialog.find("[name=Username]").attr("readonly", "readonly");
+        });
+    </script>
+}
 
 <script>
     $(function () {
@@ -58,11 +85,11 @@
         //Server Processing
         startAjaxSpinner(btn);
         $.post("@Url.Action("Save")", form.serialize(), function (response) {
-            if (errorMessages(response)) return false;
+            if (errorMessages(response.errors)) return false;
             else {
                 editAgentDialog.modal("hide");
                 toastr.success("Data successfully saved.", "Success!");
-                agentListDialog.find("table").first().DataTable().draw();
+                agentDialog.find("table").first().DataTable().draw();
             }
         });
         return false;

@@ -1,9 +1,9 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Softphone.Frontend.Helpers;
 using Softphone.Frontend.Models;
 using Softphone.Frontend.Services;
+using Softphone.Frontend.Validators;
 
 namespace Softphone.Frontend.Controllers;
 
@@ -11,10 +11,12 @@ namespace Softphone.Frontend.Controllers;
 public class WorkspaceController : Controller
 {
     private IWorkspaceService _workspaceService;
+    private IWorkspaceValidator _workspaceValidator;
 
-    public WorkspaceController(IWorkspaceService workspaceService)
+    public WorkspaceController(IWorkspaceService workspaceService, IWorkspaceValidator workspaceValidator)
     {
         _workspaceService = workspaceService;
+        _workspaceValidator = workspaceValidator;
     }
 
     public IActionResult Start()
@@ -28,7 +30,7 @@ public class WorkspaceController : Controller
         string sort = Request.Form["columns[" + Request.Form["order[0][column]"] + "][data]"];
         string sortdir = Request.Form["order[0][dir]"];
 
-        var result = await _workspaceService.Paging(start, length, sort, sortdir, search ?? string.Empty);
+        var result = await _workspaceService.Paging(start, length, sort ?? "id", sortdir ?? "asc", search ?? string.Empty);
         return Json(new { draw, recordsFiltered = result.RecordsTotal, result.RecordsTotal, result.Data });
     }
 
@@ -39,9 +41,9 @@ public class WorkspaceController : Controller
 
     public async Task<IActionResult> Edit(long id)
     {
-        var workspace = await _workspaceService.FindById(id);
-        if (workspace == null) return AjaxDataError(ErrorMessage.DataError_NoLongerExist);
-        return PartialView("Edit", workspace);
+        var model = await _workspaceService.FindById(id);
+        if (model == null) return AjaxDataError(ErrorMessage.DataError_NoLongerExist);
+        return PartialView("Edit", model);
     }
 
     [HttpPost]
@@ -53,10 +55,7 @@ public class WorkspaceController : Controller
 
     private async Task<IActionResult> CreateSubmit(WorkspaceBO model)
     {
-        //TODO: to move "ChannelAutomationAPIKey" column to a global settings
-        model.ChannelAutomationAPIKey = string.Empty; 
-
-        var errors = new List<string>(); //No Validation yet
+        var errors = await _workspaceValidator.ValidateCreate(model);
         if (!errors.Any()) await _workspaceService.Create(model, User.Identity.Name);
         return Json(new { Errors = errors });
     }
@@ -66,7 +65,7 @@ public class WorkspaceController : Controller
         var workspace = await _workspaceService.FindById(model.Id);
         if (workspace == null) return AjaxDataError(ErrorMessage.DataError_NoLongerExist);
 
-        var errors = new List<string>(); //No Validation yet
+        var errors = await _workspaceValidator.ValidateEdit(model);
         if (!errors.Any())
         {
             workspace.Name = model.Name;

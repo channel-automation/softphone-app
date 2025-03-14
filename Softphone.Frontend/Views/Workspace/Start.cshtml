@@ -17,7 +17,7 @@
     </form>
 </div>
 <div class="table-responsive mt-2">
-    <table class="table table-bordered table-hover table-sm text-center mb-2" style="width:100%">
+    <table class="table table-bordered table-hover table-sm mb-2" style="width:100%">
         <thead class="thead-light"></thead>
     </table>
 </div>
@@ -39,11 +39,12 @@
                     e.__RequestVerificationToken = form.find("[name=__RequestVerificationToken]").val();
                 }
             },
+            columnDefs: [{ targets: "_all", className: "dt-center" }],
             columns: [
                     { data: "name", title: "Name" },
-                    { data: "twilioAccountSID", title: "Twilio Account SID" },
-                    { data: "twilioAPIKey", title: "Twilio API Key" },
-                    { data: "createdAt", title: "Date Added", render: dateTimeRender },
+                    { data: "twilio_account_sid", title: "Twilio Account SID" },
+                    { data: "twilio_api_key", title: "Twilio API Key" },
+                    { data: "created_at", title: "Date Added", render: dateTimeRender },
                     { data: "id", orderable: false, render: actionRender }
             ],
             pageLength: 10,
@@ -66,6 +67,7 @@
         let htm = "";
         htm += "<button class='btn bg-gradient-purple mr-1 mb-1' onclick='editWorkspace(this, " + d + ")' title='Edit Workspace'><i class='fas fa-pencil-alt'></i></button>";
         htm += "<button class='btn bg-gradient-purple mr-1 mb-1' onclick='deleteWorkspace(this, " + d + ")' title='Delete User'><i class='fas fa-trash'></i></button>";
+        htm += "<button class='btn bg-gradient-purple mr-1 mb-1' onclick='manageTwilioNos(this, " + d + ")' title='Manage Twilio Numbers'><i class='fas fa-mobile-retro'></i></button>";
         return htm;
     }
 
@@ -91,6 +93,13 @@
                 toastr.success("Data successfully deleted.", "Success!");
                 workspaceDialog.find("table").first().DataTable().draw();
             });
+        });
+    }
+
+    function manageTwilioNos(btn, id) {
+        startAjaxSpinner(btn)
+        $.get("@Url.Action("Start", "WorkspaceTwilioNumber")?workspaceId=" + id, function (response) {
+           twilioNumbersDialog = bootModal("Twilio Phone Numbers", response, "large");
         });
     }
 

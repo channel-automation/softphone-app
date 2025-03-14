@@ -24,9 +24,9 @@ function initializeFormControls(parent) {
         width: "100%",
     });
     //Select2 Agent Phone
-    $(parent).find(".select2-agentphone").select2({
-        ajax: { url: baseUrl + "/AgentList/RemoteAgentPhone?workspaceId=" + globalWorkspaceId },
-        placeholder: "Select Agent",
+    $(parent).find(".select2-phone").select2({
+        ajax: { url: baseUrl + "/Home/RemotePhoneNo" },
+        placeholder: "Select Phone No.",
         width: "100%",
         templateResult: function (data) {
             if (data.loading) return data.text;

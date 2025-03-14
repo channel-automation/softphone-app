@@ -1,6 +1,6 @@
 @using Softphone.Frontend.Helpers
 @{
-    string loggedRole = (string)ViewBag.LoggedRole;
+    UserBO loggedUser = (UserBO)ViewBag.LoggedUser;
     string controller = (string)ViewContext.RouteData.Values["controller"];
 }
 
@@ -18,7 +18,7 @@
                         <i class="nav-icon fa fa-home"></i><p>Home</p>
                     </a>
                 </li>
-                @if (loggedRole == UserRole.Developer)
+                @if (loggedUser.Role == UserRole.Developer)
                 {
                     <li class="nav-item">
                         <a href="#" onclick="openSettings(this)"
@@ -51,18 +51,24 @@
                         </a>
                     </li>
                 }
-                @if (loggedRole == UserRole.Admin)
+                @if (loggedUser.Role == UserRole.Admin)
                 {
                     <li class="nav-item">
-                        <a href="#" onclick="openConfiguration(this)"
+                        <a href="#" onclick="openAgents(this)"
                            class="nav-link bg-light">
-                            <i class="nav-icon fas fa-cog"></i><p>Configuration</p>
+                            <i class="nav-icon fas fa-user-tie"></i><p>Agents</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" onclick="openAgentList(this)"
+                        <a href="#" onclick="openTwilioConfig(this)"
                            class="nav-link bg-light">
-                            <i class="nav-icon fas fa-users"></i><p>Agent List</p>
+                            <i class="nav-icon fas fa-cog"></i><p>Twilio Config</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" onclick="openTwilioNumbers(this)"
+                           class="nav-link bg-light">
+                            <i class="nav-icon fas fa-mobile-retro"></i><p>Twilio Numbers</p>
                         </a>
                     </li>
                 }

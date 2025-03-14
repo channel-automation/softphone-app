@@ -1,0 +1,42 @@
+﻿@model IList<Softphone.Frontend.Models.UserBO>
+@{
+	var selectedIds = (List<long>)ViewBag.SelectedIds;
+}
+
+<form onsubmit="return false;">
+    @Html.AntiForgeryToken()
+	<table class="table table-bordered table-hover table-sm text-center">
+		<tr class="thead-light">
+			<th>Role</th>
+			<th>Name</th>
+			<th></th>
+		</tr>
+		@foreach (var user in Model)
+		{<tr>
+			<td>@user.Role</td>
+			<td>@user.FirstName @user.LastName</td>
+			<td><input type="checkbox" name="UserId-@user.Id" class="icheck" @(selectedIds.Contains(user.Id) ? "checked" : "") /></td>
+		</tr>}
+	</table>
+</form>
+<div class="text-center mt-5 mb-1">
+	<button class="btn bg-gradient-purple mr-2" onclick="_done(this)"><i class="fas fa-check-circle"></i> Done</button>
+</div>
+
+<script>
+    $(function () {
+		let form = selectUserDialog.find("form").first();
+        initializeFormControls(form);
+    });
+
+	function _done(btn) {
+		let form = selectUserDialog.find("form");
+        startAjaxSpinner(btn);
+        $.post("@Url.Action("SelectDone")", form.serialize(), function (response) {
+			selectUserDialog.modal("hide");
+			let table = editNumberDialog.find("table").DataTable();
+			table.clear();
+			table.rows.add(response).draw();
+        });
+	}
+</script>

@@ -1,6 +1,6 @@
-﻿using Softphone.Frontend.Helpers;
-using Softphone.Frontend.Models;
+﻿using Softphone.Frontend.Models;
 using Supabase;
+using Supabase.Postgrest.Interfaces;
 using static Supabase.Postgrest.Constants;
 
 namespace Softphone.Frontend.Services
@@ -39,41 +39,44 @@ namespace Softphone.Frontend.Services
                 .Filter(w => w.Username, Operator.ILike, $"{username}")
                 .Get();
 
-            return response.Models.FirstOrDefault();
+            return response.Models.SingleOrDefault();
+        }
+
+        public async Task<IList<UserBO>> FindByWorkspaceId(long workspaceId)
+        {
+            var response = await _client.From<UserBO>().Where(w => w.WorkspaceId == workspaceId).Get();
+            return response.Models.ToList();
         }
 
         public async Task<UserBO?> FindById(long id)
         {
             var response = await _client.From<UserBO>().Where(w => w.Id == id).Get();
-            return response.Models.FirstOrDefault();
+            return response.Models.SingleOrDefault();
         }
 
         public async Task<Paged<UserSearchBO>> Paging(int skip, int take, string sort, string sortdir, string search, string role)
         {
-            var paged = new Paged<UserSearchBO>();
+            var filters = new List<IPostgrestQueryFilter>
+            {
+                new Supabase.Postgrest.QueryFilter("workspace_name", Operator.ILike, $"%{search}%"),
+                new Supabase.Postgrest.QueryFilter("first_name", Operator.ILike, $"%{search}%"),
+                new Supabase.Postgrest.QueryFilter("last_name", Operator.ILike, $"%{search}%"),
+                new Supabase.Postgrest.QueryFilter("username", Operator.ILike, $"%{search}%"),
+                new Supabase.Postgrest.QueryFilter("role", Operator.ILike, $"%{search}%")
+            };
 
             var response = await _client.From<UserSearchBO>()
-                .Filter(w => w.WorkspaceName, Operator.ILike, $"%{search}%")
-                .Filter(w => w.FirstName, Operator.ILike, $"%{search}%")
-                .Filter(w => w.LastName, Operator.ILike, $"%{search}%")
-                .Filter(w => w.Username, Operator.ILike, $"%{search}%")
-                .Filter(w => w.Role, Operator.ILike, $"%{search}%")
-                .Where(x => x.Role == role)
+                .Or(filters)
+                .Where(w => w.role == role)
                 .Get();
 
-            paged.RecordsTotal = response.Models.Count;
+            var paged = new Paged<UserSearchBO>();
+            paged.RecordsTotal = response.Models.Count();
 
             var response2 = await _client.From<UserSearchBO>()
-                .Filter(w => w.WorkspaceName, Operator.ILike, $"%{search}%")
-                .Filter(w => w.FirstName, Operator.ILike, $"%{search}%")
-                .Filter(w => w.LastName, Operator.ILike, $"%{search}%")
-                .Filter(w => w.Username, Operator.ILike, $"%{search}%")
-                .Filter(w => w.Role, Operator.ILike, $"%{search}%")
-                .Where(x => x.Role == role)
-
-                //TODO Sorting:
-                //.Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
-
+                .Or(filters)
+                .Where(w => w.role == role)
+                .Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
                 .Range(skip, take)
                 .Get();
 
@@ -81,26 +84,29 @@ namespace Softphone.Frontend.Services
             return paged;
         }
 
-        public async Task<Paged<AgentBO>> PagingAgent(int skip, int take, string sort, string sortdir, string search, long workspaceId)
+        public async Task<Paged<UserSearchBO>> Paging(int skip, int take, string sort, string sortdir, string search, string role, long workspaceId)
         {
-            var paged = new Paged<AgentBO>();
+            var filters = new List<IPostgrestQueryFilter>
+            {
+                new Supabase.Postgrest.QueryFilter("first_name", Operator.ILike, $"%{search}%"),
+                new Supabase.Postgrest.QueryFilter("last_name", Operator.ILike, $"%{search}%"),
+                new Supabase.Postgrest.QueryFilter("username", Operator.ILike, $"%{search}%")
+            };
 
-            var response = await _client.From<AgentBO>()
-                .Filter(w => w.FullName, Operator.ILike, $"%{search}%")
-                .Filter(w => w.Username, Operator.ILike, $"%{search}%")
-                .Where(x => x.WorkspaceId == workspaceId)
+            var response = await _client.From<UserSearchBO>()
+                .Or(filters)
+                .Where(w => w.role == role)
+                .Where(w => w.workspace_id == workspaceId)
                 .Get();
 
-            paged.RecordsTotal = response.Models.Count;
+            var paged = new Paged<UserSearchBO>();
+            paged.RecordsTotal = response.Models.Count();
 
-            var response2 = await _client.From<AgentBO>()
-                .Filter(w => w.FullName, Operator.ILike, $"%{search}%")
-                .Filter(w => w.Username, Operator.ILike, $"%{search}%")
-                .Where(x => x.WorkspaceId == workspaceId)
-
-                //TODO Sorting:
-                //.Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
-                
+            var response2 = await _client.From<UserSearchBO>()
+                .Or(filters)
+                .Where(w => w.role == role)
+                .Where(w => w.workspace_id == workspaceId)
+                .Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
                 .Range(skip, take)
                 .Get();
 
@@ -108,30 +114,36 @@ namespace Softphone.Frontend.Services
             return paged;
         }
 
-        public async Task<Paged<AgentPhoneBO>> RemoteAgentPhone(int skip, int take, string search, long workspaceId, string loggedUsername, string loggedRole)
+        public async Task<Paged<PhoneNumberBO>> RemotePhoneNo(int skip, int take, string search, string username, long workspaceId)
         {
-            if (loggedRole == UserRole.Admin) loggedUsername = string.Empty;
-            var paged = new Paged<AgentPhoneBO>();
+            var filters = new List<IPostgrestQueryFilter>
+            {
+                new Supabase.Postgrest.QueryFilter("full_name", Operator.ILike, $"%{search}%"),
+                new Supabase.Postgrest.QueryFilter("twilio_number", Operator.ILike, $"%{search}%")
+            };
 
-            var response = await _client.From<AgentPhoneBO>()
-                .Filter(w => w.FullName, Operator.ILike, $"%{search}%")
-                .Filter(w => w.TwilioNumber, Operator.ILike, $"%{search}%")
-                .Filter(w => w.Username, Operator.ILike, $"%{loggedUsername}%")
-                .Where(x => x.WorkspaceId == workspaceId)
+            var response = await _client.From<PhoneNumberBO>()
+                .Or(filters)
+                .Filter("username", Operator.ILike, $"%{username}%")
+                .Where(w => w.workspace_id == workspaceId)
                 .Get();
 
+            var paged = new Paged<PhoneNumberBO>();
             paged.RecordsTotal = response.Models.Count;
 
-            var response2 = await _client.From<AgentPhoneBO>()
-                .Filter(w => w.FullName, Operator.ILike, $"%{search}%")
-                .Filter(w => w.TwilioNumber, Operator.ILike, $"%{search}%")
-                .Filter(w => w.Username, Operator.ILike, $"%{loggedUsername}%")
-                .Where(x => x.WorkspaceId == workspaceId)
-                .Order(w => w.FullName, Ordering.Ascending)
+            var response2 = await _client.From<PhoneNumberBO>()
+                .Or(filters)
+                .Filter("username", Operator.ILike, $"%{username}%")
+                .Where(w => w.workspace_id == workspaceId)
+                .Order("full_name", Ordering.Ascending)
                 .Range(skip, take)
                 .Get();
 
             paged.Data = response2.Models.ToList();
+
+            foreach (var content in paged.Data)
+                content.full_name = content.full_name.Trim() == string.Empty ? "No Name" : content.full_name;
+
             return paged;
         }
     }

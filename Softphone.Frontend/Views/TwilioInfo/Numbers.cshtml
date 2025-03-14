@@ -1,0 +1,76 @@
+﻿
+<div class="table-responsive mt-2">
+    <table class="table table-bordered table-hover table-sm mb-2" style="width:100%">
+        <thead class="thead-light"></thead>
+    </table>
+</div>
+
+<script>
+    $(function () {
+        var table = numberDialog.find("table").first();
+        table.DataTable({
+            processing: true,
+            serverSide: true,
+            searching: false,
+            lengthChange: false,
+            sorting: false,
+            ajax: {
+                url: "@Url.Action("GetList")", type: "get", datatype: "json"
+            },
+            columnDefs: [{ targets: "_all", className: "dt-center" }],
+            columns: [
+                    { data: "twilioNumber", title: "Twilio Number", orderable: false, render: twilioNumberRender },
+                    { data: "userFullnames", title: "Assigned Users", orderable: false, render: assignedNamesRender },
+                    { data: "id", title: addButtonRender(), orderable: false, render: actionRender }
+            ],
+            pageLength: 10,
+            language: { emptyTable: "No data found." },
+        });
+    });
+
+    function twilioNumberRender(d) {
+        let mask = new Inputmask("(999) 999-9999");
+        return mask.format(d.replaceAll("+1", ""));
+    }
+
+    function assignedNamesRender(d) {
+        return d.replaceAll(",", "<br />");
+    }
+
+    function addButtonRender() {
+        let htm = "<button class='btn bg-gradient-purple mr-1 mb-1' onclick='addNumber(this)' title='Add Twilio Number'><i class='fas fa-plus-circle'></i></button>";
+        return htm;
+    }
+
+    function actionRender(d) {
+        let htm = "";
+        htm += "<button class='btn bg-gradient-purple mr-1 mb-1' onclick='editNumber(this, " + d + ")' title='Edit Twilio Number'><i class='fas fa-pencil-alt'></i></button>";
+        htm += "<button class='btn bg-gradient-purple mr-1 mb-1' onclick='deleteNumber(this, " + d + ")' title='Delete Twilio Twilio'><i class='fas fa-trash'></i></button>";
+        return htm;
+    }
+
+    function addNumber(btn) {
+        startAjaxSpinner(btn)
+        $.get("@Url.Action("AddNumber")", function (response) {
+            editNumberDialog = bootModal("Add Twilio Number", response);
+        });
+    }
+
+    function editNumber(btn, id) {
+        startAjaxSpinner(btn)
+        $.get("@Url.Action("EditNumber")/" + id, function (response) {
+            editNumberDialog = bootModal("Edit Twilio Number", response);
+        });
+    }
+
+    function deleteNumber(btn, id) {
+        swalConfirm("", "Delete this Twilio Number?", function () {
+            startAjaxSpinner(btn);
+            $.get("@Url.Action("DeleteNumber")/" + id, function (response) {
+                if (errorMessages(response.errors)) return false;
+                toastr.success("Data successfully deleted.", "Success!");
+                numberDialog.find("table").first().DataTable().draw();
+            });
+        });
+    }
+</script>

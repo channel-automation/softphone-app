@@ -30,6 +30,7 @@ builder.Services.AddTransient<ISettingsService, SettingsService>();
 builder.Services.AddTransient<IWorkspaceService, WorkspaceService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IUserValidator, UserValidator>();
+builder.Services.AddTransient<IWorkspaceValidator, WorkspaceValidator>();
 
 var app = builder.Build();
 

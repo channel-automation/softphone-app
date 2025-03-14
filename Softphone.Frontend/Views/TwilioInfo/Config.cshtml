@@ -17,8 +17,20 @@
     </div>
     <div class="form-group row">
         <div class="col-12">
-            <label class="text-purple">Channel Automation API Key</label>
-            <input type="text" asp-for="ChannelAutomationAPIKey" class="form-control" />
+            <label class="text-purple">Twilio API Key</label>
+            <input type="text" asp-for="TwilioAPIKey" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Twilio API Secret</label>
+            <input type="text" asp-for="TwilioAPISecret" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Twilio TwiML App SID</label>
+            <input type="text" asp-for="TwilioTwiMLAppSID" class="form-control" />
         </div>
     </div>
 </form>
@@ -29,17 +41,16 @@
 
 <script>
     $(function () {
-       // let form = configurationDialog.find("form");
-       // initializeFormControls(form);
+        let form = configDialog.find("form");
+        initializeFormControls(form);
     });
 
     function _cancel() {
-        //configurationDialog.modal("hide");
-        Swal.close(configurationDialog);
+        configDialog.modal("hide");
     }
 
     function _save(btn) {
-        let form = configurationDialog.find("form");
+        let form = configDialog.find("form");
         //Client Validation
         if (form.find("[name=TwilioAccountSID]").val().trim() == "") {
             form.find("[name=TwilioAccountSID]").focus();
@@ -51,20 +62,26 @@
             toastr.error("Twilio Auth Token is required.", "Error..");
             return false;
         }
-        if (form.find("[name=ChannelAutomationAPIKey]").val().trim() == "") {
-            form.find("[name=ChannelAutomationAPIKey]").focus();
-            toastr.error("Channel Automation API Key is required.", "Error..");
+        if (form.find("[name=TwilioAPIKey]").val().trim() == "") {
+            form.find("[name=TwilioAPIKey]").focus();
+            toastr.error("Twilio API Key is required.", "Error..");
+            return false;
+        }
+        if (form.find("[name=TwilioAPISecret]").val().trim() == "") {
+            form.find("[name=TwilioAPISecret]").focus();
+            toastr.error("Twilio API Secret is required.", "Error..");
+            return false;
+        }
+        if (form.find("[name=TwilioTwiMLAppSID]").val().trim() == "") {
+            form.find("[name=TwilioTwiMLAppSID]").focus();
+            toastr.error("Twilio TwiML App SID is required.", "Error..");
             return false;
         }
         //Server Processing
         startAjaxSpinner(btn);
-        $.post("@Url.Action("Save")", form.serialize(), function (response) {
-            if (errorMessages(response)) return false;
-            else {
-                //configurationDialog.modal("hide");
-                Swal.close(configurationDialog);
-                toastr.success("Configuration successfully saved.", "Success!");
-            }
+        $.post("@Url.Action("ConfigSave")", form.serialize(), function () {
+            configDialog.modal("hide");
+            toastr.success("Data successfully saved.", "Success!");
         });
         return false;
     }

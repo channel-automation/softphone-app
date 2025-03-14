@@ -3,8 +3,8 @@ using Supabase.Postgrest.Models;
 
 namespace Softphone.Frontend.Models
 {
-    [Table("agent_phone")]
-    public class AgentPhoneBO : BaseModel
+    [Table("workspace_twilio_number_search")]
+    public class WorkspaceTwilioNumberSearchBO : BaseModel
     {
         [PrimaryKey("id")]
         public long Id { get; set; }
@@ -12,16 +12,13 @@ namespace Softphone.Frontend.Models
         [Column("workspace_id")]
         public long WorkspaceId { get; set; }
 
+        [Column("twilio_number")]
+        public string TwilioNumber { get; set; }
+
         [Column("workspace_name")]
         public string WorkspaceName { get; set; }
 
-        [Column("username")]
-        public string Username { get; set; }
-
-        [Column("full_name")]
-        public string FullName { get; set; }
-
-        [Column("twilio_number")]
-        public string TwilioNumber { get; set; }
+        [Column("user_fullnames")]
+        public string UserFullnames { get; set; }
     }
 }

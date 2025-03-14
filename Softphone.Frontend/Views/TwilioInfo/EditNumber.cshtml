@@ -1,0 +1,93 @@
+﻿@model Softphone.Frontend.Models.WorkspaceTwilioNumberBO
+@{
+    Model.TwilioNumber = Model.TwilioNumber ?? string.Empty; 
+}
+
+<form onsubmit="return false;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="WorkspaceId" />
+    <input type="hidden" asp-for="TwilioNumber" />
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Twilio Number</label>
+            <input type="text" value="@Model.TwilioNumber.Replace("+1", "")" class="form-control inputmask-usphone" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Assigned Users</label>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-sm" style="white-space:nowrap;width:100%">
+                    <thead class="thead-light"></thead>
+                </table>
+            </div>
+            <button class="btn btn-link" onclick="_select(this)">Click to Manage</button>
+        </div>
+    </div>
+</form>
+<div class="text-center mt-5 mb-1">
+    <button class="btn bg-gradient-purple mr-2" onclick="_save(this)"><i class="fas fa-save"></i> Save</button>
+    <button class="btn bg-gradient-dark" onclick="_cancel()"><i class="fas fa-times-circle"></i> Cancel</button>
+</div>
+
+<script>
+    $(function () {
+        let form = editNumberDialog.find("form").first();
+        initializeFormControls(form);
+
+        var table = editNumberDialog.find("table").first();
+        table.DataTable({
+            searching: false,
+            lengthChange: false,
+            paging: false,
+            info: false,
+            sorting: false,
+            data: @Html.Raw(ViewBag.Assigned),
+            columnDefs: [{ targets: "_all", className: "dt-center" }],
+            columns: [{ data: "name", title: "Name", orderable: false }],
+            language: { emptyTable: "No data found." },
+        });
+    });
+
+    function _select(btn) {
+        startAjaxSpinner(btn);
+        let data = editNumberDialog.find("table").first().DataTable().rows().data().toArray();
+        $.get("@Url.Action("Select")?workspaceId=@Model.WorkspaceId", { assigned: JSON.stringify(data) }, function (response) {
+            selectUserDialog = bootModal("Select Users", response);
+        });
+    }
+
+    function _cancel() {
+        editNumberDialog.modal("hide");
+    }
+
+    function _save(btn) {
+        let form = editNumberDialog.find("form");
+        let textbox = form.find("[type=Text]").first();
+        //Client Validation
+        if (textbox.val().trim() == "") {
+            textbox.focus();
+            toastr.error("Twilio Number is required.", "Error..");
+            return false;
+        }
+
+        //Coverto +1 phone format
+        let val = textbox.inputmask("unmaskedvalue");
+        form.find("[name=TwilioNumber]").val("+1" + val);
+
+        //Server Processing
+        startAjaxSpinner(btn);
+        let data = editNumberDialog.find("table").first().DataTable().rows().data().toArray();
+        let toPost = form.serialize() + "&assigned=" + JSON.stringify(data);
+        $.post("@Url.Action("SaveNumber")", toPost, function (response) {
+            if (errorMessages(response.errors)) return false;
+            else {
+                editNumberDialog.modal("hide");
+                toastr.success("Data successfully saved.", "Success!");
+                numberDialog.find("table").first().DataTable().draw();
+            }
+        });
+        return false;
+    }
+</script>

@@ -1,8 +1,7 @@
 ﻿@using Softphone.Frontend.Helpers
 @{
-    string loggedRole = (string)ViewBag.LoggedRole;
-    long userWorkspaceId = (long)ViewBag.UserWorkspaceId;
-    AgentPhoneBO? selectedPhone = (AgentPhoneBO?)ViewBag.SelectedPhone;
+    UserBO loggedUser = (UserBO)ViewBag.LoggedUser;
+    PhoneNumberBO? selectedPhone = (PhoneNumberBO?)ViewBag.SelectedPhone;
 }
 
 <!DOCTYPE html>
@@ -72,12 +71,12 @@
     {
         <script>
             $(function () {
-                let option = new Option("@Html.Raw(selectedPhone.FullName)", "@Html.Raw(selectedPhone.TwilioNumber)", true, true);
+                let option = new Option("@Html.Raw(selectedPhone.full_name)", "@Html.Raw(selectedPhone.twilio_number)", true, true);
                 $("#divDialer").find("select").append(option).trigger("change");
             });
         </script>
     }
-    @if (loggedRole == UserRole.Developer)
+    @if (loggedUser.Role == UserRole.Developer)
     {
         <script>
             function openSettings(btn) {
@@ -112,28 +111,35 @@
             }
         </script>
     }
-    @if (loggedRole == UserRole.Admin)
+    @if (loggedUser.Role == UserRole.Admin)
     {
         <script>
-            function openConfiguration(btn) {
+            function openAgents(btn) {
                 startAjaxSpinner(btn);
-                $.get("@Url.Action("Start", "Configuration")", function (response) {
-                    configurationDialog = bootModal("Configuration", response);
+                $.get("@Url.Action("Start", "Agents")", function (response) {
+                    agentDialog = bootModal("Agents", response, "extra-large");
                 });
             }
 
-            function openAgentList(btn) {
+            function openTwilioConfig(btn) {
                 startAjaxSpinner(btn);
-                $.get("@Url.Action("Start", "AgentList")", function (response) {
-                    agentListDialog = bootModal("Agent List", response, "extra-large");
+                $.get("@Url.Action("Config", "TwilioInfo")", function (response) {
+                    configDialog = bootModal("Twilio Configuration", response);
+                });
+            }
+
+            function openTwilioNumbers(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Numbers", "TwilioInfo")", function (response) {
+                    numberDialog = bootModal("Twilio Phone Numbers", response, "large");
                 });
             }
         </script>
     }
 
     <script>
-        globalWorkspaceId = @ViewBag.UserWorkspaceId;
-        globalUsername = "@User.Identity.Name";
+        globalWorkspaceId = @loggedUser.WorkspaceId;
+        globalUsername = "@loggedUser.Username";
 
         $(this).ajaxError(function (e, xhr) {
             // Ajax Data Error

@@ -38,8 +38,5 @@ namespace Softphone.Frontend.Models
 
         [Column("twilio_twiml_app_sid")]
         public string TwilioTwiMLAppSID { get; set; }
-
-        [Column("channel_automation_api_key")]
-        public string ChannelAutomationAPIKey { get; set; }
     }
 }

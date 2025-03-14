@@ -6,31 +6,15 @@ namespace Softphone.Frontend.Models
     [Table("user_search")]
     public class UserSearchBO : BaseModel
     {
-        [PrimaryKey("id")]
-        public long Id { get; set; }
-
-        [Column("created_at")]
-        public DateTime CreatedAt { get; set; }
-
-        [Column("workspace_name")]
-        public string WorkspaceName { get; set; }
-
-        [Column("workspace_id")]
-        public long WorkspaceId { get; set; }
-
-        [Column("first_name")]
-        public string FirstName { get; set; }
-
-        [Column("last_name")]
-        public string LastName { get; set; }
-
-        [Column("username")]
-        public string Username { get; set; }
-
-        [Column("role")]
-        public string Role { get; set; }
-
-        [Column("is_active")]
-        public bool IsActive { get; set; }
+        [PrimaryKey]
+        public long id { get; set; }
+        public DateTime created_at { get; set; }
+        public string workspace_name { get; set; }
+        public long workspace_id { get; set; }
+        public string first_name { get; set; }
+        public string last_name { get; set; }
+        public string username { get; set; }
+        public string role { get; set; }
+        public bool is_active { get; set; }
     }
 }

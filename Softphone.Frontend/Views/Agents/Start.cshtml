@@ -1,17 +1,17 @@
 ﻿
 <div class="float-sm-right mb-1 mr-2">
-    <button class="btn bg-gradient-purple" onclick="editAgent(this, 0)" title="Add New Agent"><i class="fas fa-plus-circle"></i> New</button>
+    <button class="btn bg-gradient-purple" onclick="createAgent(this)" title="Add New Agent"><i class="fas fa-plus-circle"></i> New</button>
 </div>
 <div class="mb-1 ml-2">
     <form class="form-inline" onsubmit="return false;">
         @Html.AntiForgeryToken()
         <div class="input-group">
             <div class="input-group-prepend">
-                <span class="input-group-text bg-secondary">Search</span>
+                <span class="input-group-text bg-light">Search</span>
             </div>
             <input type="text" name="Search" class="form-control" autocomplete="off" placeholder="Type here.."/>
             <div class="input-group-append">
-                <span class="input-group-text bg-secondary"><i class="fas fa-search"></i></span>
+                <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
             </div>
         </div>
     </form>
@@ -24,8 +24,8 @@
 
 <script>
     $(function () {
-        var form = agentListDialog.find("form").first();
-        var table = agentListDialog.find("table").first();
+        var form = agentDialog.find("form").first();
+        var table = agentDialog.find("table").first();
 
         table.DataTable({
             processing: true,
@@ -35,16 +35,16 @@
             ajax: {
                 url: "@Url.Action("Search")", type: "post", datatype: "json",
                 data: function (e) {
-                    e.workspaceId = globalWorkspaceId;
                     e.search = form.find("[name=Search]").val();
                     e.__RequestVerificationToken = form.find("[name=__RequestVerificationToken]").val();
                 }
             },
             columns: [
-                    { data: "fullName", title: "Name" },
+                    { data: "first_name", title: "First Name" },
+                    { data: "last_name", title: "Last Name" },
                     { data: "username", title: "Username" },
-                    { data: "twilioNumbers", title: "Twilio Numbers", render: numberRender },
-                    { data: "createdAt", title: "Date Added", render: dateTimeRender },
+                    { data: "is_active", title: "Active?", render: isActiveRender },
+                    { data: "created_at", title: "Date Added", render: dateTimeRender },
                     { data: "id", orderable: false, render: actionRender }
             ],
             pageLength: 10,
@@ -57,34 +57,35 @@
         });
     });
 
-    function numberRender(d) {
-        let htm = "";
-        let arr = d.trim().split(",");
-
-        for (let i = 0; i < arr.length; i++) 
-            htm += (new Inputmask("(999) 999-9999").format(arr[i].replaceAll("+1", "")) + ",");
-
-        return htm.trim().replaceAll(",", "<br />");
-    }
-
     function dateTimeRender(d) {
         let sDate = moment(d).format("MMM DD, YYYY");
         let sTime = moment(d).format("h:mm:ss A");
-        return  `${sDate} ${sTime}`;
+        return `${sDate}<br />${sTime}`;
+    }
+
+    function isActiveRender(d) {
+        var text = d ? "Yes" : "No";
+        var bg = d ? "purple" : "dark";
+        return `<span class='badge bg-${bg} p-1'>${text}</span>`;
     }
 
     function actionRender(d) {
         let htm = "";
         htm += "<button class='btn bg-gradient-purple mr-1 mb-1' onclick='editAgent(this, " + d + ")' title='Edit Agent'><i class='fas fa-pencil-alt'></i></button>";
-        htm += "<button class='btn bg-gradient-purple mr-1 mb-1' onclick='deleteAgent(this, " + d + ")' title='Delete User'><i class='fas fa-trash'></i></button>";
         return htm;
+    }
+
+    function createAgent(btn) {
+        startAjaxSpinner(btn)
+        $.get("@Url.Action("Create")", function (response) {
+            editAgentDialog = bootModal("Add Agent", response);
+        });
     }
 
     function editAgent(btn, id) {
         startAjaxSpinner(btn)
         $.get("@Url.Action("Edit")/" + id, function (response) {
-            let title = id == 0 ? "Add" : "Edit";
-            editAgentDialog = bootModal(`${title} Agent`, response);
+            editAgentDialog = bootModal("Edit Agent", response);
         });
     }
 </script>

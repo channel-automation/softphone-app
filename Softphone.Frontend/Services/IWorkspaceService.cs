@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Softphone.Frontend.Models;
+﻿using Softphone.Frontend.Models;
 
 namespace Softphone.Frontend.Services
 {
@@ -9,8 +8,15 @@ namespace Softphone.Frontend.Services
         Task Update(WorkspaceBO model, string username);
         Task<string> Delete(WorkspaceBO model, string username);
         Task<WorkspaceBO?> FindById(long id);
-        Task<IList<WorkspaceTwilioNumberBO>> GetTwilioNumbers(long id);
-        Task<Paged<WorkspaceBO>> Paging(int skip, int take, string sort, string sortdir, string search);
+        Task<WorkspaceBO?> FindByName(string name);
+        Task<WorkspaceTwilioNumberBO?> FindByTwilioNumber(string twilioNumber);
+        Task<Paged<WorkspaceTwilioNumberSearchBO>> PagingTwilioNumbers(int skip, int take, long workspaceId);
+        Task<WorkspaceTwilioNumberBO?> GetTwilioNumber(long twilioNumberId);
+        Task<IList<WorkspaceTwilioNumberUserBO>> GetTwilioNumberUsers(long twilioNumberId);
+        Task CreateTwilioNumber(WorkspaceTwilioNumberBO model, IList<WorkspaceTwilioNumberUserBO> wtnUsers);
+        Task UpdateTwilioNumber(WorkspaceTwilioNumberBO model, IList<WorkspaceTwilioNumberUserBO> wtnUsers);
+        Task<string> DeleteTwilioNumber(WorkspaceTwilioNumberBO model);
+        Task<Paged<WorkspaceSearchBO>> Paging(int skip, int take, string sort, string sortdir, string search);
         Task<Paged<WorkspaceBO>> Remote(int skip, int take, string search);
     }
 }
