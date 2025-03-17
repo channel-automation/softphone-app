@@ -1,8 +1,15 @@
-﻿using Microsoft.AspNetCore.Cors;
+﻿using System;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Softphone.Frontend.Helpers;
 using Softphone.Frontend.Services;
+using Supabase.Gotrue;
 using Twilio.Jwt.AccessToken;
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+using Twilio.Types;
+using static Twilio.TwiML.Voice.Client;
 
 namespace Softphone.Frontend.Controllers
 {
@@ -46,26 +53,68 @@ namespace Softphone.Frontend.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"EXCEPTION: {ex.Message}");
-                return StatusCode(500, $"EXCEPTION: {ex.Message}");
+                Console.WriteLine($"Access Token Exception: {ex.Message}");
+                return StatusCode(500, $"Access Token Exception: {ex.Message}");
             }
         }
 
-        //[HttpPost]
-        //public IActionResult IncomingCalls([FromBody] Payload payload)
-        //{
-        //    //Get user based on "To" number
-        //    var user = await _userService.(username);
+        [HttpPost]
+        public async Task<IActionResult> InboundVoice([FromBody] Payload payload)
+        {
+            try
+            {
+                //Get user based on "To" number
+                var workspaceNumber = await _workspaceService.FindByTwilioNumber(payload.To);
+                var workspaceNumberUsers = await _workspaceService.GetTwilioNumberUsers(workspaceNumber.Id);
+                var user = await _userService.FindById(workspaceNumberUsers.First().UserId);
 
-        //    //Console.WriteLine($"Call Status update at {DateTime.Now.ToString("o")}.");
-        //    //Console.WriteLine(CommonHelper.JsonSerialize(payload));
-        //    //return StatusCode(200);
-        //}
+                VoiceResponse voiceResponse = new VoiceResponse();
+
+                // Add a small delay to ensure client is ready
+                voiceResponse.Pause(1);
+
+                var dial = new Dial(
+                    callerId: workspaceNumber.TwilioNumber,
+                    answerOnBridge: true,
+                    timeout: 30);
+
+                dial.Client(
+                    identity: user.Username,
+                    statusCallbackEvent: new EventEnum[] { EventEnum.Initiated, EventEnum.Ringing, EventEnum.Answered, EventEnum.Completed },
+                    statusCallback: new Uri($"{GetBaseUrl()}/InboundCallStatus"),
+                    statusCallbackMethod: "POST"
+                );
+
+                voiceResponse.Append(dial);
+                Console.WriteLine($"Inbound Voice Generated TwiML: {voiceResponse.ToString()}");
+
+                Response.ContentType = "text/xml";
+                return Content(voiceResponse.ToString());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Inbound Voice Exception: {ex.Message}");
+                return StatusCode(500, $"Inbound Voice Exception: {ex.Message}");
+            }
+        }
 
         [HttpPost]
-        public IActionResult CallStatus([FromBody] Payload payload)
+        public IActionResult InboundCallStatus([FromBody] Payload payload)
         {
-            Console.WriteLine($"Call Status update at {DateTime.Now.ToString("o")}.");
+            Console.WriteLine($"Inbound-Call Status update at {DateTime.Now.ToString("o")}.");
+            Console.WriteLine(
+                $"CallSid: {payload.CallSid}, " +
+                $"CallStatus: {payload.CallSid}, " +
+                $"From: {payload.From}, " +
+                $"To: {payload.To}, " +
+                $"Direction: {payload.Direction}");
+            return StatusCode(200);
+        }
+
+        [HttpPost]
+        public IActionResult OutboundCallStatus([FromBody] Payload payload)
+        {
+            Console.WriteLine($"Outbound-Call Status update at {DateTime.Now.ToString("o")}.");
             Console.WriteLine(
                 $"CallSid: {payload.CallSid}, " +
                 $"CallStatus: {payload.CallSid}, " +
@@ -97,6 +146,13 @@ namespace Softphone.Frontend.Controllers
             public string From { get; set; }
             public string To { get; set; }
             public string Direction { get; set; }
+        }
+
+        private string GetBaseUrl()
+        {
+            var host = Request.Host.ToUriComponent();
+            var pathBase = Request.PathBase.ToUriComponent();
+            return $"{Request.Scheme}://{host}{pathBase}";
         }
     }
 }
