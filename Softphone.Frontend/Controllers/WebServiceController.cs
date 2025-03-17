@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using Softphone.Frontend.Helpers;
 using Softphone.Frontend.Services;
 using Twilio.Jwt.AccessToken;
 
 namespace Softphone.Frontend.Controllers
 {
+    [EnableCors("AllowSpecificOrigins")]
     public class WebServiceController : ControllerBase
     {
         private IWorkspaceService _workspaceService;

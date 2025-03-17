@@ -17,8 +17,12 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddControllers().AddNewtonsoftJson(o => { o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore; });
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(o => o.LoginPath = new PathString("/Security/Login"));
 builder.Services.AddControllersWithViews(o => o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
-builder.Services.AddCors(o => o.AddPolicy("AllowSpecificOrigins", p => { p.WithOrigins("https://localhost:7245").AllowAnyHeader().AllowAnyMethod(); }));
 builder.Services.AddElmah<XmlFileErrorLog>(o => { o.LogPath = "~/elmah_logs"; });
+
+builder.Services.AddCors(o => 
+        o.AddPolicy("AllowSpecificOrigins", p => 
+        { p.WithOrigins("https://localhost:7245").AllowAnyHeader().AllowAnyMethod(); }
+    ));
 
 builder.Services.AddScoped<Client>(_ =>
     new Client(
@@ -51,8 +55,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseElmah();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
+app.UseCors("AllowSpecificOrigins");
+app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 app.Run();
