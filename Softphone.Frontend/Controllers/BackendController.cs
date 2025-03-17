@@ -63,6 +63,9 @@ namespace Softphone.Frontend.Controllers
         {
             try
             {
+                Console.WriteLine($"Inbound Voice request at {DateTime.Now.ToString("o")}.");
+                Console.WriteLine($"From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
+            
                 //Get user based on "To" number
                 var workspaceNumber = await _workspaceService.FindByTwilioNumber(payload.To);
                 var workspaceNumberUsers = await _workspaceService.GetTwilioNumberUsers(workspaceNumber.Id);
@@ -101,7 +104,7 @@ namespace Softphone.Frontend.Controllers
         [HttpPost]
         public IActionResult InboundCallStatus([FromBody] Payload payload)
         {
-            Console.WriteLine($"Inbound-Call Status update at {DateTime.Now.ToString("o")}.");
+            Console.WriteLine($"Inbound Call Status update at {DateTime.Now.ToString("o")}.");
             Console.WriteLine(
                 $"CallSid: {payload.CallSid}, " +
                 $"CallStatus: {payload.CallSid}, " +
@@ -114,7 +117,7 @@ namespace Softphone.Frontend.Controllers
         [HttpPost]
         public IActionResult OutboundCallStatus([FromBody] Payload payload)
         {
-            Console.WriteLine($"Outbound-Call Status update at {DateTime.Now.ToString("o")}.");
+            Console.WriteLine($"Outbound Call Status update at {DateTime.Now.ToString("o")}.");
             Console.WriteLine(
                 $"CallSid: {payload.CallSid}, " +
                 $"CallStatus: {payload.CallSid}, " +
