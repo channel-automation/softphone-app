@@ -59,7 +59,7 @@ namespace Softphone.Frontend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> InboundVoice([FromBody] Payload payload)
+        public async Task<IActionResult> InboundVoice([FromForm] Payload payload)
         {
             Console.WriteLine($"Inbound Voice request at {DateTime.Now.ToString("o")}.");
             Console.WriteLine($"From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
@@ -101,7 +101,7 @@ namespace Softphone.Frontend.Controllers
         }
 
         [HttpPost]
-        public IActionResult InboundCallStatus([FromBody] Payload payload)
+        public IActionResult InboundCallStatus([FromForm] Payload payload)
         {
             Console.WriteLine($"Inbound Call Status update at {DateTime.Now.ToString("o")}.");
             Console.WriteLine(
@@ -114,7 +114,7 @@ namespace Softphone.Frontend.Controllers
         }
 
         [HttpPost]
-        public IActionResult OutboundCallStatus([FromBody] Payload payload)
+        public IActionResult OutboundCallStatus([FromForm] Payload payload)
         {
             Console.WriteLine($"Outbound Call Status update at {DateTime.Now.ToString("o")}.");
             Console.WriteLine(
@@ -127,7 +127,7 @@ namespace Softphone.Frontend.Controllers
         }
 
         [HttpPost]
-        public IActionResult CallRecordingStatus([FromBody] Payload payload)
+        public IActionResult CallRecordingStatus([FromForm] Payload payload)
         {
             Console.WriteLine($"Call Recording Status update at {DateTime.Now.ToString("o")}.");
             Console.WriteLine(
