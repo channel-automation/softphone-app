@@ -67,6 +67,9 @@ namespace Softphone.Frontend.Controllers
                 
                 Console.WriteLine($"Inbound Voice request at {DateTime.Now.ToString("o")}.");
                 Console.WriteLine($"From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
+
+                Response.ContentType = "text/html";
+                return Content("<b>Hello World!</b>");
             
                 //Get user based on "To" number
                 var workspaceNumber = await _workspaceService.FindByTwilioNumber(payload.To);
