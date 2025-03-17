@@ -59,10 +59,12 @@ namespace Softphone.Frontend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> InboundVoice([FromBody] Payload payload)
+        public async Task<IActionResult> InboundVoice() /*InboundVoice([FromBody] Payload payload)*/
         {
             try
             {
+                var payload = new Payload(); //just for testing
+                
                 Console.WriteLine($"Inbound Voice request at {DateTime.Now.ToString("o")}.");
                 Console.WriteLine($"From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
             
