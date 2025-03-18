@@ -81,8 +81,8 @@ namespace Softphone.Frontend.Controllers
                 dial.Client(
                     identity: user.Username,
                     statusCallbackEvent: new EventEnum[] { EventEnum.Initiated, EventEnum.Ringing, EventEnum.Answered, EventEnum.Completed },
-                    statusCallback: new Uri($"{GetBaseUrl()}/Backend/InboundCallStatus"),
-                    statusCallbackMethod: new Twilio.Http.HttpMethod("post")
+                    //statusCallback: new Uri($"{GetBaseUrl()}/Backend/InboundCallStatus"),
+                    //statusCallbackMethod: new Twilio.Http.HttpMethod("post")
                 );
 
                 voiceResponse.Append(dial);
