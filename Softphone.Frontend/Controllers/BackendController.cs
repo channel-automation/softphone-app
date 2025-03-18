@@ -81,7 +81,8 @@ namespace Softphone.Frontend.Controllers
                 dial.Client(
                     identity: user.Username,
                     statusCallbackEvent: new EventEnum[] { EventEnum.Initiated, EventEnum.Ringing, EventEnum.Answered, EventEnum.Completed },
-                    statusCallback: new Uri($"{GetBaseUrl()}/Backend/InboundCallStatus")
+                    statusCallback: new Uri($"{GetBaseUrl()}/Backend/InboundCallStatus"),
+                    statusCallbackMethod: new Twilio.Http.HttpMethod("post")
                 );
 
                 voiceResponse.Append(dial);
@@ -97,7 +98,7 @@ namespace Softphone.Frontend.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpPost]
         public IActionResult InboundCallStatus([FromForm] Payload payload)
         {
             Console.WriteLine($"Inbound Call Status update at {DateTime.Now.ToString("o")}.");
@@ -110,7 +111,7 @@ namespace Softphone.Frontend.Controllers
             return StatusCode(200);
         }
 
-        [HttpGet]
+        [HttpPost]
         public IActionResult OutboundCallStatus([FromForm] Payload payload)
         {
             Console.WriteLine($"Outbound Call Status update at {DateTime.Now.ToString("o")}.");
@@ -123,7 +124,7 @@ namespace Softphone.Frontend.Controllers
             return StatusCode(200);
         }
 
-        [HttpGet]
+        [HttpPost]
         public IActionResult CallRecordingStatus([FromForm] Payload payload)
         {
             Console.WriteLine($"Call Recording Status update at {DateTime.Now.ToString("o")}.");
