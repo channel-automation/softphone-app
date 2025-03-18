@@ -24,13 +24,16 @@ namespace Softphone.Models
         [Column("channel_automation_api_key")]
         public string ChannelAutomationAPIKey { get; set; }
 
-        [Column("call_inbound_webhook")]
-        public string CallInboundWebhook { get; set; }
+        [Column("inbound_voice_endpoint")]
+        public string InboundVoiceEndpoint { get; set; }
 
-        [Column("call_outbound_webhook")]
-        public string CallOutboundWebhook { get; set; }
+        [Column("outbound_voice_endpoint")]
+        public string OutboundVoiceEndpoint { get; set; }
 
-        [Column("call_status_webhook")]
-        public string CallStatusWebhook { get; set; }
+        [Column("inbound_call_status_endpoint")]
+        public string InboundCallStatusEndpoint { get; set; }
+
+        [Column("outbound_call_status_endpoint")]
+        public string OutboundCallStatusEndpoint { get; set; }
     }
 }

@@ -11,20 +11,26 @@
     </div>
     <div class="form-group row">
         <div class="col-12">
-            <label class="text-purple">Call Inbound Webhook</label>
-            <input type="text" asp-for="CallInboundWebhook" class="form-control" />
+            <label class="text-purple">Inbound Voice Endpoint</label>
+            <input type="text" asp-for="InboundVoiceEndpoint" class="form-control" />
         </div>
     </div>
     <div class="form-group row">
         <div class="col-12">
-            <label class="text-purple">Call Outbound Webhook</label>
-            <input type="text" asp-for="CallOutboundWebhook" class="form-control" />
+            <label class="text-purple">Outbound Voice Endpoint</label>
+            <input type="text" asp-for="OutboundVoiceEndpoint" class="form-control" />
         </div>
     </div>
     <div class="form-group row">
         <div class="col-12">
-            <label class="text-purple">Call Status Webhook</label>
-            <input type="text" asp-for="CallStatusWebhook" class="form-control" />
+            <label class="text-purple">Inbound Call Status Endpoint</label>
+            <input type="text" asp-for="InboundCallStatusEndpoint" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Outbound Call Status Endpoint</label>
+            <input type="text" asp-for="OutboundCallStatusEndpoint" class="form-control" />
         </div>
     </div>
 </form>
@@ -51,19 +57,24 @@
             toastr.error("Channel Automation API Key is required.", "Error..");
             return false;
         }
-        if (form.find("[name=CallInboundWebhook]").val().trim() == "") {
-            form.find("[name=CallInboundWebhook]").focus();
-            toastr.error("Call Inbound Webhook is required.", "Error..");
+        if (form.find("[name=InboundVoiceEndpoint]").val().trim() == "") {
+            form.find("[name=InboundVoiceEndpoint]").focus();
+            toastr.error("Inbound Voice Endpoint is required.", "Error..");
             return false;
         }
-        if (form.find("[name=CallOutboundWebhook]").val().trim() == "") {
-            form.find("[name=CallOutboundWebhook]").focus();
-            toastr.error("Call Outbound Webhook is required.", "Error..");
+        if (form.find("[name=OutboundVoiceEndpoint]").val().trim() == "") {
+            form.find("[name=OutboundVoiceEndpoint]").focus();
+            toastr.error("Outbound Voice Endpoint is required.", "Error..");
             return false;
         }
-        if (form.find("[name=CallStatusWebhook]").val().trim() == "") {
-            form.find("[name=CallStatusWebhook]").focus();
-            toastr.error("Call Status Webhook is required.", "Error..");
+        if (form.find("[name=InboundCallStatusEndpoint]").val().trim() == "") {
+            form.find("[name=InboundCallStatusEndpoint]").focus();
+            toastr.error("Inbound Call Status Endpoint is required.", "Error..");
+            return false;
+        }
+        if (form.find("[name=OutboundCallStatusEndpoint]").val().trim() == "") {
+            form.find("[name=OutboundCallStatusEndpoint]").focus();
+            toastr.error("Outbound Call Status Endpoint is required.", "Error..");
             return false;
         }
         //Server Processing

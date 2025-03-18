@@ -1,0 +1,212 @@
+﻿<error errorId="fa7de549-9c61-42b1-9b25-233c0bc8175f" application="Softphone" host="DESKTOP-4GLKI2G" type="Supabase.Postgrest.Exceptions.PostgrestException" message="{&quot;code&quot;:&quot;PGRST204&quot;,&quot;details&quot;:null,&quot;hint&quot;:null,&quot;message&quot;:&quot;Could not find the 'created_at' column of 'settings' in the schema cache&quot;}" source="Supabase.Postgrest" detail="# caller: @C:\Sources\ElmahCore\ElmahCore\ElmahCore\Internal$\CallerInfo.cs:9&#xD;&#xA;Supabase.Postgrest.Exceptions.PostgrestException: {&quot;code&quot;:&quot;PGRST204&quot;,&quot;details&quot;:null,&quot;hint&quot;:null,&quot;message&quot;:&quot;Could not find the 'created_at' column of 'settings' in the schema cache&quot;}&#xD;&#xA;   at Supabase.Postgrest.Helpers.MakeRequest(ClientOptions clientOptions, HttpMethod method, String url, JsonSerializerSettings serializerSettings, Object data, Dictionary`2 headers, CancellationToken cancellationToken)&#xD;&#xA;   at Supabase.Postgrest.Helpers.MakeRequest[T](ClientOptions clientOptions, HttpMethod method, String url, JsonSerializerSettings serializerSettings, Object data, Dictionary`2 headers, Func`1 getHeaders, CancellationToken cancellationToken)&#xD;&#xA;   at Softphone.Services.SettingsService.Update(SettingsBO model, String username) in D:\Files\Documents\Verden Software\Freelancing\Channel Automation\GitHub\softphone-app\Softphone\Services\SettingsService.cs:line 30&#xD;&#xA;   at Softphone.Controllers.SettingsController.EditSubmit(SettingsBO model) in D:\Files\Documents\Verden Software\Freelancing\Channel Automation\GitHub\softphone-app\Softphone\Controllers\SettingsController.cs:line 52&#xD;&#xA;   at Softphone.Controllers.SettingsController.Save(SettingsBO model) in D:\Files\Documents\Verden Software\Freelancing\Channel Automation\GitHub\softphone-app\Softphone\Controllers\SettingsController.cs:line 29&#xD;&#xA;   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)&#xD;&#xA;   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)&#xD;&#xA;   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;&#xA;   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)&#xD;&#xA;   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)&#xD;&#xA;   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeInnerFilterAsync&gt;g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;&#xA;   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeNextResourceFilter&gt;g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;&#xA;   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)&#xD;&#xA;   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)&#xD;&#xA;   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;&#xA;   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;&#xA;   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;&#xA;   at Microsoft.AspNetCore.Routing.EndpointMiddleware.&lt;Invoke&gt;g__AwaitRequestTask|6_0(Endpoint endpoint, Task requestTask, ILogger logger)&#xD;&#xA;   at ElmahCore.Mvc.ErrorLogMiddleware.InvokeAsync(HttpContext context)" user="developer" time="2025-03-18T04:21:46.1902429Z" statusCode="500">
+  <serverVariables>
+    <item name="TotalParsedHeaderSize">
+      <value string="1666" />
+    </item>
+    <item name="StreamId">
+      <value string="9" />
+    </item>
+    <item name="InputRemaining">
+      <value string="0" />
+    </item>
+    <item name="RequestBodyStarted">
+      <value string="True" />
+    </item>
+    <item name="EndStreamReceived">
+      <value string="True" />
+    </item>
+    <item name="ReceivedEmptyRequestBody">
+      <value string="False" />
+    </item>
+    <item name="CanReuse">
+      <value string="False" />
+    </item>
+    <item name="ConnectionIdFeature">
+      <value string="0HNB5QGOVBAPG" />
+    </item>
+    <item name="HasStartedConsumingRequestBody">
+      <value string="True" />
+    </item>
+    <item name="MaxRequestBodySize">
+      <value string="30000000" />
+    </item>
+    <item name="MinRequestBodyDataRate">
+      <value string="Bytes per second: 240, Grace Period: 00:00:05" />
+    </item>
+    <item name="AllowSynchronousIO">
+      <value string="False" />
+    </item>
+    <item name="TraceIdentifier">
+      <value string="0HNB5QGOVBAPG:00000009" />
+    </item>
+    <item name="IsUpgradableRequest">
+      <value string="False" />
+    </item>
+    <item name="IsUpgraded">
+      <value string="False" />
+    </item>
+    <item name="RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="RemotePort">
+      <value string="60993" />
+    </item>
+    <item name="LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="LocalPort">
+      <value string="7245" />
+    </item>
+    <item name="Scheme">
+      <value string="https" />
+    </item>
+    <item name="Method">
+      <value string="Post" />
+    </item>
+    <item name="MethodText">
+      <value string="POST" />
+    </item>
+    <item name="Path">
+      <value string="/Settings/Save" />
+    </item>
+    <item name="QueryString">
+      <value string="" />
+    </item>
+    <item name="RawTarget">
+      <value string="/Settings/Save" />
+    </item>
+    <item name="HttpVersion">
+      <value string="HTTP/2" />
+    </item>
+    <item name="Header_Accept">
+      <value string="*/*" />
+    </item>
+    <item name="Header_Host">
+      <value string="localhost:7245" />
+    </item>
+    <item name="Header_User-Agent">
+      <value string="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0" />
+    </item>
+    <item name="Header_:method">
+      <value string="POST" />
+    </item>
+    <item name="Header_Accept-Encoding">
+      <value string="gzip, deflate, br, zstd" />
+    </item>
+    <item name="Header_Accept-Language">
+      <value string="en-US,en;q=0.9" />
+    </item>
+    <item name="Header_Content-Type">
+      <value string="application/x-www-form-urlencoded; charset=UTF-8" />
+    </item>
+    <item name="Header_Cookie">
+      <value string=".AspNetCore.Antiforgery.3priFVFKuRU=CfDJ8N3Z2DluEjpGnf3DCm-4c-KqWUt_zk5uRY0Xir1AFPpNstNP195AnMgFB6zcDA6HGIw3c8IwX7rBr0IKPbDaFbYyfyvfU5hDyJAxqPjkGhs-vgSOQ0gAiwI19sJQ82lyas00eedOTMctl3vQebLQgqY,.AspNetCore.Antiforgery.lLh0eyKoCpw=CfDJ8N3Z2DluEjpGnf3DCm-4c-L7TKL_BZaarROyjA8Tqie8vZkLVoxb1PA3ohn7j6mZdSVGU_JzUndBfmbe5I9p1s0gR7QwhN-j-C2FE46okVzSeI95WkWYopjEwqPdotfhAsAz3kqY8pcywXxYRBPqFZw,.AspNetCore.Antiforgery.NsFokeSrlwc=CfDJ8N3Z2DluEjpGnf3DCm-4c-KeI29GMBNHkuNk-ch7Fcv61wdP54NgwUyjr2jBXRubLa4K_YmWmbsheSgdvvBmwtg7Yo3FX-LPhzs7Yp3L4Xzf3JbElwhmpBf60ho6NoKlhCWeGv7Ub160zTaCirT0H48,.AspNetCore.Cookies=CfDJ8N3Z2DluEjpGnf3DCm-4c-IEfEtfFJ9ypJsatXhdnSMR-y8LeIGXtLbuhGSdP5UDzBwIVsHhGsoiYzBzVIb2yHJa9aEXlMVBzTLu3MLBzg4h5IiceMJjbaq-iEumZwiS7UAESozl8ZsZM-Y7FHD9cnxv-YTEYgg1jOz6-NZUIpDW2sH8KnkQaR4H0OAQSzfUQ7NKSof9IFC9bJYMjcMRh4se8kNSSgcc1el3YR7LFeud3hcCbbsMhxxjeKqJ6NVXsp8Nbi5NnRunqZEKoJxwmTCzZiL6ETA1x0aWwYuWqFn5N5OKrxculdPFTEUsmgYmD6l97mCa_rxAHnO-P3v8AwmQR8xDtGrMEO3SqxaZZ69Nkjyx-f2pKbFTefLLqG7m9tExG2G1l3GB9z3sCsyJ2wU" />
+    </item>
+    <item name="Header_Origin">
+      <value string="https://localhost:7245" />
+    </item>
+    <item name="Header_Referer">
+      <value string="https://localhost:7245/" />
+    </item>
+    <item name="Header_Content-Length">
+      <value string="665" />
+    </item>
+    <item name="Header_sec-ch-ua-platform">
+      <value string="&quot;Windows&quot;" />
+    </item>
+    <item name="Header_X-Requested-With">
+      <value string="XMLHttpRequest" />
+    </item>
+    <item name="Header_sec-ch-ua">
+      <value string="&quot;Chromium&quot;;v=&quot;134&quot;, &quot;Not:A-Brand&quot;;v=&quot;24&quot;, &quot;Microsoft Edge&quot;;v=&quot;134&quot;" />
+    </item>
+    <item name="Header_sec-ch-ua-mobile">
+      <value string="?0" />
+    </item>
+    <item name="Header_sec-fetch-site">
+      <value string="same-origin" />
+    </item>
+    <item name="Header_sec-fetch-mode">
+      <value string="cors" />
+    </item>
+    <item name="Header_sec-fetch-dest">
+      <value string="empty" />
+    </item>
+    <item name="Header_priority">
+      <value string="u=1, i" />
+    </item>
+    <item name="RequestTrailersAvailable">
+      <value string="True" />
+    </item>
+    <item name="StatusCode">
+      <value string="200" />
+    </item>
+    <item name="HasResponseStarted">
+      <value string="False" />
+    </item>
+    <item name="HasFlushedHeaders">
+      <value string="False" />
+    </item>
+    <item name="HasResponseCompleted">
+      <value string="False" />
+    </item>
+    <item name="Connection_Id">
+      <value string="0HNB5QGOVBAPG" />
+    </item>
+    <item name="Connection_RemoteIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_RemotePort">
+      <value string="60993" />
+    </item>
+    <item name="Connection_LocalIpAddress">
+      <value string="::1" />
+    </item>
+    <item name="Connection_LocalPort">
+      <value string="7245" />
+    </item>
+    <item name="HttpStatusCode">
+      <value string="500" />
+    </item>
+  </serverVariables>
+  <form>
+    <item name="__RequestVerificationToken">
+      <value string="CfDJ8N3Z2DluEjpGnf3DCm-4c-IBQNNjgLfVz_1AbSdE3AgDpjKr_2tqJV210FZ8R09CxqTtY9vdCWNzAs_IdBBkBd9JhPIr1OxmtC-Sa3VQ3Gojpy_ZsjCzIbUFCSiWzH_DTMOWasDToU2KcGewnNGptqqxCxa1bapa3Fw2NNJ5RTW2r0jgWCaZ1Vare18PiMGfMg" />
+    </item>
+    <item name="Id">
+      <value string="1" />
+    </item>
+    <item name="ChannelAutomationAPIKey">
+      <value string="-" />
+    </item>
+    <item name="InboundVoiceEndpoint">
+      <value string="https://beta.sofphone.channelautomation.com/Backend/InboundVoice" />
+    </item>
+    <item name="OutboundVoiceEndpoint">
+      <value string="https://beta.sofphone.channelautomation.com/Backend/OutboundVoice" />
+    </item>
+    <item name="InboundCallStatusEndpoint">
+      <value string="https://beta.sofphone.channelautomation.com/Backend/InboundCallStatus" />
+    </item>
+    <item name="OutboundCallStatusEndpoint">
+      <value string=" https://beta.sofphone.channelautomation.com/Backend/OutboundCallStatus" />
+    </item>
+    <item name="$request-body">
+      <value string="__RequestVerificationToken=CfDJ8N3Z2DluEjpGnf3DCm-4c-IBQNNjgLfVz_1AbSdE3AgDpjKr_2tqJV210FZ8R09CxqTtY9vdCWNzAs_IdBBkBd9JhPIr1OxmtC-Sa3VQ3Gojpy_ZsjCzIbUFCSiWzH_DTMOWasDToU2KcGewnNGptqqxCxa1bapa3Fw2NNJ5RTW2r0jgWCaZ1Vare18PiMGfMg&amp;Id=1&amp;ChannelAutomationAPIKey=-&amp;InboundVoiceEndpoint=https%3A%2F%2Fbeta.sofphone.channelautomation.com%2FBackend%2FInboundVoice&amp;OutboundVoiceEndpoint=https%3A%2F%2Fbeta.sofphone.channelautomation.com%2FBackend%2FOutboundVoice&amp;InboundCallStatusEndpoint=https%3A%2F%2Fbeta.sofphone.channelautomation.com%2FBackend%2FInboundCallStatus&amp;OutboundCallStatusEndpoint=+https%3A%2F%2Fbeta.sofphone.channelautomation.com%2FBackend%2FOutboundCallStatus" />
+    </item>
+  </form>
+  <cookies>
+    <item name=".AspNetCore.Antiforgery.3priFVFKuRU">
+      <value string="CfDJ8N3Z2DluEjpGnf3DCm-4c-KqWUt_zk5uRY0Xir1AFPpNstNP195AnMgFB6zcDA6HGIw3c8IwX7rBr0IKPbDaFbYyfyvfU5hDyJAxqPjkGhs-vgSOQ0gAiwI19sJQ82lyas00eedOTMctl3vQebLQgqY" />
+    </item>
+    <item name=".AspNetCore.Antiforgery.lLh0eyKoCpw">
+      <value string="CfDJ8N3Z2DluEjpGnf3DCm-4c-L7TKL_BZaarROyjA8Tqie8vZkLVoxb1PA3ohn7j6mZdSVGU_JzUndBfmbe5I9p1s0gR7QwhN-j-C2FE46okVzSeI95WkWYopjEwqPdotfhAsAz3kqY8pcywXxYRBPqFZw" />
+    </item>
+    <item name=".AspNetCore.Antiforgery.NsFokeSrlwc">
+      <value string="CfDJ8N3Z2DluEjpGnf3DCm-4c-KeI29GMBNHkuNk-ch7Fcv61wdP54NgwUyjr2jBXRubLa4K_YmWmbsheSgdvvBmwtg7Yo3FX-LPhzs7Yp3L4Xzf3JbElwhmpBf60ho6NoKlhCWeGv7Ub160zTaCirT0H48" />
+    </item>
+    <item name=".AspNetCore.Cookies">
+      <value string="CfDJ8N3Z2DluEjpGnf3DCm-4c-IEfEtfFJ9ypJsatXhdnSMR-y8LeIGXtLbuhGSdP5UDzBwIVsHhGsoiYzBzVIb2yHJa9aEXlMVBzTLu3MLBzg4h5IiceMJjbaq-iEumZwiS7UAESozl8ZsZM-Y7FHD9cnxv-YTEYgg1jOz6-NZUIpDW2sH8KnkQaR4H0OAQSzfUQ7NKSof9IFC9bJYMjcMRh4se8kNSSgcc1el3YR7LFeud3hcCbbsMhxxjeKqJ6NVXsp8Nbi5NnRunqZEKoJxwmTCzZiL6ETA1x0aWwYuWqFn5N5OKrxculdPFTEUsmgYmD6l97mCa_rxAHnO-P3v8AwmQR8xDtGrMEO3SqxaZZ69Nkjyx-f2pKbFTefLLqG7m9tExG2G1l3GB9z3sCsyJ2wU" />
+    </item>
+  </cookies>
+</error>

@@ -45,9 +45,10 @@ public class SettingsController : Controller
         if (!errors.Any())
         {
             settings.ChannelAutomationAPIKey = model.ChannelAutomationAPIKey;
-            settings.CallInboundWebhook = model.CallInboundWebhook;
-            settings.CallOutboundWebhook = model.CallOutboundWebhook;
-            settings.CallStatusWebhook = model.CallStatusWebhook;
+            settings.InboundVoiceEndpoint = model.InboundVoiceEndpoint;
+            settings.OutboundVoiceEndpoint = model.OutboundVoiceEndpoint;
+            settings.InboundCallStatusEndpoint = model.InboundCallStatusEndpoint;
+            settings.OutboundCallStatusEndpoint = model.OutboundCallStatusEndpoint;
             await _settingsService.Update(settings, User.Identity.Name);
         }
 
