@@ -77,12 +77,18 @@ namespace Softphone.Frontend.Controllers
                     callerId: workspaceNumber.TwilioNumber,
                     answerOnBridge: true,
                     timeout: 30);
-
+                /*
                 dial.Client(
                     identity: user.Username,
                     statusCallbackEvent: new EventEnum[] { EventEnum.Initiated, EventEnum.Ringing, EventEnum.Answered, EventEnum.Completed },
-                    //statusCallback: new Uri($"{GetBaseUrl()}/Backend/InboundCallStatus"),
-                    //statusCallbackMethod: new Twilio.Http.HttpMethod("post")
+                    statusCallback: new Uri($"{GetBaseUrl()}/Backend/InboundCallStatus"),
+                    statusCallbackMethod: new Twilio.Http.HttpMethod("post")
+                );
+                */
+
+                dial.Client(
+                    identity: user.Username,
+                    statusCallbackEvent: new EventEnum[] { EventEnum.Initiated, EventEnum.Ringing, EventEnum.Answered, EventEnum.Completed }
                 );
 
                 voiceResponse.Append(dial);
