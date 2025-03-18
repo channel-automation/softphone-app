@@ -65,25 +65,31 @@ namespace Softphone.Controllers
                 //Get user based on "To" number
                 var workspaceNumber = await _workspaceService.FindByTwilioNumber(payload.To);
                 var workspaceNumberUsers = await _workspaceService.GetTwilioNumberUsers(workspaceNumber.Id);
-                var user = await _userService.FindById(workspaceNumberUsers.First().UserId);
 
                 VoiceResponse voiceResponse = new VoiceResponse();
 
                 // Add a small delay to ensure client is ready
                 voiceResponse.Pause(1);
 
-                var dial = new Dial(
+                //Create dial for each user that is assigned on the twilio number
+                foreach (long userId in workspaceNumberUsers.Select(w => w.UserId))
+                {
+                    var user = await _userService.FindById(userId);
+
+                    var dial = new Dial(
                     callerId: payload.To,
                     answerOnBridge: true,
                     timeout: 30);
 
-                dial.Client(
-                    identity: user.Username,
-                    statusCallbackEvent: new Client.EventEnum[] { Client.EventEnum.Initiated, Client.EventEnum.Ringing, Client.EventEnum.Answered, Client.EventEnum.Completed },
-                    statusCallback: new Uri($"{GetBaseUrl()}/Backend/InboundStatusCallback")
-                );
+                    dial.Client(
+                        identity: user.Username,
+                        statusCallbackEvent: new Client.EventEnum[] { Client.EventEnum.Initiated, Client.EventEnum.Ringing, Client.EventEnum.Answered, Client.EventEnum.Completed },
+                        statusCallback: new Uri($"{GetBaseUrl()}/Backend/InboundStatusCallback")
+                    );
 
-                voiceResponse.Append(dial);
+                    voiceResponse.Append(dial);
+                }
+
                 Console.WriteLine($"Inbound Voice Generated TwiML: {voiceResponse.ToString()}");
 
                 Response.ContentType = "text/xml";
