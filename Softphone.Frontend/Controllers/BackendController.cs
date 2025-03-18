@@ -77,18 +77,11 @@ namespace Softphone.Frontend.Controllers
                     callerId: workspaceNumber.TwilioNumber,
                     answerOnBridge: true,
                     timeout: 30);
-                /*
-                dial.Client(
-                    identity: user.Username,
-                    statusCallbackEvent: new EventEnum[] { EventEnum.Initiated, EventEnum.Ringing, EventEnum.Answered, EventEnum.Completed },
-                    statusCallback: new Uri($"{GetBaseUrl()}/Backend/InboundCallStatus"),
-                    statusCallbackMethod: new Twilio.Http.HttpMethod("post")
-                );
-                */
 
                 dial.Client(
                     identity: user.Username,
-                    statusCallbackEvent: new EventEnum[] { EventEnum.Initiated, EventEnum.Ringing, EventEnum.Answered, EventEnum.Completed }
+                    statusCallbackEvent: new EventEnum[] { EventEnum.Initiated, EventEnum.Ringing, EventEnum.Answered, EventEnum.Completed },
+                    statusCallback: new Uri($"{GetBaseUrl()}/Backend/InboundCallStatusProgress")
                 );
 
                 voiceResponse.Append(dial);
@@ -107,20 +100,20 @@ namespace Softphone.Frontend.Controllers
         [HttpPost]
         public IActionResult InboundCallStatus([FromForm] Payload payload)
         {
-            Console.WriteLine($"Inbound Call Status update at {DateTime.Now.ToString("o")}.");
+            Console.WriteLine($"Inbound Call Status final at {DateTime.Now.ToString("o")}.");
             Console.WriteLine(
                 $"CallSid: {payload.CallSid}, " +
                 $"CallStatus: {payload.CallStatus}, " +
                 $"From: {payload.From}, " +
-                $"To: {payload.To}, " +
-                $"Direction: {payload.Direction}");
+                $"To: {payload.To}," +
+                $" Direction: {payload.Direction}");
             return StatusCode(200);
         }
 
         [HttpPost]
         public IActionResult OutboundCallStatus([FromForm] Payload payload)
         {
-            Console.WriteLine($"Outbound Call Status update at {DateTime.Now.ToString("o")}.");
+            Console.WriteLine($"Outbound Call Status final at {DateTime.Now.ToString("o")}.");
             Console.WriteLine(
                 $"CallSid: {payload.CallSid}, " +
                 $"CallStatus: {payload.CallStatus}, " +
@@ -133,12 +126,52 @@ namespace Softphone.Frontend.Controllers
         [HttpPost]
         public IActionResult CallRecordingStatus([FromForm] Payload payload)
         {
-            Console.WriteLine($"Call Recording Status update at {DateTime.Now.ToString("o")}.");
+            Console.WriteLine($"Call Recording Status final at {DateTime.Now.ToString("o")}.");
             Console.WriteLine(
                 $"RecordingSid: {payload.RecordingSid}, " +
                 $"RecordingStatus: {payload.RecordingStatus}, " +
                 $"RecordingUrl: {payload.RecordingUrl}, " +
                 $"CallSid: {payload.CallSid}");
+            return StatusCode(200);
+        }
+
+        [HttpGet]
+        public IActionResult InboundCallStatusProgress()
+        {
+            Payload payload = new Payload();
+            payload.CallSid = Request.Query["CallSid"];
+            payload.CallStatus = Request.Query["CallStatus"];
+            payload.From = Request.Query["From"];
+            payload.To = Request.Query["To"];
+            payload.Direction = Request.Query["Direction"];
+
+            Console.WriteLine($"Inbound Call Status progress at {DateTime.Now.ToString("o")}.");
+            Console.WriteLine(
+                $"CallSid: {payload.CallSid}, " +
+                $"CallStatus: {payload.CallStatus}, " +
+                $"From: {payload.From}, " +
+                $"To: {payload.To}," +
+                $" Direction: {payload.Direction}");
+            return StatusCode(200);
+        }
+
+        [HttpGet]
+        public IActionResult OutboundCallStatusProgress()
+        {
+            Payload payload = new Payload();
+            payload.CallSid = Request.Query["CallSid"];
+            payload.CallStatus = Request.Query["CallStatus"];
+            payload.From = Request.Query["From"];
+            payload.To = Request.Query["To"];
+            payload.Direction = Request.Query["Direction"];
+
+            Console.WriteLine($"Outbound Call Status progress at {DateTime.Now.ToString("o")}.");
+            Console.WriteLine(
+                $"CallSid: {payload.CallSid}, " +
+                $"CallStatus: {payload.CallStatus}, " +
+                $"From: {payload.From}, " +
+                $"To: {payload.To}," +
+                $" Direction: {payload.Direction}");
             return StatusCode(200);
         }
 
