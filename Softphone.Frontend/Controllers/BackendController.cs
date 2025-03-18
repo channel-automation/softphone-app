@@ -13,7 +13,9 @@ using static Twilio.TwiML.Voice.Client;
 
 namespace Softphone.Frontend.Controllers
 {
+    [IgnoreAntiforgeryToken]
     [EnableCors("AllowSpecificOrigins")]
+    [Route("api/[controller]")]
     public class BackendController : ControllerBase
     {
         private IWorkspaceService _workspaceService;
@@ -61,6 +63,8 @@ namespace Softphone.Frontend.Controllers
         [HttpPost]
         public async Task<IActionResult> InboundVoice([FromBody] Payload payload)
         {
+            Console.WriteLine($"Inbound Voice request at {DateTime.Now.ToString("o")}.");
+            Console.WriteLine($"From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
             try
             {
                 //Get user based on "To" number
