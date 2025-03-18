@@ -22,6 +22,7 @@ namespace Softphone.Frontend.Controllers
             _userService = userService;
         }
 
+        [HttpGet]
         public async Task<IActionResult> AccessToken(string key, string username)
         {
             if (key != BackKey.Value) return StatusCode(401, "Unathorized Access!");
@@ -80,8 +81,7 @@ namespace Softphone.Frontend.Controllers
                 dial.Client(
                     identity: user.Username,
                     statusCallbackEvent: new EventEnum[] { EventEnum.Initiated, EventEnum.Ringing, EventEnum.Answered, EventEnum.Completed },
-                    statusCallback: new Uri($"{GetBaseUrl()}/Backend/InboundCallStatus"),
-                    statusCallbackMethod: Twilio.Http.HttpMethod.Post
+                    statusCallback: new Uri($"{GetBaseUrl()}/Backend/InboundCallStatus")
                 );
 
                 voiceResponse.Append(dial);
@@ -97,7 +97,7 @@ namespace Softphone.Frontend.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet]
         public IActionResult InboundCallStatus([FromForm] Payload payload)
         {
             Console.WriteLine($"Inbound Call Status update at {DateTime.Now.ToString("o")}.");
@@ -110,7 +110,7 @@ namespace Softphone.Frontend.Controllers
             return StatusCode(200);
         }
 
-        [HttpPost]
+        [HttpGet]
         public IActionResult OutboundCallStatus([FromForm] Payload payload)
         {
             Console.WriteLine($"Outbound Call Status update at {DateTime.Now.ToString("o")}.");
@@ -123,7 +123,7 @@ namespace Softphone.Frontend.Controllers
             return StatusCode(200);
         }
 
-        [HttpPost]
+        [HttpGet]
         public IActionResult CallRecordingStatus([FromForm] Payload payload)
         {
             Console.WriteLine($"Call Recording Status update at {DateTime.Now.ToString("o")}.");
