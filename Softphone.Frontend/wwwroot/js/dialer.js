@@ -51,7 +51,7 @@
         $.ajax({
             //url: "https://webhook.call-app.channelautomation.com/api/token",
             url: "https://new-backend-dynamic-production.up.railway.app/api/token?workspaceId=" + globalWorkspaceId + "&identity=" + globalUsername,
-            //url: "https://beta.sofphone.channelautomation.com/Backend/AccessToken?key=ygRiOET8F1jpqwyoh8NYrcYDh3qAQJwt&username=" + globalUsername,
+            //url: "https://beta.sofphone.channelautomation.com/api/Backend/AccessToken?key=ygRiOET8F1jpqwyoh8NYrcYDh3qAQJwt&username=" + globalUsername,
             type: "get", dataType: "json",
             success: function (response) {
                 if (!device) setupDevice(response.token);

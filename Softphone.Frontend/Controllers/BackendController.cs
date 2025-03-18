@@ -1,14 +1,10 @@
-﻿using System;
-using System.Diagnostics;
-using Microsoft.AspNetCore.Cors;
+﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Softphone.Frontend.Helpers;
 using Softphone.Frontend.Services;
-using Supabase.Gotrue;
 using Twilio.Jwt.AccessToken;
 using Twilio.TwiML;
 using Twilio.TwiML.Voice;
-using Twilio.Types;
 using static Twilio.TwiML.Voice.Client;
 
 namespace Softphone.Frontend.Controllers
@@ -85,7 +81,7 @@ namespace Softphone.Frontend.Controllers
                 dial.Client(
                     identity: user.Username,
                     statusCallbackEvent: new EventEnum[] { EventEnum.Initiated, EventEnum.Ringing, EventEnum.Answered, EventEnum.Completed },
-                    statusCallback: new Uri($"{GetBaseUrl()}/InboundCallStatus"),
+                    statusCallback: new Uri($"{GetBaseUrl()}/api/Backend/InboundCallStatus"),
                     statusCallbackMethod: "POST"
                 );
 
