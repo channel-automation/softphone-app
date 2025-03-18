@@ -110,7 +110,7 @@ namespace Softphone.Frontend.Controllers
             Console.WriteLine($"Inbound Call Status update at {DateTime.Now.ToString("o")}.");
             Console.WriteLine(
                 $"CallSid: {payload.CallSid}, " +
-                $"CallStatus: {payload.CallSid}, " +
+                $"CallStatus: {payload.CallStatus}, " +
                 $"From: {payload.From}, " +
                 $"To: {payload.To}, " +
                 $"Direction: {payload.Direction}");
@@ -123,7 +123,7 @@ namespace Softphone.Frontend.Controllers
             Console.WriteLine($"Outbound Call Status update at {DateTime.Now.ToString("o")}.");
             Console.WriteLine(
                 $"CallSid: {payload.CallSid}, " +
-                $"CallStatus: {payload.CallSid}, " +
+                $"CallStatus: {payload.CallStatus}, " +
                 $"From: {payload.From}, " +
                 $"To: {payload.To}, " +
                 $"Direction: {payload.Direction}");
