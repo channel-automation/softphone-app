@@ -11,7 +11,6 @@ namespace Softphone.Frontend.Controllers
 {
     [IgnoreAntiforgeryToken]
     [EnableCors("AllowSpecificOrigins")]
-    [Route("api/[controller]")]
     public class BackendController : ControllerBase
     {
         private IWorkspaceService _workspaceService;
@@ -81,7 +80,7 @@ namespace Softphone.Frontend.Controllers
                 dial.Client(
                     identity: user.Username,
                     statusCallbackEvent: new EventEnum[] { EventEnum.Initiated, EventEnum.Ringing, EventEnum.Answered, EventEnum.Completed },
-                    statusCallback: new Uri($"{GetBaseUrl()}/api/Backend/InboundCallStatus"),
+                    statusCallback: new Uri($"{GetBaseUrl()}/Backend/InboundCallStatus"),
                     statusCallbackMethod: "POST"
                 );
 
