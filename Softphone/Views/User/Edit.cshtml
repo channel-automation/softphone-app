@@ -1,0 +1,120 @@
+﻿@model Softphone.Models.UserBO
+@using Softphone.Helpers
+
+<form onsubmit="return false;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Workspace</label>
+            <select asp-for="WorkspaceId" class="form-control select2-workspace-modal"></select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">First Name</label>
+            <input type="text" asp-for="FirstName" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Last Name</label>
+            <input type="text" asp-for="LastName" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Username</label>
+            <input type="text" asp-for="Username" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Role</label>
+            <input type="text" asp-for="Role" class="form-control" readonly />
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Active?</label><br />
+            @Html.CheckBoxFor(w => w.IsActive, new { @class = "icheck" })
+        </div>
+    </div>
+    @if (Model.Id != 0)
+    {
+        <div class="form-group row">
+            <div class="col-12">
+                <label class="text-purple">Reset Password?</label><br />
+                @Html.CheckBox("IsResetPassword", new { @class = "icheck" })
+                <span class="badge bg-secondary ml-3 p-1">Reset to default "123456"</span>
+            </div>
+        </div>
+    }
+</form>
+<div class="text-center mt-5 mb-1">
+    <button class="btn bg-gradient-purple mr-2" onclick="_save(this)"><i class="fas fa-save"></i> Save</button>
+    <button class="btn bg-gradient-dark" onclick="_cancel()"><i class="fas fa-times-circle"></i> Cancel</button>
+</div>
+
+@if (Model.Id != 0)
+{
+    <script>
+        $(function () {
+            editUserDialog.find("[name=Username]").attr("readonly", "readonly");
+        });
+    </script>
+}
+
+<script>
+    $(function () {
+        let form = editUserDialog.find("form");
+        initializeFormControls(form);
+        setWorkspaceId("@ViewBag.WorkspaceName", "@Model.WorkspaceId");
+    });
+
+    function setWorkspaceId(text, value) {
+        var form = editUserDialog.find("form").first();
+        var option = new Option(text, value, true, true);
+        form.find("[name=WorkspaceId]").append(option).trigger("change");
+    }
+
+    function _cancel() {
+        editUserDialog.modal("hide");
+    }
+
+    function _save(btn) {
+        let form = editUserDialog.find("form");
+        //Client Validation
+        if (form.find("[name=WorkspaceId]").val() == 0) {
+            form.find("[name=WorkspaceId]").focus();
+            toastr.error("Workspace is required.", "Error..");
+            return false;
+        }
+        if (form.find("[name=FirstName]").val().trim() == "") {
+            form.find("[name=FirstName]").focus();
+            toastr.error("First Name is required.", "Error..");
+            return false;
+        }
+        if (form.find("[name=LastName]").val().trim() == "") {
+            form.find("[name=LastName]").focus();
+            toastr.error("Last Name is required.", "Error..");
+            return false;
+        }
+        if (form.find("[name=Username]").val().trim() == "") {
+            form.find("[name=Username]").focus();
+            toastr.error("Username is required.", "Error..");
+            return false;
+        }
+        //Server Processing
+        startAjaxSpinner(btn);
+        $.post("@Url.Action("Save")", form.serialize(), function (response) {
+            if (errorMessages(response.errors)) return false;
+            else {
+                editUserDialog.modal("hide");
+                toastr.success("Data successfully saved.", "Success!");
+                userDialog.find("table").first().DataTable().draw();
+            }
+        });
+        return false;
+    }
+</script>

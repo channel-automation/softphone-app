@@ -1,0 +1,88 @@
+﻿@model Softphone.Models.WorkspaceBO
+
+<form onsubmit="return false;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Twilio Account SID</label>
+            <input type="text" asp-for="TwilioAccountSID" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Twilio Auth Token</label>
+            <input type="text" asp-for="TwilioAuthToken" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Twilio API Key</label>
+            <input type="text" asp-for="TwilioAPIKey" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Twilio API Secret</label>
+            <input type="text" asp-for="TwilioAPISecret" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Twilio TwiML App SID</label>
+            <input type="text" asp-for="TwilioTwiMLAppSID" class="form-control" />
+        </div>
+    </div>
+</form>
+<div class="text-center mt-5 mb-1">
+    <button class="btn bg-gradient-purple mr-2" onclick="_save(this)"><i class="fas fa-save"></i> Save</button>
+    <button class="btn bg-gradient-dark" onclick="_cancel()"><i class="fas fa-times-circle"></i> Cancel</button>
+</div>
+
+<script>
+    $(function () {
+        let form = configDialog.find("form");
+        initializeFormControls(form);
+    });
+
+    function _cancel() {
+        configDialog.modal("hide");
+    }
+
+    function _save(btn) {
+        let form = configDialog.find("form");
+        //Client Validation
+        if (form.find("[name=TwilioAccountSID]").val().trim() == "") {
+            form.find("[name=TwilioAccountSID]").focus();
+            toastr.error("Twilio Account SID is required.", "Error..");
+            return false;
+        }
+        if (form.find("[name=TwilioAuthToken]").val().trim() == "") {
+            form.find("[name=TwilioAuthToken]").focus();
+            toastr.error("Twilio Auth Token is required.", "Error..");
+            return false;
+        }
+        if (form.find("[name=TwilioAPIKey]").val().trim() == "") {
+            form.find("[name=TwilioAPIKey]").focus();
+            toastr.error("Twilio API Key is required.", "Error..");
+            return false;
+        }
+        if (form.find("[name=TwilioAPISecret]").val().trim() == "") {
+            form.find("[name=TwilioAPISecret]").focus();
+            toastr.error("Twilio API Secret is required.", "Error..");
+            return false;
+        }
+        if (form.find("[name=TwilioTwiMLAppSID]").val().trim() == "") {
+            form.find("[name=TwilioTwiMLAppSID]").focus();
+            toastr.error("Twilio TwiML App SID is required.", "Error..");
+            return false;
+        }
+        //Server Processing
+        startAjaxSpinner(btn);
+        $.post("@Url.Action("ConfigSave")", form.serialize(), function () {
+            configDialog.modal("hide");
+            toastr.success("Data successfully saved.", "Success!");
+        });
+        return false;
+    }
+</script>

@@ -1,0 +1,177 @@
+﻿@using Softphone.Helpers
+@{
+    UserBO loggedUser = (UserBO)ViewBag.LoggedUser;
+    PhoneNumberBO? selectedPhone = (PhoneNumberBO?)ViewBag.SelectedPhone;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>@ViewBag.Title | Softphone</title>
+    <link href="~/favicon.png" rel="shortcut icon" />
+    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="~/lib/toastr/toastr.min.css" rel="stylesheet" />
+    <link href="~/lib/icheck/skins/all.min.css" rel="stylesheet" />
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="~/lib/select2-bootstrap4-theme/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/lib/datatables-bs4/css/datatables.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/lib/chart/chart.min.css" rel="stylesheet" />
+    <link href="~/lib/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
+    <link href="~/lib/admin-lte/css/adminlte.min.css" rel="stylesheet" />
+</head>
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
+    <div class="wrapper">
+        <!-- Navbar -->
+        @{ await Html.RenderPartialAsync("NavbarPartial"); }
+        <!-- Main Sidebar Container -->
+        @{ await Html.RenderPartialAsync("SidebarPartial"); }
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <div class="container-fluid p-3">
+                <div class="row">
+                    <div class="col-lg-3 col-md-4">
+                        @{ 
+                            await Html.RenderPartialAsync("DialerPartial");
+                            await Html.RenderPartialAsync("CallingPartial");
+                        }
+                    </div>
+                    <div class="col-lg-9 col-md-8">@RenderBody()</div>
+                </div>
+            </div>
+        </div>
+        <!-- Footer -->
+        @{ await Html.RenderPartialAsync("FooterPartial"); }
+    </div>
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/popper/popper.min.js"></script>
+    <script src="~/lib/bootbox/bootbox.min.js"></script>
+    <script src="~/lib/toastr/toastr.min.js"></script>
+    <script src="~/lib/icheck/icheck.min.js"></script>
+    <script src="~/lib/select2/js/select2.full.min.js"></script>
+    <script src="~/lib/datatables/js/datatables.min.js"></script>
+    <script src="~/lib/datatables-bs4/js/datatables.bootstrap4.min.js"></script>
+    <script src="~/lib/moment/moment.min.js"></script>
+    <script src="~/lib/numeral/numeral.min.js"></script>
+    <script src="~/lib/inputmask/jquery.inputmask.min.js"></script>
+    <script src="~/lib/chart/chart.bundle.min.js"></script>
+    <script src="~/lib/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js"></script>
+    <script src="~/lib/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="~/lib/admin-lte/js/adminlte.min.js"></script>
+    <script src="~/lib/twilio-voice-sdk/dist/twilio.min.js"></script>
+    <script src="~/js/app.js"></script>
+    <script src="~/js/spinner.js"></script>
+    <script src="~/js/dashboard.js"></script>
+    <script src="~/js/dialer.js"></script>
+
+    @if (selectedPhone != null)
+    {
+        <script>
+            $(function () {
+                let option = new Option("@Html.Raw(selectedPhone.full_name)", "@Html.Raw(selectedPhone.twilio_number)", true, true);
+                $("#divDialer").find("select").append(option).trigger("change");
+            });
+        </script>
+    }
+    @if (loggedUser.Role == UserRole.Developer)
+    {
+        <script>
+            function openSettings(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Start", "Settings")", function (response) {
+                    settingsDialog = bootModal("Settings", response);
+                });
+            }
+            function openWorkspace(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Start", "Workspace")", function (response) {
+                    workspaceDialog = bootModal("Workspaces", response, "extra-large");
+                });
+            }
+            function openAgentUsers(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Start", "User", new { @ByRole = UserRole.Agent })", function (response) {
+                    userDialog = bootModal("Agent Users", response, "extra-large");
+                });
+            }
+            function openAdminUsers(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Start", "User", new { @ByRole = UserRole.Admin })", function (response) {
+                    userDialog = bootModal("Admin Users", response, "extra-large");
+                });
+            }
+            function openDevsUsers(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Start", "User", new { @ByRole = UserRole.Developer })", function (response) {
+                    userDialog = bootModal("Developer Users", response, "extra-large");
+                });
+            }
+        </script>
+    }
+    @if (loggedUser.Role == UserRole.Admin)
+    {
+        <script>
+            function openAgents(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Start", "Agents")", function (response) {
+                    agentDialog = bootModal("Agents", response, "extra-large");
+                });
+            }
+
+            function openTwilioConfig(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Config", "TwilioInfo")", function (response) {
+                    configDialog = bootModal("Twilio Configuration", response);
+                });
+            }
+
+            function openTwilioNumbers(btn) {
+                startAjaxSpinner(btn);
+                $.get("@Url.Action("Numbers", "TwilioInfo")", function (response) {
+                    numberDialog = bootModal("Twilio Phone Numbers", response, "large");
+                });
+            }
+        </script>
+    }
+
+    <script>
+        globalWorkspaceId = @loggedUser.WorkspaceId;
+        globalUsername = "@loggedUser.Username";
+
+        $(this).ajaxError(function (e, xhr) {
+            // Ajax Data Error
+            if (xhr.status == 418) {
+                let title = "<h5><i class='fas fa-exclamation-circle'></i> Data Error</h5>";
+                bootModal(title, xhr.responseText);
+            }
+            //Ajax Unauthorized Access Handler
+            if (xhr.status == 403) {
+                let title = "<h5><i class='fas fa-ban'></i> Access Denied</h5>";
+                let message = "You don't have enough permission.";
+                bootModal(title, message);
+            }
+            // Internal Server Error
+            if (xhr.status == 500) {
+                alert("Internal server error!");
+            }
+        });
+
+        function changePassword(btn) {
+            startAjaxSpinner(btn);
+            $.get("@Url.Action("ChangePassword", "Security")", function (response) {
+                changePasswordDialog = bootModal("Change Password", response);
+            });
+        }
+
+        function logout() {
+            swalConfirm("SOFTPHONE", "Are you sure to logout?", function () {
+                location.href = "@Url.Action("Logout", "Security")";
+            });
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

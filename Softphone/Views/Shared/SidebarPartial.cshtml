@@ -1,0 +1,84 @@
+@using Softphone.Helpers
+@{
+    UserBO loggedUser = (UserBO)ViewBag.LoggedUser;
+    string controller = (string)ViewContext.RouteData.Values["controller"];
+}
+
+<aside class="main-sidebar sidebar-dark-dark bg-navy elevation-3">
+    <a asp-area="" asp-controller="Home" asp-action="Index" class="brand-link pb-2 pt-2 bg-purple">
+        <img src="~/logo.png" class="img-rounded" style="height:40px" />
+        <span class="brand-text font-weight-bold">SOFTPHONE</span>
+    </a>
+    <div class="sidebar">
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <li class="nav-item">
+                    <a asp-controller="Home" asp-action="Index" onclick="startRedirectSpinner(this)"
+                       class="nav-link bg-@(controller == "Home" ? "purple" : "light")">
+                        <i class="nav-icon fa fa-home"></i><p>Home</p>
+                    </a>
+                </li>
+                @if (loggedUser.Role == UserRole.Developer)
+                {
+                    <li class="nav-item">
+                        <a href="#" onclick="openSettings(this)"
+                           class="nav-link bg-light">
+                            <i class="nav-icon fas fa-cog"></i><p>Settings</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" onclick="openWorkspace(this)"
+                           class="nav-link bg-light">
+                            <i class="nav-icon fas fa-building"></i><p>Workspaces</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" onclick="openAgentUsers(this)"
+                           class="nav-link bg-light">
+                            <i class="nav-icon fas fa-user-tie"></i><p>Agent Users</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" onclick="openAdminUsers(this)"
+                           class="nav-link bg-light">
+                            <i class="nav-icon fas fa-user-cog"></i><p>Admin Users</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" onclick="openDevsUsers(this)"
+                           class="nav-link bg-light">
+                            <i class="nav-icon fas fa-user-secret"></i><p>Developer Users</p>
+                        </a>
+                    </li>
+                }
+                @if (loggedUser.Role == UserRole.Admin)
+                {
+                    <li class="nav-item">
+                        <a href="#" onclick="openAgents(this)"
+                           class="nav-link bg-light">
+                            <i class="nav-icon fas fa-user-tie"></i><p>Agents</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" onclick="openTwilioConfig(this)"
+                           class="nav-link bg-light">
+                            <i class="nav-icon fas fa-cog"></i><p>Twilio Config</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" onclick="openTwilioNumbers(this)"
+                           class="nav-link bg-light">
+                            <i class="nav-icon fas fa-mobile-retro"></i><p>Twilio Numbers</p>
+                        </a>
+                    </li>
+                }
+                <li class="nav-item">
+                    <a asp-controller="LiveChat" asp-action="Index" onclick="startRedirectSpinner(this)"
+                       class="nav-link bg-@(controller == "LiveChat" ? "purple" : "light")">
+                        <i class="nav-icon fas fa-comment-dots"></i><p>Live Chat</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</aside>
