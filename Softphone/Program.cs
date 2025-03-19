@@ -19,11 +19,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddControllersWithViews(o => o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
 builder.Services.AddElmah<XmlFileErrorLog>(o => { o.LogPath = "~/elmah_logs"; });
 
-builder.Services.AddCors(o => 
-        o.AddPolicy("AllowSpecificOrigins", p => 
-        { p.WithOrigins("https://localhost:7245").AllowAnyHeader().AllowAnyMethod(); }
-    ));
-
 builder.Services.AddScoped<Client>(_ =>
     new Client(
         builder.Configuration["SupabaseUrl"],
@@ -34,6 +29,8 @@ builder.Services.AddScoped<Client>(_ =>
 builder.Services.AddTransient<ISettingsService, SettingsService>();
 builder.Services.AddTransient<IWorkspaceService, WorkspaceService>();
 builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IVoiceCallService, VoiceCallService>();
+
 builder.Services.AddTransient<IUserValidator, UserValidator>();
 builder.Services.AddTransient<IWorkspaceValidator, WorkspaceValidator>();
 
@@ -55,6 +52,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseElmah();
 
-app.UseCors("AllowSpecificOrigins");
 app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 app.Run();

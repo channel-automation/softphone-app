@@ -24,6 +24,7 @@ public class HomeController : Controller
 
         ViewBag.LoggedUser = user;
         ViewBag.SelectedPhone = phone;
+        ViewBag.BaseUrl = GetBaseUrl();
         return View();
     }
 
@@ -42,5 +43,12 @@ public class HomeController : Controller
 
         var pagination = new { more = skip < paged.RecordsTotal };
         return Json(new { results, pagination });
+    }
+
+    private string GetBaseUrl()
+    {
+        var host = Request.Host.ToUriComponent();
+        var pathBase = Request.PathBase.ToUriComponent();
+        return $"{Request.Scheme}://{host}{pathBase}";
     }
 }

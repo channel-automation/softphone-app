@@ -23,7 +23,15 @@ namespace Softphone.Controllers
 
             ViewBag.LoggedUser = user;
             ViewBag.SelectedPhone = phone;
+            ViewBag.BaseUrl = GetBaseUrl();
             return View();
+        }
+
+        private string GetBaseUrl()
+        {
+            var host = Request.Host.ToUriComponent();
+            var pathBase = Request.PathBase.ToUriComponent();
+            return $"{Request.Scheme}://{host}{pathBase}";
         }
     }
 }

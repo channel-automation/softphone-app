@@ -138,8 +138,8 @@
     }
 
     <script>
-        globalWorkspaceId = @loggedUser.WorkspaceId;
-        globalUsername = "@loggedUser.Username";
+        baseUrl = "@ViewBag.BaseUrl";
+        backendKey = "@BackendKey.Value";
 
         $(this).ajaxError(function (e, xhr) {
             // Ajax Data Error

@@ -49,11 +49,9 @@
 
     function getAccessToken() {
         $.ajax({
-            //url: "https://webhook.call-app.channelautomation.com/api/token",
-            //url: "https://new-backend-dynamic-production.up.railway.app/api/token?workspaceId=" + globalWorkspaceId + "&identity=" + globalUsername,
-            url: "https://beta.sofphone.channelautomation.com/Backend/AccessToken?key=ygRiOET8F1jpqwyoh8NYrcYDh3qAQJwt&username=" + globalUsername,
+            url: `${baseUrl}/Backend/AccessToken?backendKey=${backendKey}`,
             type: "get", dataType: "json",
-            success: function (response) {
+            success: (response) => {
                 if (!device) setupDevice(response.token);
                 else device.updateToken(response.token);
                 expiry = new Date(response.expires);
@@ -129,45 +127,57 @@
     async function deviceConnect() {
         let to = `+1${divDialer.find("input").inputmask("unmaskedvalue")}`;
         let from = divDialer.find("select").val();
-        let params = { To: to, From: from };
-        const call = await device.connect({ params });
+        startAjaxSpinner(divDialer.find("button"));
+        $.ajax({
+            url: `${baseUrl}/Backend/PlaceCall?backendKey=${backendKey}&from=${from}&to=${to}`,
+            type: "post", dataType: "json",
+            success: async () => {
+                //Start device for outbound call
+                let params = { To: to, From: from };
+                const call = await device.connect({ params });
 
-        call.on("connecting", () => {
-            console.log("Outbound call connecting.");
-        });
-        call.on("ringing", () => {
-            console.log("Outbound call ringing.");
-            divDialer.hide();
-            divCalling.show();
-            setCallingInfo(to, false);
-        });
-        call.on("connect", () => {
-            console.log("Outbound call connected.");
-        });
-        call.on("accept", () => {
-            console.log("Outbound call accepted.");
-            divDialer.hide();
-            divCalling.show();
-            setCallingInfo(to, true);
-        });
-        call.on("reject", () => {
-            console.log("Outbound call rejected.");
-        });
-        call.on("cancel", () => {
-            console.log("Outbound call cancelled.");
-        });
-        call.on("disconnect", () => {
-            console.log("Outbound call disconnected.");
-            divDialer.show();
-            divCalling.hide();
-            clearInterval(callTimerInterval);
-        });
-        call.on("error", (error) => {
-            console.log(`Error during outbound call: ${error}`);
-            toastr.error("Unexpected error during call.", "Error!");
-            divDialer.show();
-            divCalling.hide();
-            clearInterval(callTimerInterval);
+                // Set up event listeners for the connection
+                call.on("connecting", () => {
+                    console.log("Outbound call connecting.");
+                });
+                call.on("ringing", () => {
+                    console.log("Outbound call ringing.");
+                    divDialer.hide();
+                    divCalling.show();
+                    setCallingInfo(to, false);
+                });
+                call.on("connect", () => {
+                    console.log("Outbound call connected.");
+                });
+                call.on("accept", () => {
+                    console.log("Outbound call accepted.");
+                    divDialer.hide();
+                    divCalling.show();
+                    setCallingInfo(to, true);
+                });
+                call.on("reject", () => {
+                    console.log("Outbound call rejected.");
+                });
+                call.on("cancel", () => {
+                    console.log("Outbound call cancelled.");
+                });
+                call.on("disconnect", () => {
+                    console.log("Outbound call disconnected.");
+                    divDialer.show();
+                    divCalling.hide();
+                    clearInterval(callTimerInterval);
+                });
+                call.on("error", (error) => {
+                    console.log(`Error during outbound call: ${error}`);
+                    toastr.error("Unexpected error during call.", "Error!");
+                    divDialer.show();
+                    divCalling.hide();
+                    clearInterval(callTimerInterval);
+                });
+            },
+            error: () => {
+                toastr.error("Failed to communicate backend service.", "Error!");
+            }
         });
     }
 

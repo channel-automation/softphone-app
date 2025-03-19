@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Softphone.Helpers;
+using Softphone.Models;
 using Softphone.Services;
 using Twilio.Jwt.AccessToken;
 using Twilio.TwiML;
@@ -9,25 +9,29 @@ using Twilio.TwiML.Voice;
 namespace Softphone.Controllers
 {
     [IgnoreAntiforgeryToken]
-    [EnableCors("AllowSpecificOrigins")]
     public class BackendController : ControllerBase
     {
+        private IVoiceCallService _voiceCallService;
         private IWorkspaceService _workspaceService;
         private IUserService _userService;
 
-        public BackendController(IWorkspaceService workspaceService, IUserService userService)
+        public BackendController(
+            IVoiceCallService voiceCallService,
+            IWorkspaceService workspaceService, 
+            IUserService userService)
         {
+            _voiceCallService = voiceCallService;
             _workspaceService = workspaceService;
             _userService = userService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> AccessToken(string key, string username)
+        public async Task<IActionResult> AccessToken(string backendKey)
         {
-            if (key != BackKey.Value) return StatusCode(401, "Unathorized Access!");
+            if (backendKey != BackendKey.Value) return StatusCode(401, "Unathorized Access!");
             try
             {
-                var user = await _userService.FindByUsername(username);
+                var user = await _userService.FindByUsername(User.Identity.Name);
                 var workspace = await _workspaceService.FindById(user.WorkspaceId);
                 // Create a grant for Voice
                 var voiceGrant = new VoiceGrant
@@ -50,26 +54,49 @@ namespace Softphone.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Access Token Exception: {ex.Message}");
-                return StatusCode(500, $"Access Token Exception: {ex.Message}");
+                Console.WriteLine($"[Access Token] EXCEPTION: {ex.Message}");
+                return StatusCode(500, $"[Access Token] EXCEPTION: {ex.Message}");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PlaceCall(string backendKey, string from, string to)
+        {
+            if (backendKey != BackendKey.Value) return StatusCode(401, "Unathorized Access!");
+            try
+            {
+                var user = await _userService.FindByUsername(User.Identity.Name);
+                var model = new VoiceCallBO();
+                model.WorkspaceId = user.WorkspaceId;
+                model.Identity = user.Username;
+                model.Type = CallType.Outbound;
+                model.From = from;
+                model.To = to;
+                model.RecordingCallSID = string.Empty;
+                await _voiceCallService.Create(model, user.Username);
+                return new JsonResult("");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Place Call] EXCEPTION: {ex.Message}");
+                return StatusCode(500, $"[Place Call] EXCEPTION: {ex.Message}");
             }
         }
 
         [HttpPost]
         public async Task<IActionResult> InboundVoice([FromForm] Payload payload)
         {
-            Console.WriteLine($"Inbound Voice request at {DateTime.Now.ToString("o")}.");
-            Console.WriteLine($"From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
             try
             {
+                Console.WriteLine($"Inbound Voice request at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+                Console.WriteLine($"From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
+
                 //Get user based on "To" number
                 var workspaceNumber = await _workspaceService.FindByTwilioNumber(payload.To);
                 var workspaceNumberUsers = await _workspaceService.GetTwilioNumberUsers(workspaceNumber.Id);
 
                 VoiceResponse voiceResponse = new VoiceResponse();
-
-                // Add a small delay to ensure client is ready
-                voiceResponse.Pause(1);
+                voiceResponse.Pause(1); // Add a small delay to ensure client is ready
 
                 //Create dial for each user that is assigned on the twilio number
                 foreach (long userId in workspaceNumberUsers.Select(w => w.UserId))
@@ -91,35 +118,33 @@ namespace Softphone.Controllers
                 }
 
                 Console.WriteLine($"Inbound Voice Generated TwiML: {voiceResponse.ToString()}");
-
                 Response.ContentType = "text/xml";
                 return Content(voiceResponse.ToString());
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Inbound Voice Exception: {ex.Message}");
-                return StatusCode(500, $"Inbound Voice Exception: {ex.Message}");
+                Console.WriteLine($"[Inbound Voice] EXCEPTION: {ex.Message}");
+                return StatusCode(500, $"[Inbound Voice] EXCEPTION: {ex.Message}");
             }
         }
 
         [HttpPost]
         public async Task<IActionResult> OutboundVoice([FromForm] Payload payload)
         {
-            Console.WriteLine($"Outbound Voice request at {DateTime.Now.ToString("o")}.");
-            Console.WriteLine($"From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
             try
             {
-                VoiceResponse voiceResponse = new VoiceResponse();
+                Console.WriteLine($"Outbound Voice request at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+                Console.WriteLine($"From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
 
-                // Add a small delay to ensure client is ready
-                voiceResponse.Pause(1);
+                VoiceResponse voiceResponse = new VoiceResponse();
+                voiceResponse.Pause(1); // Add a small delay to ensure client is ready
 
                 var dial = new Dial(
                     callerId: payload.From,
                     answerOnBridge: true,
                     timeout: 30,
                     record: Dial.RecordEnum.RecordFromAnswer,
-                    recordingStatusCallback: new Uri($"{GetBaseUrl()}/Backend/RecordingStatusCallback"));
+                    recordingStatusCallback: new Uri($"{GetBaseUrl()}/Backend/OutboundRecordingCallback"));
 
                 dial.Number(
                     phoneNumber: new Twilio.Types.PhoneNumber(payload.To),
@@ -128,41 +153,57 @@ namespace Softphone.Controllers
                 );
 
                 voiceResponse.Append(dial);
-                Console.WriteLine($"Outbound Voice Generated TwiML: {voiceResponse.ToString()}");
 
+                Console.WriteLine($"Outbound Voice Generated TwiML: {voiceResponse.ToString()}");
                 Response.ContentType = "text/xml";
                 return Content(voiceResponse.ToString());
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Outbound Voice Exception: {ex.Message}");
-                return StatusCode(500, $"Outbound Voice Exception: {ex.Message}");
+                Console.WriteLine($"[Outbound Voice] EXCEPTION: {ex.Message}");
+                return StatusCode(500, $"[Outbound Voice] EXCEPTION: {ex.Message}");
             }
         }
 
         [HttpPost]
         public IActionResult InboundCallStatus([FromForm] Payload payload)
         {
-            Console.WriteLine($"Inbound Call Status at {DateTime.Now.ToString("o")}.");
-            Console.WriteLine(
-                $"CallSid: {payload.CallSid}, " +
-                $"CallStatus: {payload.CallStatus}, " +
-                $"From: {payload.From}, " +
-                $"To: {payload.To}," +
-                $" Direction: {payload.Direction}");
+            Console.WriteLine($"Inbound Call Status at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+            Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
             return StatusCode(200);
+            //try
+            //{
+            //    Console.WriteLine($"Inbound Call Status at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+            //    Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
+
+            //    //Process to Database
+            //    var user = await _userService.FindByUsername(payload.From.Replace("client:", ""));
+            //    var latest = await _statusCallbackService.LatestByCallSID(payload.CallSid);
+            //    var model = new StatusCallbackBO();
+            //    model.WorkspaceId = user.WorkspaceId;
+            //    model.Type = CallType.Inbound;
+            //    model.Identity = user.Username;
+            //    model.CallSID = payload.CallSid;
+            //    model.CallStatus = payload.CallStatus;
+            //    model.FromNumber = latest != null ? latest.FromNumber : string.Empty;
+            //    model.ToNumber = payload.To;
+            //    model.Payload = payload;
+            //    await _statusCallbackService.Create(model, "endpoint");
+
+            //    return StatusCode(200);
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine($"[Inbound Call Status] EXCEPTION: {ex.Message}");
+            //    return StatusCode(500, $"[Inbound Call Status] EXCEPTION: {ex.Message}");
+            //}
         }
 
         [HttpPost]
         public IActionResult OutboundCallStatus([FromForm] Payload payload)
         {
-            Console.WriteLine($"Outbound Call Status at {DateTime.Now.ToString("o")}.");
-            Console.WriteLine(
-                $"CallSid: {payload.CallSid}, " +
-                $"CallStatus: {payload.CallStatus}, " +
-                $"From: {payload.From}, " +
-                $"To: {payload.To}, " +
-                $"Direction: {payload.Direction}");
+            Console.WriteLine($"Outbound Call Status at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+            Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
             return StatusCode(200);
         }
 
@@ -176,38 +217,77 @@ namespace Softphone.Controllers
             payload.To = Request.Query["To"];
             payload.Direction = Request.Query["Direction"];
 
-            Console.WriteLine($"Inbound Status Callback at {DateTime.Now.ToString("o")}.");
-            Console.WriteLine(
-                $"CallSid: {payload.CallSid}, " +
-                $"CallStatus: {payload.CallStatus}, " +
-                $"From: {payload.From}, " +
-                $"To: {payload.To}," +
-                $" Direction: {payload.Direction}");
+            Console.WriteLine($"Inbound Status Callback at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+            Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
             return StatusCode(200);
+            //try
+            //{
+            //    Payload payload = new Payload();
+            //    payload.CallSid = Request.Query["CallSid"];
+            //    payload.CallStatus = Request.Query["CallStatus"];
+            //    payload.From = Request.Query["From"];
+            //    payload.To = Request.Query["To"];
+            //    payload.Direction = Request.Query["Direction"];
+
+            //    Console.WriteLine($"Inbound Status Callback at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+            //    Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
+
+            //    //Process to Database
+            //    var user = await _userService.FindByUsername(payload.From.Replace("client:", ""));
+            //    var latest = await _statusCallbackService.LatestByCallSID(payload.CallSid); 
+            //    var model = new StatusCallbackBO();
+            //    model.WorkspaceId = user.WorkspaceId;
+            //    model.Type = CallType.Inbound;
+            //    model.Identity = user.Username;
+            //    model.CallSID = payload.CallSid;
+            //    model.CallStatus = payload.CallStatus;
+            //    model.FromNumber = latest != null ? latest.FromNumber : string.Empty;
+            //    model.ToNumber = payload.To;
+            //    model.Payload = payload;
+            //    await _statusCallbackService.Create(model, "endpoint");
+            //    return StatusCode(200);
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine($"[Inbound Status Callback] EXCEPTION: {ex.Message}");
+            //    return StatusCode(500, $"[Inbound Status Callback] EXCEPTION: {ex.Message}");
+            //}
         }
 
         [HttpGet]
         public IActionResult OutboundStatusCallback()
         {
-            Payload payload = new Payload();
-            payload.CallSid = Request.Query["CallSid"];
-            payload.CallStatus = Request.Query["CallStatus"];
-            payload.From = Request.Query["From"];
-            payload.To = Request.Query["To"];
-            payload.Direction = Request.Query["Direction"];
+            try
+            {
+                Payload payload = new Payload();
+                payload.CallSid = Request.Query["CallSid"];
+                payload.CallStatus = Request.Query["CallStatus"];
+                payload.From = Request.Query["From"];
+                payload.To = Request.Query["To"];
+                payload.Direction = Request.Query["Direction"];
 
-            Console.WriteLine($"Outbound Status Callback at {DateTime.Now.ToString("o")}.");
-            Console.WriteLine(
-                $"CallSid: {payload.CallSid}, " +
-                $"CallStatus: {payload.CallStatus}, " +
-                $"From: {payload.From}, " +
-                $"To: {payload.To}," +
-                $" Direction: {payload.Direction}");
-            return StatusCode(200);
+                Console.WriteLine($"Outbound Status Callback at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+                Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
+
+                //Database process
+                var outbound = _voiceCallService.LastestOutbound(payload.From, payload.To);
+                var model = new VoiceCallCallbackBO();
+                model.VoiceId = outbound.Id;
+                model.CallSID = payload.CallSid;
+                model.CallStatus = payload.CallStatus;
+                model.Payload = payload;
+                _voiceCallService.Create(model);
+                return StatusCode(200);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Outbound Status Callback] EXCEPTION: {ex.Message}");
+                return StatusCode(500, $"[Outbound Status Callback] EXCEPTION: {ex.Message}");
+            }
         }
 
         [HttpGet]
-        public IActionResult RecordingStatusCallback()
+        public IActionResult OutboundRecordingCallback()
         {
             Payload payload = new Payload();
             payload.RecordingSid = Request.Query["RecordingSid"];
@@ -215,12 +295,8 @@ namespace Softphone.Controllers
             payload.RecordingUrl = Request.Query["RecordingUrl"];
             payload.CallSid = Request.Query["CallSid"];
 
-            Console.WriteLine($"Recording Status Callback at {DateTime.Now.ToString("o")}.");
-            Console.WriteLine(
-                $"RecordingSid: {payload.RecordingSid}, " +
-                $"RecordingStatus: {payload.RecordingStatus}, " +
-                $"RecordingUrl: {payload.RecordingUrl}, " +
-                $"CallSid: {payload.CallSid}");
+            Console.WriteLine($"Recording Status Callback at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+            Console.WriteLine($"RecordingSid: {payload.RecordingSid}, RecordingStatus: {payload.RecordingStatus}, RecordingUrl: {payload.RecordingUrl}, CallSid: {payload.CallSid}");
             return StatusCode(200);
         }
 
