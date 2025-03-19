@@ -100,6 +100,7 @@
                 divDialer.show();
                 divCalling.hide();
                 clearInterval(callTimerInterval);
+                try { updateDashboard(); } catch (x) { }
             });
             call.on("cancel", () => {
                 console.log("Inbound call cancelled.");
@@ -113,6 +114,7 @@
             });
             call.on("reject", () => {
                 console.log("Inbound call rejected.");
+                try { updateDashboard(); } catch (x) { }
             });
             call.on("error", (error) => {
                 console.log(`Error during inbound call: ${error}`);
@@ -120,6 +122,7 @@
                 divDialer.show();
                 divCalling.hide();
                 clearInterval(callTimerInterval);
+                try { updateDashboard(); } catch (x) { }
             });
         });
     }
@@ -166,6 +169,7 @@
                     divDialer.show();
                     divCalling.hide();
                     clearInterval(callTimerInterval);
+                    try { updateDashboard(); } catch (x) { }
                 });
                 call.on("error", (error) => {
                     console.log(`Error during outbound call: ${error}`);
@@ -173,6 +177,7 @@
                     divDialer.show();
                     divCalling.hide();
                     clearInterval(callTimerInterval);
+                    try { updateDashboard(); } catch (x) { }
                 });
             },
             error: () => {
