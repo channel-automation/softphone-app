@@ -195,27 +195,30 @@ namespace Softphone.Controllers
                 Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
 
                 //Database process
-                VoiceCallBO inbound = await _voiceCallService.FindCallbackCallSID(payload.CallSid);
-                if (inbound == null)
+                if (payload.CallStatus != CallStatus.Initiated)
                 {
-                    //Note: On the inbound callback, the [To] is the passed 'client:identity' and [From] is the original 'To'
-                    inbound = await _voiceCallService.FindNewInbound(payload.To.Replace("client:", ""), payload.From);
-                    inbound.CallbackCallSID = payload.CallSid;
-                    await _voiceCallService.Update(inbound, "endpoint");
+                    VoiceCallBO inbound = await _voiceCallService.FindCallbackCallSID(payload.CallSid);
+                    if (inbound == null)
+                    {
+                        //Note: On the inbound callback, the [To] is the passed 'client:identity' and [From] is the original 'To'
+                        inbound = await _voiceCallService.FindNewInbound(payload.To.Replace("client:", ""), payload.From);
+                        inbound.CallbackCallSID = payload.CallSid;
+                        await _voiceCallService.Update(inbound, "endpoint");
+                    }
+                    //Update Duration when completed
+                    else if (payload.CallStatus == CallStatus.Completed)
+                    {
+                        var callback = await _voiceCallService.FindCallback(inbound.Id, CallStatus.InProgress);
+                        inbound.Duration = (int)DateTime.Now.Subtract(callback.CreatedAt).TotalSeconds;
+                        await _voiceCallService.Update(inbound, "endpoint");
+                    }
+                    //Save Callback
+                    var model = new VoiceCallCallbackBO();
+                    model.VoiceId = inbound.Id;
+                    model.CallStatus = payload.CallStatus;
+                    model.Payload = payload;
+                    await _voiceCallService.Create(model);
                 }
-                //Update Duration when completed
-                else if (payload.CallStatus == CallStatus.Completed)
-                {
-                    var callback = await _voiceCallService.FindCallback(inbound.Id, CallStatus.InProgress);
-                    inbound.Duration = (int)DateTime.Now.Subtract(callback.CreatedAt).TotalSeconds;
-                    await _voiceCallService.Update(inbound, "endpoint");
-                }
-                //Save Callback
-                var model = new VoiceCallCallbackBO();
-                model.VoiceId = inbound.Id;
-                model.CallStatus = payload.CallStatus;
-                model.Payload = payload;
-                await _voiceCallService.Create(model);
                 return StatusCode(200);
             }
             catch (Exception ex)
@@ -239,28 +242,31 @@ namespace Softphone.Controllers
 
                 Console.WriteLine($"Outbound Status Callback at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
                 Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
-                
+
                 //Database process
-                VoiceCallBO outbound = await _voiceCallService.FindCallbackCallSID(payload.CallSid);
-                if (outbound == null)
+                if (payload.CallStatus != CallStatus.Initiated)
                 {
-                    outbound = await _voiceCallService.FindNewOutbound(payload.From, payload.To);
-                    outbound.CallbackCallSID = payload.CallSid;
-                    await _voiceCallService.Update(outbound, "endpoint");
+                    VoiceCallBO outbound = await _voiceCallService.FindCallbackCallSID(payload.CallSid);
+                    if (outbound == null)
+                    {
+                        outbound = await _voiceCallService.FindNewOutbound(payload.From, payload.To);
+                        outbound.CallbackCallSID = payload.CallSid;
+                        await _voiceCallService.Update(outbound, "endpoint");
+                    }
+                    //Update Duration when completed
+                    else if (payload.CallStatus == CallStatus.Completed)
+                    {
+                        var callback = await _voiceCallService.FindCallback(outbound.Id, CallStatus.InProgress);
+                        outbound.Duration = (int)DateTime.Now.Subtract(callback.CreatedAt).TotalSeconds;
+                        await _voiceCallService.Update(outbound, "endpoint");
+                    }
+                    //Save Callback
+                    var model = new VoiceCallCallbackBO();
+                    model.VoiceId = outbound.Id;
+                    model.CallStatus = payload.CallStatus;
+                    model.Payload = payload;
+                    await _voiceCallService.Create(model);
                 }
-                //Update Duration when completed
-                else if (payload.CallStatus == CallStatus.Completed)
-                {
-                    var callback = await _voiceCallService.FindCallback(outbound.Id, CallStatus.InProgress);
-                    outbound.Duration = (int)DateTime.Now.Subtract(callback.CreatedAt).TotalSeconds;
-                    await _voiceCallService.Update(outbound, "endpoint");
-                }
-                //Save Callback
-                var model = new VoiceCallCallbackBO();
-                model.VoiceId = outbound.Id;
-                model.CallStatus = payload.CallStatus;
-                model.Payload = payload;
-                await _voiceCallService.Create(model);
                 return StatusCode(200);
             }
             catch (Exception ex)
