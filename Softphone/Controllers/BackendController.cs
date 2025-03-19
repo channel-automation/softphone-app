@@ -271,21 +271,25 @@ namespace Softphone.Controllers
                 Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
 
                 //Database process
+                Console.WriteLine("Passed 0");
                 VoiceCallBO outbound = await _voiceCallService.FindByCallbackCallSID(payload.CallSid);
+                Console.WriteLine("Passed 1");
                 if (outbound == null)
                 {
                     outbound = await _voiceCallService.FindNewOutbound(payload.From, payload.To);
+                    Console.WriteLine("Passed 2");
                     outbound.CallbackCallSID = payload.CallSid;
                     await _voiceCallService.Update(outbound, "endpoint");
-                    Console.WriteLine("outbound.CallbackCallSID = " + outbound.CallbackCallSID);
+                    Console.WriteLine("Passed 3");
                 }
                 //Save Callback
                 var model = new VoiceCallCallbackBO();
                 model.VoiceId = outbound.Id;
+                Console.WriteLine("Passed 4");
                 model.CallStatus = payload.CallStatus;
                 model.Payload = payload;
                 await _voiceCallService.Create(model);
-                Console.WriteLine("model.CallStatus = " + model.CallStatus);
+                Console.WriteLine("Passed 5");
                 return StatusCode(200);
             }
             catch (Exception ex)
