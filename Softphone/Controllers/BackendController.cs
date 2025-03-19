@@ -277,6 +277,7 @@ namespace Softphone.Controllers
                     outbound = await _voiceCallService.FindNewOutbound(payload.From, payload.To);
                     outbound.CallbackCallSID = payload.CallSid;
                     await _voiceCallService.Update(outbound, "endpoint");
+                    Console.WriteLine("outbound.CallbackCallSID = " + outbound.CallbackCallSID);
                 }
                 //Save Callback
                 var model = new VoiceCallCallbackBO();
@@ -284,6 +285,7 @@ namespace Softphone.Controllers
                 model.CallStatus = payload.CallStatus;
                 model.Payload = payload;
                 await _voiceCallService.Create(model);
+                Console.WriteLine("model.CallStatus = " + model.CallStatus);
                 return StatusCode(200);
             }
             catch (Exception ex)
