@@ -72,6 +72,7 @@ namespace Softphone.Controllers
                 model.Type = CallType.Outbound;
                 model.From = from;
                 model.To = to;
+                model.CallbackCallSID = string.Empty;
                 model.RecordingCallSID = string.Empty;
                 await _voiceCallService.Create(model, user.Username);
                 return new JsonResult("");
@@ -270,10 +271,16 @@ namespace Softphone.Controllers
                 Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
 
                 //Database process
-                var outbound = await _voiceCallService.LastestOutbound(payload.From, payload.To);
+                VoiceCallBO outbound = await _voiceCallService.FindByCallbackCallSID(payload.CallSid);
+                if (outbound == null)
+                {
+                    outbound = await _voiceCallService.FindNewOutbound(payload.From, payload.To);
+                    outbound.CallbackCallSID = payload.CallSid;
+                    await _voiceCallService.Update(outbound, "endpoint");
+                }
+                //Save Callback
                 var model = new VoiceCallCallbackBO();
                 model.VoiceId = outbound.Id;
-                model.CallSID = payload.CallSid;
                 model.CallStatus = payload.CallStatus;
                 model.Payload = payload;
                 await _voiceCallService.Create(model);
@@ -310,6 +317,7 @@ namespace Softphone.Controllers
             public string From { get; set; }
             public string To { get; set; }
             public string Direction { get; set; }
+            public int Duration { get; set; }
         }
 
         private string GetBaseUrl()

@@ -129,7 +129,7 @@
         let from = divDialer.find("select").val();
         startAjaxSpinner(divDialer.find("button"));
         $.ajax({
-            url: `${baseUrl}/Backend/PlaceCall?backendKey=${backendKey}&from=${from}&to=${to}`,
+            url: `${baseUrl}/Backend/PlaceCall?backendKey=${backendKey}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
             type: "post", dataType: "json",
             success: async () => {
                 //Start device for outbound call

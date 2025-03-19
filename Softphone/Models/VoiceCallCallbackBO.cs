@@ -16,9 +16,6 @@ namespace Softphone.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 
-        [Column("call_sid")]
-        public string CallSID { get; set; }
-
         [Column("call_status")]
         public string CallStatus { get; set; }
 

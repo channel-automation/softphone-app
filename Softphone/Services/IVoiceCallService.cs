@@ -1,4 +1,5 @@
-﻿using Softphone.Models;
+﻿using System.Threading.Tasks;
+using Softphone.Models;
 
 namespace Softphone.Services
 {
@@ -8,9 +9,7 @@ namespace Softphone.Services
         Task Create(VoiceCallCallbackBO model);
         Task Create(VoiceCallRecordingBO model);
         Task Update(VoiceCallBO model, string username);
-        Task<VoiceCallBO?> LastestOutbound(string from, string to);
-        //Task<IList<StatusCallbackBO>> FindByTypeAndFrom(string type, string from);
-        //Task<StatusCallbackBO?> LatestByTypeAndFrom(string type, string from);
-        //Task<StatusCallbackBO?> LatestByCallSID(string callSID);
+        Task<VoiceCallBO?> FindByCallbackCallSID(string callbackCallSID);
+        Task<VoiceCallBO?> FindNewOutbound(string from, string to);
     }
 }

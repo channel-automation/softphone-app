@@ -36,8 +36,11 @@ namespace Softphone.Models
         [Column("to")]
         public string To { get; set; }
 
-        [Column("duration_seconds")]
-        public decimal DurationSeconds { get; set; }
+        [Column("duration")]
+        public int Duration { get; set; }
+
+        [Column("callback_call_sid")]
+        public string CallbackCallSID { get; set; }
 
         [Column("recording_call_sid")]
         public string RecordingCallSID { get; set; }

@@ -1,4 +1,5 @@
-﻿using Softphone.Models;
+﻿using Microsoft.VisualBasic;
+using Softphone.Models;
 using Supabase;
 using static Supabase.Postgrest.Constants;
 
@@ -50,9 +51,20 @@ namespace Softphone.Services
             await _client.From<VoiceCallBO>().Update(model);
         }
 
-        public async Task<VoiceCallBO?> LastestOutbound(string from, string to)
+        public async Task<VoiceCallBO?> FindByCallbackCallSID(string callbackCallSID)
         {
             var response = await _client.From<VoiceCallBO>()
+                .Where(w => w.CallbackCallSID == callbackCallSID)
+                .Get();
+
+            return response.Models.SingleOrDefault();
+        }
+
+        public async Task<VoiceCallBO?> FindNewOutbound(string from, string to)
+        {
+            var response = await _client.From<VoiceCallBO>()
+                .Where(w => w.Type == Helpers.CallType.Outbound)
+                .Where(w => w.CallbackCallSID == string.Empty)
                 .Where(w => w.From == from)
                 .Where(w => w.To == to)
                 .Order(w => w.CreatedAt, Ordering.Descending)
@@ -60,6 +72,8 @@ namespace Softphone.Services
 
             return response.Models.FirstOrDefault();
         }
+
+        
 
         //public async Task<StatusCallbackBO?> LatestByTypeAndFrom(string type, string from)
         //{
