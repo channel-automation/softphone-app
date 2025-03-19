@@ -64,7 +64,7 @@ namespace Softphone.Services
         {
             var response = await _client.From<VoiceCallBO>()
                 .Where(w => w.Type == Helpers.CallType.Outbound)
-                .Where(w => w.CallbackCallSID == string.Empty)
+                .Where(w => w.CallbackCallSID == "")
                 .Where(w => w.From == from)
                 .Where(w => w.To == to)
                 .Order(w => w.CreatedAt, Ordering.Descending)

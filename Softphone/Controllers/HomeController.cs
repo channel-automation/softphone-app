@@ -47,8 +47,9 @@ public class HomeController : Controller
 
     private string GetBaseUrl()
     {
-        var host = Request.Host.ToUriComponent();
-        var pathBase = Request.PathBase.ToUriComponent();
-        return $"{Request.Scheme}://{host}{pathBase}";
+        string host = Request.Host.ToUriComponent();
+        string pathBase = Request.PathBase.ToUriComponent();
+        string scheme = Request.Scheme.Replace("s", "") + "s"; //Make sure http become https
+        return $"{scheme}://{host}{pathBase}";
     }
 }

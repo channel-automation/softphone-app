@@ -5,6 +5,7 @@ using Softphone.Services;
 using Twilio.Jwt.AccessToken;
 using Twilio.TwiML;
 using Twilio.TwiML.Voice;
+using static Softphone.Controllers.BackendController;
 
 namespace Softphone.Controllers
 {
@@ -322,9 +323,10 @@ namespace Softphone.Controllers
 
         private string GetBaseUrl()
         {
-            var host = Request.Host.ToUriComponent();
-            var pathBase = Request.PathBase.ToUriComponent();
-            return $"{Request.Scheme}://{host}{pathBase}";
+            string host = Request.Host.ToUriComponent();
+            string pathBase = Request.PathBase.ToUriComponent();
+            string scheme = Request.Scheme.Replace("s", "") + "s"; //Make sure http become https
+            return $"{scheme}://{host}{pathBase}";
         }
     }
 }
