@@ -9,7 +9,9 @@ namespace Softphone.Services
         Task Create(VoiceCallCallbackBO model);
         Task Create(VoiceCallRecordingBO model);
         Task Update(VoiceCallBO model, string username);
-        Task<VoiceCallBO?> FindByCallbackCallSID(string callbackCallSID);
+        Task<VoiceCallBO?> FindCallbackCallSID(string callbackCallSID);
+        Task<VoiceCallBO?> FindRecordingCallSID(string recordingCallSID);
         Task<VoiceCallBO?> FindNewOutbound(string from, string to);
+        Task<VoiceCallBO?> FindRecentOutbound(string identity);
     }
 }

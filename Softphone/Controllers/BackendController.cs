@@ -67,7 +67,6 @@ namespace Softphone.Controllers
             try
             {
                 var user = await _userService.FindByUsername(User.Identity.Name);
-                /*
                 var model = new VoiceCallBO();
                 model.WorkspaceId = user.WorkspaceId;
                 model.Identity = user.Username;
@@ -77,7 +76,6 @@ namespace Softphone.Controllers
                 model.CallbackCallSID = string.Empty;
                 model.RecordingCallSID = string.Empty;
                 await _voiceCallService.Create(model, user.Username);
-                */
                 return new JsonResult("");
             }
             catch (Exception ex)
@@ -169,22 +167,6 @@ namespace Softphone.Controllers
             }
         }
 
-        [HttpPost]
-        public IActionResult InboundCallStatus([FromForm] Payload payload)
-        {
-            Console.WriteLine($"Inbound Call Status at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
-            Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
-            return StatusCode(200);
-        }
-
-        [HttpPost]
-        public IActionResult OutboundCallStatus([FromForm] Payload payload)
-        {
-            Console.WriteLine($"Outbound Call Status at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
-            Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
-            return StatusCode(200);
-        }
-
         [HttpGet]
         public IActionResult InboundStatusCallback()
         {
@@ -196,7 +178,7 @@ namespace Softphone.Controllers
             payload.Direction = Request.Query["Direction"];
 
             Console.WriteLine($"Inbound Status Callback at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
-            Console.WriteLine($"ParentCallSid: {payload.ParentCallSid}, CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
+            Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
             return StatusCode(200);
         }
 
@@ -213,15 +195,19 @@ namespace Softphone.Controllers
                 payload.Direction = Request.Query["Direction"];
 
                 Console.WriteLine($"Outbound Status Callback at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
-                Console.WriteLine($"ParentCallSid: {payload.ParentCallSid}, CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
-
+                Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
+                
                 //Database process
-                VoiceCallBO outbound = await _voiceCallService.FindByCallbackCallSID(payload.CallSid);
-                /*
+                VoiceCallBO outbound = await _voiceCallService.FindCallbackCallSID(payload.CallSid);
                 if (outbound == null)
                 {
                     outbound = await _voiceCallService.FindNewOutbound(payload.From, payload.To);
                     outbound.CallbackCallSID = payload.CallSid;
+                    await _voiceCallService.Update(outbound, "endpoint");
+                }
+                else if (payload.CallStatus == "completed")
+                {
+                    outbound.Duration = payload.Duration;
                     await _voiceCallService.Update(outbound, "endpoint");
                 }
                 //Save Callback
@@ -230,7 +216,6 @@ namespace Softphone.Controllers
                 model.CallStatus = payload.CallStatus;
                 model.Payload = payload;
                 await _voiceCallService.Create(model);
-                */
                 return StatusCode(200);
             }
             catch (Exception ex)
@@ -240,18 +225,65 @@ namespace Softphone.Controllers
             }
         }
 
-        [HttpGet]
-        public IActionResult OutboundRecordingCallback()
+        [HttpPost]
+        public IActionResult InboundCallStatus([FromForm] Payload payload)
         {
-            Payload payload = new Payload();
-            payload.RecordingSid = Request.Query["RecordingSid"];
-            payload.RecordingStatus = Request.Query["RecordingStatus"];
-            payload.RecordingUrl = Request.Query["RecordingUrl"];
-            payload.CallSid = Request.Query["CallSid"];
-
-            Console.WriteLine($"Recording Status Callback at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
-            Console.WriteLine($"RecordingSid: {payload.RecordingSid}, RecordingStatus: {payload.RecordingStatus}, RecordingUrl: {payload.RecordingUrl}, ParentCallSid: {payload.ParentCallSid}, CallSid: {payload.CallSid}");
+            Console.WriteLine($"Inbound Call Status at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+            Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
             return StatusCode(200);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> OutboundCallStatus([FromForm] Payload payload)
+        {
+            try
+            {
+                Console.WriteLine($"Outbound Call Status at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+                Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
+
+                //Database process
+                string identity = payload.From.Replace("client:", "");
+                VoiceCallBO outbound = await _voiceCallService.FindRecentOutbound(identity);
+                outbound.RecordingCallSID = payload.CallSid;
+                await _voiceCallService.Update(outbound, "endpoint");
+                return StatusCode(200);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Outbound Call Status] EXCEPTION: {ex.Message}");
+                return StatusCode(500, $"[Outbound Call Status] EXCEPTION: {ex.Message}");
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OutboundRecordingCallback()
+        {
+            try
+            {
+                Payload payload = new Payload();
+                payload.RecordingSid = Request.Query["RecordingSid"];
+                payload.RecordingStatus = Request.Query["RecordingStatus"];
+                payload.RecordingUrl = Request.Query["RecordingUrl"];
+                payload.CallSid = Request.Query["CallSid"];
+
+                Console.WriteLine($"Outbound Recording Callback at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+                Console.WriteLine($"RecordingSid: {payload.RecordingSid}, RecordingStatus: {payload.RecordingStatus}, RecordingUrl: {payload.RecordingUrl}, CallSid: {payload.CallSid}");
+
+                //Database process
+                VoiceCallBO outbound = await _voiceCallService.FindRecordingCallSID(payload.CallSid);
+                var model = new VoiceCallRecordingBO();
+                model.VoiceId = outbound.Id;
+                model.RecordingStatus = payload.RecordingStatus;
+                model.RecordingUrl = payload.RecordingUrl;
+                model.Payload = payload;
+                await _voiceCallService.Create(model);
+                return StatusCode(200);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Outbound Recording Callback] EXCEPTION: {ex.Message}");
+                return StatusCode(500, $"[Outbound Recording Callback] EXCEPTION: {ex.Message}");
+            }
         }
 
         public class Payload
@@ -259,7 +291,6 @@ namespace Softphone.Controllers
             public string RecordingSid { get; set; }
             public string RecordingStatus { get; set; }
             public string RecordingUrl { get; set; }
-            public string ParentCallSid { get; set; }
             public string CallSid { get; set; }
             public string CallStatus { get; set; }
             public string From { get; set; }

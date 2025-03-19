@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using Softphone.Models;
+﻿using Softphone.Models;
 using Supabase;
 using static Supabase.Postgrest.Constants;
 
@@ -51,10 +50,19 @@ namespace Softphone.Services
             await _client.From<VoiceCallBO>().Update(model);
         }
 
-        public async Task<VoiceCallBO?> FindByCallbackCallSID(string callbackCallSID)
+        public async Task<VoiceCallBO?> FindCallbackCallSID(string callbackCallSID)
         {
             var response = await _client.From<VoiceCallBO>()
                 .Where(w => w.CallbackCallSID == callbackCallSID)
+                .Get();
+
+            return response.Models.SingleOrDefault();
+        }
+
+        public async Task<VoiceCallBO?> FindRecordingCallSID(string recordingCallSID)
+        {
+            var response = await _client.From<VoiceCallBO>()
+                .Where(w => w.RecordingCallSID == recordingCallSID)
                 .Get();
 
             return response.Models.SingleOrDefault();
@@ -73,27 +81,16 @@ namespace Softphone.Services
             return response.Models.FirstOrDefault();
         }
 
-        
+        public async Task<VoiceCallBO?> FindRecentOutbound(string identity)
+        {
+            var response = await _client.From<VoiceCallBO>()
+                .Where(w => w.Type == Helpers.CallType.Outbound)
+                .Where(w => w.RecordingCallSID == "")
+                .Where(w => w.Identity == identity)
+                .Order(w => w.CreatedAt, Ordering.Descending)
+                .Get();
 
-        //public async Task<StatusCallbackBO?> LatestByTypeAndFrom(string type, string from)
-        //{
-        //    var response = await _client.From<StatusCallbackBO>()
-        //        .Where(w => w.Type == type)
-        //        .Where(w => w.FromNumber == from)
-        //        .Order(w => w.CreatedAt, Ordering.Descending)
-        //        .Get();
-
-        //    return response.Models.FirstOrDefault();
-        //}
-
-        //public async Task<StatusCallbackBO?> LatestByCallSID(string callSID)
-        //{
-        //    var response = await _client.From<StatusCallbackBO>()
-        //        .Where(w => w.CallSID == callSID)
-        //        .Order(w => w.CreatedAt, Ordering.Descending)
-        //        .Get();
-
-        //    return response.Models.FirstOrDefault();
-        //}
+            return response.Models.FirstOrDefault();
+        }
     }
 }

@@ -16,6 +16,9 @@ namespace Softphone.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 
+        [Column("recording_status")]
+        public string RecordingStatus { get; set; }
+
         [Column("recording_url")]
         public string RecordingUrl { get; set; }
 
