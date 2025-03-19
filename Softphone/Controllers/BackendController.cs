@@ -255,7 +255,7 @@ namespace Softphone.Controllers
         }
 
         [HttpGet]
-        public IActionResult OutboundStatusCallback()
+        public async Task<IActionResult> OutboundStatusCallback()
         {
             try
             {
@@ -270,13 +270,13 @@ namespace Softphone.Controllers
                 Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
 
                 //Database process
-                var outbound = _voiceCallService.LastestOutbound(payload.From, payload.To);
+                var outbound = await _voiceCallService.LastestOutbound(payload.From, payload.To);
                 var model = new VoiceCallCallbackBO();
                 model.VoiceId = outbound.Id;
                 model.CallSID = payload.CallSid;
                 model.CallStatus = payload.CallStatus;
                 model.Payload = payload;
-                _voiceCallService.Create(model);
+                await _voiceCallService.Create(model);
                 return StatusCode(200);
             }
             catch (Exception ex)
