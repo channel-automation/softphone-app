@@ -325,8 +325,7 @@ namespace Softphone.Controllers
         {
             string host = Request.Host.ToUriComponent();
             string pathBase = Request.PathBase.ToUriComponent();
-            string scheme = Request.Scheme.Replace("s", "") + "s"; //Make sure http become https
-            return $"{scheme}://{host}{pathBase}";
+            return $"{Request.Scheme}://{host}{pathBase}";
         }
     }
 }
