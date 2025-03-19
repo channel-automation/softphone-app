@@ -101,6 +101,11 @@
                 $("#lblInboundCount").text(numeral(response.inboundCountNow).format("0,0"));
                 $("#lblOutboundCount").text(numeral(response.outboundCountNow).format("0,0"));
                 $("#lblAverageDuration").text(numeral(response.averageDurationNow).format("0,0.0"));
+                $("#divTotalCountChanges").html(`${numeral(response.totalCountChanges).format("0,0")}% increased <i class="fas fa-arrow-up-wide-short"></i>`);
+                $("#divInboundCountChanges").html(`${numeral(response.inboundCountChanges).format("0,0")}% increased <i class="fas fa-arrow-up-wide-short"></i>`);
+                $("#divOutboundCountChanges").html(`${numeral(response.outboundCountChanges).format("0,0")}% increased <i class="fas fa-arrow-up-wide-short"></i>`);
+                let isNeg = response.averageDurationChanges < 0;
+                $("#divAverageDurationChanges").html(`${numeral(response.averageDurationChanges).format("0,0")}% ${isNeg ? "decreased" : "increased"} <i class="fas fa-arrow-${isNeg ? "down" : "up"}-wide-short"></i>`);
                 //Set update timer for every 10 seconds
                 setTimeout(updateDashboard, 10000);
             });

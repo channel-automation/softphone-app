@@ -37,29 +37,29 @@ public class HomeController : Controller
         int inboundCountNow = await _voiceCallService.Count(DateTime.UtcNow, CallType.Inbound, user.WorkspaceId, identity);
         int outboundCountNow = await _voiceCallService.Count(DateTime.UtcNow, CallType.Outbound, user.WorkspaceId, identity);
         int inboundCountLast24H = await _voiceCallService.Count(DateTime.UtcNow.AddHours(-24), CallType.Inbound, user.WorkspaceId, identity);
-        int outboundCountLast24H = await _voiceCallService.Count(DateTime.UtcNow.AddHours(-24), CallType.Inbound, user.WorkspaceId, identity);
+        int outboundCountLast24H = await _voiceCallService.Count(DateTime.UtcNow.AddHours(-24), CallType.Outbound, user.WorkspaceId, identity);
         IList<int> durationsNow = await _voiceCallService.Durations(DateTime.UtcNow, user.WorkspaceId, identity);
         IList<int> durationsLast24H = await _voiceCallService.Durations(DateTime.UtcNow.AddHours(-24), user.WorkspaceId, identity);
         int totalCountNow = inboundCountNow + outboundCountNow;
         int totalCountLast24H = inboundCountLast24H + outboundCountLast24H;
 
-        int inboundCountChanges = 0;
-        try { inboundCountChanges = Convert.ToInt32(Convert.ToDecimal((inboundCountNow - inboundCountLast24H) / inboundCountLast24H) * 100); }
+        decimal inboundCountChanges = 0;
+        try { inboundCountChanges = (Convert.ToDecimal(inboundCountNow - inboundCountLast24H) / inboundCountLast24H) * 100; }
         catch { };
-        int outboundCountChanges = 0;
-        try { outboundCountChanges = Convert.ToInt32(Convert.ToDecimal((outboundCountNow - outboundCountLast24H) / outboundCountLast24H) * 100); }
+        decimal outboundCountChanges = 0;
+        try { outboundCountChanges = (Convert.ToDecimal(outboundCountNow - outboundCountLast24H) / outboundCountLast24H) * 100; }
         catch { }
-        int totalCountChanges = 0;
-        try { totalCountChanges = Convert.ToInt32(Convert.ToDecimal((totalCountNow - totalCountLast24H) / totalCountLast24H) * 100); }
+        decimal totalCountChanges = 0;
+        try { totalCountChanges = (Convert.ToDecimal(totalCountNow - totalCountLast24H) / totalCountLast24H) * 100; }
         catch { }
         decimal averageDurationNow = 0;
-        try { averageDurationNow = Convert.ToDecimal(durationsNow.Sum() / durationsNow.Count); }
+        try { averageDurationNow = Convert.ToDecimal(durationsNow.Sum()) / durationsNow.Count; }
         catch { }
         decimal averageDurationLast24H = 0;
-        try { averageDurationLast24H = Convert.ToDecimal(durationsLast24H.Sum() / durationsLast24H.Count); }
+        try { averageDurationLast24H = Convert.ToDecimal(durationsLast24H.Sum()) / durationsLast24H.Count; }
         catch { }
-        int averageDurationChanges = 0;
-        try { averageDurationChanges = Convert.ToInt32(Convert.ToDecimal((averageDurationNow - averageDurationLast24H) / averageDurationLast24H) * 100); }
+        decimal averageDurationChanges = 0;
+        try { averageDurationChanges = (Convert.ToDecimal(averageDurationNow - averageDurationLast24H) / averageDurationLast24H) * 100; }
         catch { }
 
         return new JsonResult(new 

@@ -132,6 +132,7 @@ namespace Softphone.Services
             var filters = new List<IPostgrestQueryFilter> { new Supabase.Postgrest.QueryFilter("identity", Operator.ILike, $"%{identity}%") };
             var response = await _client.From<VoiceCallBO>()
                 .Or(filters)
+                .Where(w => w.Duration > 0)
                 .Where(w => w.CreatedAt <= dateAsOf)
                 .Where(w => w.WorkspaceId == workspaceId)
                 .Select("duration")
