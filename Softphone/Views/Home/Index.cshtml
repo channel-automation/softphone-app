@@ -6,48 +6,56 @@
         <div class="small-box bg-gradient-info">
             <div class="inner">
                 <p>Total Calls</p>
-                <h2>785</h2>
+                <h2 id="lblTotalCount">0</h2>
             </div>
             <div class="icon">
                 <i class="fas fa-phone"></i>
             </div>
-            <span class="small-box-footer text-sm">+48% increased <i class="fas fa-arrow-up-wide-short"></i></span>
+            <div class="small-box-footer text-sm" id="divTotalCountChanges">
+                0% increased <i class="fas fa-arrow-up-wide-short"></i>
+            </div>
         </div>
     </div>
     <div class="col-lg-3 col-6">
         <div class="small-box bg-gradient-purple">
             <div class="inner">
                 <p>Inbound Calls</p>
-                <h2>395</h2>
+                <h2 id ="lblInboundCount">0</h2>
             </div>
             <div class="icon">
                 <i class="fas fa-headphones"></i>
             </div>
-            <span class="small-box-footer text-sm">-18% decreased <i class="fas fa-arrow-down-wide-short"></i></span>
+            <div class="small-box-footer text-sm" id="divInboundCountChanges">
+                0% increased <i class="fas fa-arrow-up-wide-short"></i>
+            </div>
         </div>
     </div>
     <div class="col-lg-3 col-6">
         <div class="small-box bg-gradient-success">
             <div class="inner">
                 <p>Outbound Calls</p>
-                <h2>78</h2>
+                <h2 id="lblOutboundCount">0</h2>
             </div>
             <div class="icon">
                 <i class="fas fa-square-phone"></i>
             </div>
-            <span class="small-box-footer text-sm">+58% increased <i class="fas fa-arrow-up-wide-short"></i></span>
+            <div class="small-box-footer text-sm" id="divOutboundCountChanges">
+                0% increased <i class="fas fa-arrow-up-wide-short"></i>
+            </div>
         </div>
     </div>
     <div class="col-lg-3 col-6">
         <div class="small-box bg-gradient-warning">
             <div class="inner">
                 <p>Average Duration</p>
-                <h2>6.5</h2>
+                <h2 id="lblAverageDuration">0.0</h2>
             </div>
             <div class="icon">
                 <i class="fas fa-clock"></i>
             </div>
-            <span class="small-box-footer text-sm">+18% increased <i class="fas fa-arrow-up-wide-short"></i></span>
+            <div class="small-box-footer text-sm" id="divAverageDurationChanges">
+                0% increased <i class="fas fa-arrow-up-wide-short"></i>
+            </div>
         </div>
     </div>
 </div>
@@ -80,5 +88,24 @@
     </div>
 </div>
 
+@section Scripts
+{
+    <script>
+        $(function () {
+            updateDashboard();
+        });
+
+        function updateDashboard() {
+            $.get("@Url.Action("DashboardData")", function (response) {
+                $("#lblTotalCount").text(numeral(response.totalCountNow).format("0,0"));
+                $("#lblInboundCount").text(numeral(response.inboundCountNow).format("0,0"));
+                $("#lblOutboundCount").text(numeral(response.outboundCountNow).format("0,0"));
+                $("#lblAverageDuration").text(numeral(response.averageDurationNow).format("0,0.0"));
+                //Set update timer for every 10 seconds
+                setTimeout(updateDashboard, 10000);
+            });
+        }
+    </script>
+}
 
 

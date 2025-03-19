@@ -40,7 +40,7 @@ namespace Softphone.Controllers
                     IncomingAllow = true
                 };
                 // Create an access token
-                DateTime expiration = DateTime.Now.AddHours(1);
+                DateTime expiration = DateTime.UtcNow.AddHours(1);
                 var token = new Token(
                     workspace.TwilioAccountSID,
                     workspace.TwilioAPIKey,
@@ -89,7 +89,7 @@ namespace Softphone.Controllers
         {
             try
             {
-                Console.WriteLine($"Inbound Voice request at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+                Console.WriteLine($"Inbound Voice request at {DateTime.UtcNow.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
                 Console.WriteLine($"From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
 
                 //Get user based on "To" number
@@ -147,7 +147,7 @@ namespace Softphone.Controllers
         {
             try
             {
-                Console.WriteLine($"Outbound Voice request at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+                Console.WriteLine($"Outbound Voice request at {DateTime.UtcNow.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
                 Console.WriteLine($"From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
 
                 VoiceResponse voiceResponse = new VoiceResponse();
@@ -191,7 +191,7 @@ namespace Softphone.Controllers
                 payload.To = Request.Query["To"];
                 payload.Direction = Request.Query["Direction"];
 
-                Console.WriteLine($"Inbound Status Callback at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+                Console.WriteLine($"Inbound Status Callback at {DateTime.UtcNow.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
                 Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
 
                 //Database process
@@ -209,7 +209,7 @@ namespace Softphone.Controllers
                     else if (payload.CallStatus == CallStatus.Completed)
                     {
                         var callback = await _voiceCallService.FindCallback(inbound.Id, CallStatus.InProgress);
-                        inbound.Duration = (int)DateTime.Now.Subtract(callback.CreatedAt).TotalSeconds;
+                        inbound.Duration = (int)DateTime.UtcNow.Subtract(callback.CreatedAt).TotalSeconds;
                         await _voiceCallService.Update(inbound, "endpoint");
                     }
                     //Save Callback
@@ -240,7 +240,7 @@ namespace Softphone.Controllers
                 payload.To = Request.Query["To"];
                 payload.Direction = Request.Query["Direction"];
 
-                Console.WriteLine($"Outbound Status Callback at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+                Console.WriteLine($"Outbound Status Callback at {DateTime.UtcNow.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
                 Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
 
                 //Database process
@@ -257,7 +257,7 @@ namespace Softphone.Controllers
                     else if (payload.CallStatus == CallStatus.Completed)
                     {
                         var callback = await _voiceCallService.FindCallback(outbound.Id, CallStatus.InProgress);
-                        outbound.Duration = (int)DateTime.Now.Subtract(callback.CreatedAt).TotalSeconds;
+                        outbound.Duration = (int)DateTime.UtcNow.Subtract(callback.CreatedAt).TotalSeconds;
                         await _voiceCallService.Update(outbound, "endpoint");
                     }
                     //Save Callback
@@ -279,7 +279,7 @@ namespace Softphone.Controllers
         [HttpPost]
         public IActionResult InboundCallStatus([FromForm] Payload payload)
         {
-            Console.WriteLine($"Inbound Call Status at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+            Console.WriteLine($"Inbound Call Status at {DateTime.UtcNow.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
             Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
             return StatusCode(200);
         }
@@ -289,7 +289,7 @@ namespace Softphone.Controllers
         {
             try
             {
-                Console.WriteLine($"Outbound Call Status at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+                Console.WriteLine($"Outbound Call Status at {DateTime.UtcNow.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
                 Console.WriteLine($"CallSid: {payload.CallSid}, CallStatus: {payload.CallStatus}, From: {payload.From}, To: {payload.To}, Direction: {payload.Direction}");
 
                 //Database process
@@ -317,7 +317,7 @@ namespace Softphone.Controllers
                 payload.RecordingUrl = Request.Query["RecordingUrl"];
                 payload.CallSid = Request.Query["CallSid"];
 
-                Console.WriteLine($"Outbound Recording Callback at {DateTime.Now.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
+                Console.WriteLine($"Outbound Recording Callback at {DateTime.UtcNow.ToString("MMM d, yyyy h:mm:ss tt zzz")}.");
                 Console.WriteLine($"RecordingSid: {payload.RecordingSid}, RecordingStatus: {payload.RecordingStatus}, RecordingUrl: {payload.RecordingUrl}, CallSid: {payload.CallSid}");
 
                 //Database process

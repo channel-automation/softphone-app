@@ -1,5 +1,6 @@
 ﻿using Softphone.Models;
 using Supabase;
+using Supabase.Postgrest.Interfaces;
 using static Supabase.Postgrest.Constants;
 
 namespace Softphone.Services
@@ -15,11 +16,10 @@ namespace Softphone.Services
 
         public async Task Create(VoiceCallBO model, string username)
         {
-            model.CreatedAt = DateTime.Now;
+            model.CreatedAt = DateTime.UtcNow;
             model.CreatedBy = username;
-            model.ModifiedAt = DateTime.Now;
+            model.ModifiedAt = DateTime.UtcNow;
             model.ModifiedBy = username;
-
             var response = await _client.From<VoiceCallBO>().Insert(model);
             var newModel = response.Models.FirstOrDefault();
             model.Id = (newModel == null ? 0 : newModel.Id);
@@ -27,8 +27,7 @@ namespace Softphone.Services
 
         public async Task Create(VoiceCallCallbackBO model)
         {
-            model.CreatedAt = DateTime.Now;
-
+            model.CreatedAt = DateTime.UtcNow;
             var response = await _client.From<VoiceCallCallbackBO>().Insert(model);
             var newModel = response.Models.FirstOrDefault();
             model.Id = (newModel == null ? 0 : newModel.Id);
@@ -36,8 +35,7 @@ namespace Softphone.Services
 
         public async Task Create(VoiceCallRecordingBO model)
         {
-            model.CreatedAt = DateTime.Now;
-
+            model.CreatedAt = DateTime.UtcNow;
             var response = await _client.From<VoiceCallRecordingBO>().Insert(model);
             var newModel = response.Models.FirstOrDefault();
             model.Id = (newModel == null ? 0 : newModel.Id);
@@ -45,7 +43,7 @@ namespace Softphone.Services
 
         public async Task Update(VoiceCallBO model, string username)
         {
-            model.ModifiedAt = DateTime.Now;
+            model.ModifiedAt = DateTime.UtcNow;
             model.ModifiedBy = username;
             await _client.From<VoiceCallBO>().Update(model);
         }
@@ -114,6 +112,32 @@ namespace Softphone.Services
                 .Get();
 
             return response.Models.SingleOrDefault();
+        }
+
+        public async Task<int> Count(DateTime dateAsOf, string type, long workspaceId, string identity)
+        {
+            var filters = new List<IPostgrestQueryFilter> { new Supabase.Postgrest.QueryFilter("identity", Operator.ILike, $"%{identity}%") };
+            int response = await _client.From<VoiceCallBO>()
+                .Or(filters)
+                .Where(w => w.CreatedAt <= dateAsOf)
+                .Where(w => w.Type == type)
+                .Where(w => w.WorkspaceId == workspaceId)
+                .Count(CountType.Exact);
+
+            return response;
+        }
+
+        public async Task<IList<int>> Durations(DateTime dateAsOf, long workspaceId, string identity)
+        {
+            var filters = new List<IPostgrestQueryFilter> { new Supabase.Postgrest.QueryFilter("identity", Operator.ILike, $"%{identity}%") };
+            var response = await _client.From<VoiceCallBO>()
+                .Or(filters)
+                .Where(w => w.CreatedAt <= dateAsOf)
+                .Where(w => w.WorkspaceId == workspaceId)
+                .Select("duration")
+                .Get();
+
+            return response.Models.Select(w => w.Duration).ToList();
         }
     }
 }

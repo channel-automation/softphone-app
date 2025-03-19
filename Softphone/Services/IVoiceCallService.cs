@@ -14,5 +14,7 @@ namespace Softphone.Services
         Task<VoiceCallBO?> FindNewOutbound(string from, string to);
         Task<VoiceCallBO?> FindRecentOutbound(string identity);
         Task<VoiceCallCallbackBO?> FindCallback(long voiceId, string callStatus);
+        Task<int> Count(DateTime dateAsOf, string type, long workspaceId, string identity);
+        Task<IList<int>> Durations(DateTime dateAsOf, long workspaceId, string identity);
     }
 }

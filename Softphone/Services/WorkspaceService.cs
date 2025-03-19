@@ -19,9 +19,9 @@ namespace Softphone.Services
         public async Task Create(WorkspaceBO model, string username)
         {
             model.CreatedBy = username;
-            model.CreatedAt = DateTime.Now;
+            model.CreatedAt = DateTime.UtcNow;
             model.ModifiedBy = username;
-            model.ModifiedAt = DateTime.Now;
+            model.ModifiedAt = DateTime.UtcNow;
             var response = await _client.From<WorkspaceBO>().Insert(model);
             var _new = response.Models.FirstOrDefault();
             model.Id = (_new == null ? 0 : _new.Id);
@@ -30,7 +30,7 @@ namespace Softphone.Services
         public async Task Update(WorkspaceBO model, string username)
         {
             model.ModifiedBy = username;
-            model.ModifiedAt = DateTime.Now;
+            model.ModifiedAt = DateTime.UtcNow;
             await _client.From<WorkspaceBO>().Update(model);
         }
 
