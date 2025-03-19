@@ -68,6 +68,19 @@ namespace Softphone.Services
             return response.Models.SingleOrDefault();
         }
 
+        public async Task<VoiceCallBO?> FindNewInbound(string identity, string to)
+        {
+            var response = await _client.From<VoiceCallBO>()
+                .Where(w => w.Type == Helpers.CallType.Inbound)
+                .Where(w => w.CallbackCallSID == "")
+                .Where(w => w.Identity == identity)
+                .Where(w => w.To == to)
+                .Order(w => w.CreatedAt, Ordering.Descending)
+                .Get();
+
+            return response.Models.FirstOrDefault();
+        }
+
         public async Task<VoiceCallBO?> FindNewOutbound(string from, string to)
         {
             var response = await _client.From<VoiceCallBO>()
