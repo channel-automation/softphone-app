@@ -247,6 +247,8 @@ namespace Softphone.Controllers
                 string identity = payload.From.Replace("client:", "");
                 VoiceCallBO outbound = await _voiceCallService.FindRecentOutbound(identity);
                 outbound.RecordingCallSID = payload.CallSid;
+                
+                Console.WriteLine($"outbound.RecordingCallSID: {outbound.RecordingCallSID}");
                 await _voiceCallService.Update(outbound, "endpoint");
                 return StatusCode(200);
             }
