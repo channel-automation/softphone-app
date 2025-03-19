@@ -13,5 +13,6 @@ namespace Softphone.Services
         Task<VoiceCallBO?> FindRecordingCallSID(string recordingCallSID);
         Task<VoiceCallBO?> FindNewOutbound(string from, string to);
         Task<VoiceCallBO?> FindRecentOutbound(string identity);
+        Task<VoiceCallCallbackBO?> FindCallback(long voiceId, string callStatus);
     }
 }

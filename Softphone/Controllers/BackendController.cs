@@ -205,9 +205,11 @@ namespace Softphone.Controllers
                     outbound.CallbackCallSID = payload.CallSid;
                     await _voiceCallService.Update(outbound, "endpoint");
                 }
-                else if (payload.CallStatus == "completed")
+                //Update Duration when completed
+                else if (payload.CallStatus == CallStatus.Completed)
                 {
-                    outbound.Duration = payload.Duration;
+                    var callback = await _voiceCallService.FindCallback(outbound.Id, CallStatus.InProgress);
+                    outbound.Duration = (int)DateTime.Now.Subtract(callback.CreatedAt).TotalSeconds;
                     await _voiceCallService.Update(outbound, "endpoint");
                 }
                 //Save Callback
@@ -296,7 +298,6 @@ namespace Softphone.Controllers
             public string From { get; set; }
             public string To { get; set; }
             public string Direction { get; set; }
-            public int Duration { get; set; }
         }
 
         private string GetBaseUrl()

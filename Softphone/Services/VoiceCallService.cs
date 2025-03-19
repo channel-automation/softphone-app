@@ -92,5 +92,15 @@ namespace Softphone.Services
 
             return response.Models.FirstOrDefault();
         }
+
+        public async Task<VoiceCallCallbackBO?> FindCallback(long voiceId, string callStatus)
+        {
+            var response = await _client.From<VoiceCallCallbackBO>()
+                .Where(w => w.VoiceId == voiceId)
+                .Where(w => w.CallStatus == callStatus)
+                .Get();
+
+            return response.Models.SingleOrDefault();
+        }
     }
 }
