@@ -78,7 +78,7 @@
             <div class="card-header">
                 <div class="card-title">
                     <b>Weekly Call Metrics</b>
-                    <br /><small>(+43%) than last week</small>
+                    <br /><small>(<span id="lblWeekChanges">0</span>%) than last week</small>
                 </div>
             </div>
             <div class="card-body">
@@ -158,6 +158,7 @@
         var weeklyChart;
         function setWeklyChart() {
             $.get("@Url.Action("WeeklyChartData")", function (response) {
+                $("#lblWeekChanges").text(numeral(response.weekChanges).format("+0,0"));
                 if (weeklyChart) {
                     weeklyChart.data.labels = response.labels;
                     weeklyChart.data.datasets[0].data = response.inboundValues;

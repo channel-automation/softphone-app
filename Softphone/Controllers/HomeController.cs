@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using Softphone.Helpers;
 using Softphone.Services;
 
@@ -149,7 +148,7 @@ public class HomeController : Controller
 
         var weekData = await _voiceCallService.GetByDate(user.WorkspaceId, identity, weekFrom, weekTo);
         var lastWeekData = await _voiceCallService.GetByDate(user.WorkspaceId, identity, lastWeekFrom, lastWeekTo);
-        decimal lastWeekChanges = (lastWeekData.Count != 0 ? Convert.ToDecimal(weekData.Count - lastWeekData.Count) / lastWeekData.Count : weekData.Count) * 100;
+        decimal weekChanges = (lastWeekData.Count != 0 ? Convert.ToDecimal(weekData.Count - lastWeekData.Count) / lastWeekData.Count : weekData.Count) * 100;
 
         var labels = new List<string>();
         var inboundValues = new List<int>();
@@ -161,7 +160,7 @@ public class HomeController : Controller
             outboundValues.Add(weekData.Count(w => w.CreatedAt.DayOfWeek == weekFrom.DayOfWeek && w.Type == CallType.Outbound));
         }
 
-        return new JsonResult(new { labels, inboundValues, outboundValues });
+        return new JsonResult(new { labels, inboundValues, outboundValues, weekChanges });
     }
 
     public async Task<IActionResult> RemotePhoneNo(int? page, string term)
