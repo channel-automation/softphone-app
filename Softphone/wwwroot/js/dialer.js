@@ -90,10 +90,12 @@
         });
 
         // Listen for incoming calls
-        device.on("incoming", (call) => {
-            console.log(`Incoming call received from ${call.parameters.From}.`);
-            incomingPopup(call); // Handle incoming call (e.g., answer or reject)
+         device.on("incoming", (call) => {
+             console.log(`Incoming call received from ${call.parameters.From}.`);
+             try { updateDashboard(); } catch (x) { }
 
+             incomingPopup(call); // Handle incoming call (e.g., answer or reject)
+            
             // Set up event listeners for the connection
             call.on("disconnect", () => {
                 console.log("Inbound call disconnected.");
@@ -111,6 +113,7 @@
                 divDialer.hide();
                 divCalling.show();
                 setCallingInfo(call.parameters.From, true);
+                try { updateDashboard(); } catch (x) { }
             });
             call.on("reject", () => {
                 console.log("Inbound call rejected.");
@@ -148,6 +151,7 @@
                     divDialer.hide();
                     divCalling.show();
                     setCallingInfo(to, false);
+                    try { updateDashboard(); } catch (x) { }
                 });
                 call.on("connect", () => {
                     console.log("Outbound call connected.");
@@ -157,6 +161,7 @@
                     divDialer.hide();
                     divCalling.show();
                     setCallingInfo(to, true);
+                    try { updateDashboard(); } catch (x) { }
                 });
                 call.on("reject", () => {
                     console.log("Outbound call rejected.");
