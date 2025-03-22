@@ -69,19 +69,23 @@ public class HomeController : Controller
         var user = await _userService.FindByUsername(User.Identity.Name);
         string identity = user.Role == UserRole.Agent ? user.Username : string.Empty;
         var statuses = await _voiceCallService.Statuses(user.WorkspaceId, identity);
-        
-        int count = statuses.Where(w => w == CallStatus.Ringing).Count();
-        int ringingRate = (int)((Convert.ToDecimal(count) / Convert.ToDecimal(statuses.Count)) * 100);
-        count = statuses.Where(w => w == CallStatus.InProgress).Count();
-        int inProgressRate = (int)((Convert.ToDecimal(count) / Convert.ToDecimal(statuses.Count)) * 100);
-        count = statuses.Where(w => w == CallStatus.Completed).Count();
-        int completedRate = (int)((Convert.ToDecimal(count) / Convert.ToDecimal(statuses.Count)) * 100);
-        count = statuses.Where(w => w == CallStatus.Busy).Count();
-        int busyRate = (int)((Convert.ToDecimal(count) / Convert.ToDecimal(statuses.Count)) * 100);
-        count = statuses.Where(w => w == CallStatus.NoAnswer).Count();
-        int noAnswerRate = (int)((Convert.ToDecimal(count) / Convert.ToDecimal(statuses.Count)) * 100);
-        count = statuses.Where(w => w == CallStatus.Failed).Count();
-        int failedRate = (int)((Convert.ToDecimal(count) / Convert.ToDecimal(statuses.Count)) * 100);
+
+        int count = 0, ringingRate = 0, inProgressRate = 0, completedRate = 0, busyRate = 0, noAnswerRate = 0, failedRate = 0;
+        if (statuses.Any())
+        {
+            count = statuses.Where(w => w == CallStatus.Ringing).Count();
+            ringingRate = (int)((Convert.ToDecimal(count) / Convert.ToDecimal(statuses.Count)) * 100);
+            count = statuses.Where(w => w == CallStatus.InProgress).Count();
+            inProgressRate = (int)((Convert.ToDecimal(count) / Convert.ToDecimal(statuses.Count)) * 100);
+            count = statuses.Where(w => w == CallStatus.Completed).Count();
+            completedRate = (int)((Convert.ToDecimal(count) / Convert.ToDecimal(statuses.Count)) * 100);
+            count = statuses.Where(w => w == CallStatus.Busy).Count();
+            busyRate = (int)((Convert.ToDecimal(count) / Convert.ToDecimal(statuses.Count)) * 100);
+            count = statuses.Where(w => w == CallStatus.NoAnswer).Count();
+            noAnswerRate = (int)((Convert.ToDecimal(count) / Convert.ToDecimal(statuses.Count)) * 100);
+            count = statuses.Where(w => w == CallStatus.Failed).Count();
+            failedRate = (int)((Convert.ToDecimal(count) / Convert.ToDecimal(statuses.Count)) * 100);
+        }
 
         var labels = new List<string>();
         var values = new List<int>();
