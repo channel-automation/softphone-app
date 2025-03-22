@@ -117,7 +117,7 @@ namespace Softphone.Services
         public async Task<int> Count(DateTime dateAsOf, string type, long workspaceId, string identity)
         {
             var filters = new List<IPostgrestQueryFilter> { new Supabase.Postgrest.QueryFilter("identity", Operator.ILike, $"%{identity}%") };
-            int response = await _client.From<VoiceCallBO>()
+            int response = await _client.From<VoiceSearchBO>()
                 .Or(filters)
                 .Where(w => w.CreatedAt <= dateAsOf)
                 .Where(w => w.Type == type)
@@ -130,7 +130,7 @@ namespace Softphone.Services
         public async Task<IList<int>> Durations(DateTime dateAsOf, long workspaceId, string identity)
         {
             var filters = new List<IPostgrestQueryFilter> { new Supabase.Postgrest.QueryFilter("identity", Operator.ILike, $"%{identity}%") };
-            var response = await _client.From<VoiceCallBO>()
+            var response = await _client.From<VoiceSearchBO>()
                 .Or(filters)
                 .Where(w => w.Duration > 0)
                 .Where(w => w.CreatedAt <= dateAsOf)
@@ -139,6 +139,31 @@ namespace Softphone.Services
                 .Get();
 
             return response.Models.Select(w => w.Duration).ToList();
+        }
+
+        public async Task<IList<string>> Statuses(long workspaceId, string identity)
+        {
+            var filters = new List<IPostgrestQueryFilter> { new Supabase.Postgrest.QueryFilter("identity", Operator.ILike, $"%{identity}%") };
+            var response = await _client.From<VoiceSearchBO>()
+                .Or(filters)
+                .Where(w => w.WorkspaceId == workspaceId)
+                .Select("call_status")
+                .Get();
+
+            return response.Models.Select(w => w.CallStatus).ToList();
+        }
+
+        public async Task<IList<VoiceSearchBO>> GetByDate(long workspaceId, string identity, DateTime dateFrom, DateTime dateTo)
+        {
+            var filters = new List<IPostgrestQueryFilter> { new Supabase.Postgrest.QueryFilter("identity", Operator.ILike, $"%{identity}%") };
+            var response = await _client.From<VoiceSearchBO>()
+                .Or(filters)
+                .Where(w => w.WorkspaceId == workspaceId)
+                .Where(w => w.CreatedAt >= dateFrom && w.CreatedAt <= dateTo)
+                .Order(w => w.CreatedAt, Ordering.Ascending)
+                .Get();
+
+            return response.Models.ToList();
         }
     }
 }

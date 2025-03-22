@@ -69,7 +69,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <canvas id="call-status-distribution" height="350"></canvas>
+                <canvas id="cnvDistribution" height="350"></canvas>
             </div>
         </div>
     </div>
@@ -82,7 +82,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <canvas id="weekly-call-metrics" height="160"></canvas>
+                <canvas id="cnvWeekly" height="160"></canvas>
             </div>
         </div>
     </div>
@@ -92,11 +92,19 @@
 {
     <script>
         $(function () {
-            updateDashboard();
+             updateDashboard();
         });
 
         function updateDashboard() {
-            $.get("@Url.Action("DashboardData")", function (response) {
+            seCountingCards();
+            setDistributionChart();
+            setWeklyChart();
+            //Set auto-update timer for every 5 minutes
+            setTimeout(updateDashboard, (1000 * 60 * 5));
+        }
+
+        function seCountingCards() {
+            $.get("@Url.Action("CountingCardsData")", function (response) {
                 $("#lblTotalCount").text(numeral(response.totalCountNow).format("0,0"));
                 $("#lblInboundCount").text(numeral(response.inboundCountNow).format("0,0"));
                 $("#lblOutboundCount").text(numeral(response.outboundCountNow).format("0,0"));
@@ -106,8 +114,108 @@
                 $("#divOutboundCountChanges").html(`${numeral(response.outboundCountChanges).format("0,0")}% increased <i class="fas fa-arrow-up-wide-short"></i>`);
                 let isNeg = response.averageDurationChanges < 0;
                 $("#divAverageDurationChanges").html(`${numeral(response.averageDurationChanges).format("0,0")}% ${isNeg ? "decreased" : "increased"} <i class="fas fa-arrow-${isNeg ? "down" : "up"}-wide-short"></i>`);
-                //Set auto-update timer for every 15 minutes
-                setTimeout(updateDashboard, (1000 * 60 * 15));
+            });
+        }
+
+        var distributionChart;
+        function setDistributionChart() {
+             $.get("@Url.Action("DistributionChartData")", function (response) {
+                 if (distributionChart) {
+                    distributionChart.data.labels = response.labels;
+                    distributionChart.data.datasets[0].data = response.values;
+                    distributionChart.data.datasets[0].backgroundColor = response.backgrounds;
+                    distributionChart.data.datasets[0].borderColor = response.borders;
+                    distributionChart.update();
+                    return false;
+                 }
+                var ctx = document.getElementById("cnvDistribution").getContext("2d");
+                distributionChart = new Chart(ctx, {
+                    type: "pie",
+                    data: {
+                        labels: response.labels,
+                        datasets: [{
+                            data: response.values,
+                            backgroundColor: response.backgrounds,
+                            borderColor: response.borders,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            datalabels: {
+                                color: "white",
+                                font: { weight: "bold" },
+                                formatter: (val) => `${val}%`
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+             });
+        }
+
+        var weeklyChart;
+        function setWeklyChart() {
+            $.get("@Url.Action("WeeklyChartData")", function (response) {
+                if (weeklyChart) {
+                    weeklyChart.data.labels = response.labels;
+                    weeklyChart.data.datasets[0].data = response.inboundValues;
+                    weeklyChart.data.datasets[1].data = response.outboundValues;
+                    weeklyChart.update();
+                    return false;
+                 }
+                var ctx = document.getElementById("cnvWeekly").getContext("2d");
+                weeklyChart = new Chart(ctx, {
+                    type: "bar",
+                    data: {
+                        labels: response.labels,
+                        datasets: [
+                            {
+                                label: "Inbound",
+                                data: response.inboundValues,
+                                backgroundColor: "rgba(13, 71, 161, 0.8)",
+                                borderColor: "rgba(13, 71, 161, 1)",
+                                borderWidth: 1
+                            },
+                            {
+                                label: "Outbound",
+                                data: response.outboundValues,
+                                backgroundColor: "rgba(33, 150, 243, 0.8)",
+                                borderColor: "rgba(33, 150, 243, 1)",
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                gridLines: {
+                                    display: false,
+                                    drawBorder: false
+                                }
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    stepSize: 10,
+                                    min: 0,
+                                    max: 50
+                                },
+                                gridLines: {
+                                    drawBorder: false,
+                                }
+                            }]
+                        },
+                        plugins: {
+                            datalabels: {
+                                color: "white",
+                                font: { weight: "bold" },
+                                formatter: (val) => val
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
             });
         }
     </script>

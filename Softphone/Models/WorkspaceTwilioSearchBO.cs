@@ -3,8 +3,8 @@ using Supabase.Postgrest.Models;
 
 namespace Softphone.Models
 {
-    [Table("workspace_twilio_number_search")]
-    public class WorkspaceTwilioNumberSearchBO : BaseModel
+    [Table("workspace_twilio_search")]
+    public class WorkspaceTwilioSearchBO : BaseModel
     {
         [PrimaryKey("id")]
         public long Id { get; set; }

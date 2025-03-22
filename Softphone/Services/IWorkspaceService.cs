@@ -10,7 +10,7 @@ namespace Softphone.Services
         Task<WorkspaceBO?> FindById(long id);
         Task<WorkspaceBO?> FindByName(string name);
         Task<WorkspaceTwilioNumberBO?> FindByTwilioNumber(string twilioNumber);
-        Task<Paged<WorkspaceTwilioNumberSearchBO>> PagingTwilioNumbers(int skip, int take, long workspaceId);
+        Task<Paged<WorkspaceTwilioSearchBO>> PagingTwilioNumbers(int skip, int take, long workspaceId);
         Task<WorkspaceTwilioNumberBO?> GetTwilioNumber(long twilioNumberId);
         Task<IList<WorkspaceTwilioNumberUserBO>> GetTwilioNumberUsers(long twilioNumberId);
         Task CreateTwilioNumber(WorkspaceTwilioNumberBO model, IList<WorkspaceTwilioNumberUserBO> wtnUsers);

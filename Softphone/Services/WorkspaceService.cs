@@ -69,17 +69,17 @@ namespace Softphone.Services
             return response.Models.SingleOrDefault();
         }
 
-        public async Task<Paged<WorkspaceTwilioNumberSearchBO>> PagingTwilioNumbers(int skip, int take, long workspaceId)
+        public async Task<Paged<WorkspaceTwilioSearchBO>> PagingTwilioNumbers(int skip, int take, long workspaceId)
         {
-            var paged = new Paged<WorkspaceTwilioNumberSearchBO>();
+            var paged = new Paged<WorkspaceTwilioSearchBO>();
 
-            var response = await _client.From<WorkspaceTwilioNumberSearchBO>()
+            var response = await _client.From<WorkspaceTwilioSearchBO>()
                 .Where(x => x.WorkspaceId == workspaceId)
                 .Get();
 
             paged.RecordsTotal = response.Models.Count;
 
-            var response2 = await _client.From<WorkspaceTwilioNumberSearchBO>()
+            var response2 = await _client.From<WorkspaceTwilioSearchBO>()
                 .Where(w => w.WorkspaceId == workspaceId)
                 .Order(w => w.TwilioNumber, Ordering.Ascending)
                 .Range(skip, take)
