@@ -35,12 +35,12 @@ public class HomeController : Controller
         var user = await _userService.FindByUsername(User.Identity.Name);
         string identity = user.Role == UserRole.Agent ? user.Username : string.Empty;
 
-        int inboundCountNow = await _voiceCallService.Count(DateTime.UtcNow, CallType.Inbound, user.WorkspaceId, identity);
-        int outboundCountNow = await _voiceCallService.Count(DateTime.UtcNow, CallType.Outbound, user.WorkspaceId, identity);
-        int inboundCountLast24H = await _voiceCallService.Count(DateTime.UtcNow.AddHours(-24), CallType.Inbound, user.WorkspaceId, identity);
-        int outboundCountLast24H = await _voiceCallService.Count(DateTime.UtcNow.AddHours(-24), CallType.Outbound, user.WorkspaceId, identity);
-        IList<int> durationsNow = await _voiceCallService.Durations(DateTime.UtcNow, user.WorkspaceId, identity);
-        IList<int> durationsLast24H = await _voiceCallService.Durations(DateTime.UtcNow.AddHours(-24), user.WorkspaceId, identity);
+        int inboundCountNow = await _voiceCallService.Count(DateTime.Now, CallType.Inbound, user.WorkspaceId, identity);
+        int outboundCountNow = await _voiceCallService.Count(DateTime.Now, CallType.Outbound, user.WorkspaceId, identity);
+        int inboundCountLast24H = await _voiceCallService.Count(DateTime.Now.AddHours(-24), CallType.Inbound, user.WorkspaceId, identity);
+        int outboundCountLast24H = await _voiceCallService.Count(DateTime.Now.AddHours(-24), CallType.Outbound, user.WorkspaceId, identity);
+        IList<int> durationsNow = await _voiceCallService.Durations(DateTime.Now, user.WorkspaceId, identity);
+        IList<int> durationsLast24H = await _voiceCallService.Durations(DateTime.Now.AddHours(-24), user.WorkspaceId, identity);
         int totalCountNow = inboundCountNow + outboundCountNow;
         int totalCountLast24H = inboundCountLast24H + outboundCountLast24H;
 
@@ -141,7 +141,7 @@ public class HomeController : Controller
         var user = await _userService.FindByUsername(User.Identity.Name);
         string identity = user.Role == UserRole.Agent ? user.Username : string.Empty;
 
-        DateTime weekTo = DateTime.UtcNow;
+        DateTime weekTo = DateTime.Now;
         DateTime weekFrom = weekTo.AddDays(-6).Date;
         DateTime lastWeekTo = weekFrom.AddDays(-1);
         lastWeekTo = new DateTime(lastWeekTo.Year, lastWeekTo.Month, lastWeekTo.Day, 23, 59, 59);

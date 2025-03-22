@@ -14,9 +14,9 @@ namespace Softphone.Services
 
         public async Task Create(SettingsBO model, string username)
         {
-            model.CreatedAt = DateTime.UtcNow;
+            model.CreatedAt = DateTime.Now;
             model.CreatedBy = username;
-            model.ModifiedAt = DateTime.UtcNow;
+            model.ModifiedAt = DateTime.Now;
             model.ModifiedBy = username;
             var response = await _client.From<SettingsBO>().Insert(model);
             var newModel = response.Models.FirstOrDefault();
@@ -25,7 +25,7 @@ namespace Softphone.Services
 
         public async Task Update(SettingsBO model, string username)
         {
-            model.ModifiedAt = DateTime.UtcNow;
+            model.ModifiedAt = DateTime.Now;
             model.ModifiedBy = username;
             await _client.From<SettingsBO>().Update(model);
         }
