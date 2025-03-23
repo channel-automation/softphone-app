@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using Softphone.Helpers;
 using Softphone.Services;
+using Twilio.TwiML.Voice;
 
 namespace Softphone.Controllers;
 
@@ -165,6 +167,17 @@ public class HomeController : Controller
         }
 
         return new JsonResult(new { labels, inboundValues, outboundValues, weekChanges });
+    }
+
+    [IgnoreAntiforgeryToken]
+    [HttpPost]
+    public async Task<IActionResult> CallLogSearch(int draw, int start, int length)
+    {
+        var user = await _userService.FindByUsername(User.Identity.Name);
+        string identity = user.Role == UserRole.Agent ? user.Username : string.Empty;
+
+        var result = await _voiceCallService.Paging(start, length, user.WorkspaceId, identity);
+        return Json(new { draw, recordsFiltered = result.RecordsTotal, result.RecordsTotal, result.Data });
     }
 
     public async Task<IActionResult> RemotePhoneNo(int? page, string term)

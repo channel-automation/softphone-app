@@ -18,5 +18,6 @@ namespace Softphone.Services
         Task<IList<int>> Durations(DateTime dateAsOf, long workspaceId, string identity);
         Task<IList<string>> Statuses(long workspaceId, string identity);
         Task<IList<VoiceSearchBO>> GetByDate(long workspaceId, string identity, DateTime dateFrom, DateTime dateTo);
+        Task<Paged<VoiceSearchBO>> Paging(int skip, int take, long workspaceId, string identity);
     }
 }

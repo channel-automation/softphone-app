@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Softphone.Helpers;
 using Softphone.Models;
 using Softphone.Services;
@@ -25,10 +26,10 @@ namespace Softphone.Controllers
             _userService = userService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> AccessToken(string backendKey)
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> AccessToken()
         {
-            if (backendKey != BackendKey.Value) return StatusCode(401, "Unathorized Access!");
             try
             {
                 var user = await _userService.FindByUsername(User.Identity.Name);
@@ -59,10 +60,10 @@ namespace Softphone.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> PlaceCall(string backendKey, string from, string to)
+        public async Task<IActionResult> PlaceCall(string from, string to)
         {
-            if (backendKey != BackendKey.Value) return StatusCode(401, "Unathorized Access!");
             try
             {
                 var user = await _userService.FindByUsername(User.Identity.Name);

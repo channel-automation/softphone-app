@@ -32,5 +32,8 @@ namespace Softphone.Models
 
         [Column("call_status")]
         public string CallStatus { get; set; }
+
+        [Column("identity_name")]
+        public string IdentityName { get; set; }
     }
 }

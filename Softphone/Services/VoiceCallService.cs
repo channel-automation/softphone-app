@@ -165,5 +165,28 @@ namespace Softphone.Services
 
             return response.Models.ToList();
         }
+
+        public async Task<Paged<VoiceSearchBO>> Paging(int skip, int take, long workspaceId, string identity)
+        {
+            var filters = new List<IPostgrestQueryFilter> { new Supabase.Postgrest.QueryFilter("identity", Operator.ILike, $"%{identity}%") };
+            var response = await _client.From<VoiceSearchBO>()
+                .Or(filters)
+                .Where(w => w.WorkspaceId == workspaceId)
+                .Order(w => w.CreatedAt, Ordering.Descending)
+                .Get();
+
+            var paged = new Paged<VoiceSearchBO>();
+            paged.RecordsTotal = response.Models.Count();
+
+            var response2 = await _client.From<VoiceSearchBO>()
+                .Or(filters)
+                .Where(w => w.WorkspaceId == workspaceId)
+                .Order(w => w.CreatedAt, Ordering.Descending)
+                .Range(skip, take)
+                .Get();
+
+            paged.Data = response2.Models.ToList();
+            return paged;
+        }
     }
 }

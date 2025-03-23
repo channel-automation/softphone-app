@@ -87,6 +87,20 @@
         </div>
     </div>
 </div>
+<div class="row">
+    <div class="col-12">
+        <div class="card card-purple card-outline">
+            <div class="card-header">
+                <div class="card-title"><b>Call Logs</b></div>
+            </div>
+            <div class="card-body table-responsive">
+                <table id="tblCallLogs" class="table table-bordered table-hover table-sm mb-2" style="width:100%">
+                    <thead class="thead-light"></thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts
 {
@@ -99,6 +113,7 @@
             seCountingCards();
             setDistributionChart();
             setWeklyChart();
+            setCallLogs();
             //Set auto-update timer for every 5 minutes
             setTimeout(updateDashboard, (1000 * 60 * 5));
         }
@@ -219,6 +234,62 @@
                 });
             });
         }
+
+        function setCallLogs() {
+            var table = $("#tblCallLogs");
+            if (!$.fn.dataTable.isDataTable(table)) {
+                table.DataTable({
+                    processing: true,
+                    serverSide: true,
+                    searching: false,
+                    lengthChange: false,
+                    sorting: false,
+                    ajax: {
+                        url: "@Url.Action("CallLogSearch")", type: "post", datatype: "json"
+                    },
+                    columnDefs: [{ targets: "_all", className: "dt-center" }],
+                    columns: [
+                            { data: "createdAt", title: "Other Party", orderable: false, render: logRenderOtherParty },
+                            { data: "duration", title: "Duration", orderable: false, render: logRenderDuration },
+                            { data: "type", title: "Direction", orderable: false },
+                            { data: "callStatus", title: "Status", orderable: false },
+                            { data: "identityName", title: "Identity", orderable: false },
+                            { data: "id", orderable: false, render: logRenderAction }
+                    ],
+                    pageLength: 10,
+                    language: { emptyTable: "No data found." },
+                });
+            }
+            else table.DataTable().draw();
+        }
+
+        function logRenderOtherParty(d, i, row) {
+            let number = (row.type == "@CallType.Inbound" ? row.from : row.to);
+            let htm = new Inputmask("(999) 999-9999").format(number.replaceAll("+1", ""))  + "<br />";
+            htm += "<small>" + moment(d).format("MMM DD, YYYY h:mm:ss A") + "</small>";
+            return htm;
+        }
+
+        function logRenderDuration(d) {
+            return numeral(d).format("0,0") + " seconds";
+        }
+
+        function logRenderAction(d, i, row) {
+            let number = (row.type == "@CallType.Inbound" ? row.from : row.to).replaceAll("+1", "");
+            return `<button class='btn bg-gradient-purple mr-1 mb-1' onclick='_call(\"${number}\")' title='Place a call'><i class='fas fa-phone'></i></button>`;
+        }
+
+        function _call(to) {
+            let f = new Inputmask("(999) 999-9999").format(to);
+            swalConfirm("", `Place a call for ${f}?`, function () {
+                $("#divDialer").find("input").val(to);
+                $("#divDialer").find("button").click();
+                setTimeout(function () {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                }, 500);
+            });
+        }
+
     </script>
 }
 

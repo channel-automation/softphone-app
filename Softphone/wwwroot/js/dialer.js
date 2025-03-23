@@ -49,8 +49,8 @@
 
     function getAccessToken() {
         $.ajax({
-            url: `${baseUrl}/Backend/AccessToken?backendKey=${backendKey}`,
-            type: "get", dataType: "json",
+            url: `${baseUrl}/Backend/AccessToken`,
+            type: "post", dataType: "json",
             success: (response) => {
                 if (!device) setupDevice(response.token);
                 else device.updateToken(response.token);
@@ -135,7 +135,7 @@
         let from = divDialer.find("select").val();
         startAjaxSpinner(divDialer.find("button"));
         $.ajax({
-            url: `${baseUrl}/Backend/PlaceCall?backendKey=${backendKey}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+            url: `${baseUrl}/Backend/PlaceCall?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
             type: "post", dataType: "json",
             success: async () => {
                 //Start device for outbound call

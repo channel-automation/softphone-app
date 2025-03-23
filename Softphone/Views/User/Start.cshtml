@@ -17,7 +17,7 @@
     </form>
 </div>
 <div class="table-responsive mt-2">
-    <table class="table table-bordered table-hover table-sm text-center mb-2" style="width:100%">
+    <table class="table table-bordered table-hover table-sm mb-2" style="width:100%">
         <thead class="thead-light"></thead>
     </table>
 </div>
@@ -40,6 +40,7 @@
                     e.__RequestVerificationToken = form.find("[name=__RequestVerificationToken]").val();
                 }
             },
+            columnDefs: [{ targets: "_all", className: "dt-center" }],
             columns: [
                     { data: "workspace_name", title: "Workspace" },
                     { data: "first_name", title: "First Name" },
