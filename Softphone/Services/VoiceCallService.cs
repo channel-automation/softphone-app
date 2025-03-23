@@ -182,7 +182,7 @@ namespace Softphone.Services
                 .Or(filters)
                 .Where(w => w.WorkspaceId == workspaceId)
                 .Order(w => w.CreatedAt, Ordering.Descending)
-                .Range(skip, take)
+                .Offset(skip).Limit(take)
                 .Get();
 
             paged.Data = response2.Models.ToList();

@@ -77,7 +77,7 @@ namespace Softphone.Services
                 .Or(filters)
                 .Where(w => w.role == role)
                 .Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
-                .Range(skip, take)
+                .Offset(skip).Limit(take)
                 .Get();
 
             paged.Data = response2.Models.ToList();
@@ -107,7 +107,7 @@ namespace Softphone.Services
                 .Where(w => w.role == role)
                 .Where(w => w.workspace_id == workspaceId)
                 .Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
-                .Range(skip, take)
+                .Offset(skip).Limit(take)
                 .Get();
 
             paged.Data = response2.Models.ToList();
@@ -136,7 +136,7 @@ namespace Softphone.Services
                 .Filter("username", Operator.ILike, $"%{username}%")
                 .Where(w => w.workspace_id == workspaceId)
                 .Order("full_name", Ordering.Ascending)
-                .Range(skip, take)
+                .Offset(skip).Limit(take)
                 .Get();
 
             paged.Data = response2.Models.ToList();

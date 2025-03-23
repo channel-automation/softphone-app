@@ -82,7 +82,7 @@ namespace Softphone.Services
             var response2 = await _client.From<WorkspaceTwilioSearchBO>()
                 .Where(w => w.WorkspaceId == workspaceId)
                 .Order(w => w.TwilioNumber, Ordering.Ascending)
-                .Range(skip, take)
+                .Offset(skip).Limit(take)
                 .Get();
 
             paged.Data = response2.Models.ToList();
@@ -165,7 +165,7 @@ namespace Softphone.Services
             var response2 = await _client.From<WorkspaceSearchBO>()
                 .Or(filters)
                 .Order(sort, (sortdir == "asc" ? Ordering.Ascending : Ordering.Descending))
-                .Range(skip, take)
+                .Offset(skip).Limit(take)
                 .Get();
 
             paged.Data = response2.Models.ToList();
@@ -185,7 +185,7 @@ namespace Softphone.Services
             var response2 = await _client.From<WorkspaceBO>()
                 .Filter(w => w.Name, Operator.ILike, $"%{search}%")
                 .Order(w => w.Name, Ordering.Ascending)
-                .Range(skip, take)
+                .Offset(skip).Limit(take)
                 .Get();
 
             paged.Data = response2.Models.ToList();
