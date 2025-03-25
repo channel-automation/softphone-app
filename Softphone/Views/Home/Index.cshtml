@@ -106,16 +106,18 @@
 {
     <script>
         $(function () {
-             //Set auto-update timer for every 5 minutes
-             updateDashboard((1000 * 60 * 5));
+             updateDashboard(true);
         });
 
-        function updateDashboard(timeout) {
+        function updateDashboard(isAuto) {
             seCountingCards();
             setDistributionChart();
             setWeklyChart();
             setCallLogs();
-            if (timeout) setTimeout(updateDashboard, timeout);
+            if (isAuto) {
+                let timeout = (1000 * 60 * 10);  //Set auto-update timer for every 10 minutes
+                setTimeout(() => { updateDashboard(true); }, timeout);
+            }
             console.log("Dashboard updated.");
         }
 
