@@ -92,7 +92,7 @@
         // Listen for incoming calls
          device.on("incoming", (call) => {
              console.log(`Incoming call received from ${call.parameters.From}.`);
-             try { updateDashboard(); } catch (x) { }
+             refreshDashboard();
 
              incomingPopup(call); // Handle incoming call (e.g., answer or reject)
             
@@ -102,22 +102,23 @@
                 divDialer.show();
                 divCalling.hide();
                 clearInterval(callTimerInterval);
-                try { updateDashboard(); } catch (x) { }
+                refreshDashboard();
             });
             call.on("cancel", () => {
                 console.log("Inbound call cancelled.");
                 Swal.close();
+                refreshDashboard();
             });
             call.on("accept", () => {
                 console.log("Inbound call accepted.");
                 divDialer.hide();
                 divCalling.show();
                 setCallingInfo(call.parameters.From, true);
-                try { updateDashboard(); } catch (x) { }
+                refreshDashboard();
             });
             call.on("reject", () => {
                 console.log("Inbound call rejected.");
-                try { updateDashboard(); } catch (x) { }
+                refreshDashboard();
             });
             call.on("error", (error) => {
                 console.log(`Error during inbound call: ${error}`);
@@ -125,7 +126,7 @@
                 divDialer.show();
                 divCalling.hide();
                 clearInterval(callTimerInterval);
-                try { updateDashboard(); } catch (x) { }
+                refreshDashboard();
             });
         });
     }
@@ -151,7 +152,7 @@
                     divDialer.hide();
                     divCalling.show();
                     setCallingInfo(to, false);
-                    try { updateDashboard(); } catch (x) { }
+                    refreshDashboard();
                 });
                 call.on("connect", () => {
                     console.log("Outbound call connected.");
@@ -161,7 +162,7 @@
                     divDialer.hide();
                     divCalling.show();
                     setCallingInfo(to, true);
-                    try { updateDashboard(); } catch (x) { }
+                    refreshDashboard();
                 });
                 call.on("reject", () => {
                     console.log("Outbound call rejected.");
@@ -174,7 +175,7 @@
                     divDialer.show();
                     divCalling.hide();
                     clearInterval(callTimerInterval);
-                    try { updateDashboard(); } catch (x) { }
+                    refreshDashboard();
                 });
                 call.on("error", (error) => {
                     console.log(`Error during outbound call: ${error}`);
@@ -182,7 +183,7 @@
                     divDialer.show();
                     divCalling.hide();
                     clearInterval(callTimerInterval);
-                    try { updateDashboard(); } catch (x) { }
+                    refreshDashboard();
                 });
             },
             error: () => {
@@ -240,6 +241,13 @@
 
     function pad(number) {
         return number < 10 ? '0' + number : number;
+    }
+
+    function refreshDashboard() {
+        try {
+            setTimeout(updateDashboard, 1500);
+            console.log("Trying to refresh dashboard..");
+        } catch (x) { }
     }
 
 })(jQuery);
