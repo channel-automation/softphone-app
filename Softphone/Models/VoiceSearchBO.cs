@@ -35,5 +35,8 @@ namespace Softphone.Models
 
         [Column("identity_name")]
         public string IdentityName { get; set; }
+
+        [Column("disposition")]
+        public string Disposition { get; set; }
     }
 }

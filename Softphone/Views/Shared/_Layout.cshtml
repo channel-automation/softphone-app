@@ -153,7 +153,7 @@
             }
             // Internal Server Error
             if (xhr.status == 500) {
-                alert("Internal server error!");
+                 alert("Internal server error:\n" + xhr.responseText);
             }
         });
 
@@ -169,6 +169,21 @@
                 location.href = "@Url.Action("Logout", "Security")";
             });
         }
+
+        function dispositionInbound() {
+            _disposition("@CallType.Inbound");
+        }
+
+        function dispositionOutbound() {
+            _disposition("@CallType.Outbound");
+        }
+
+        function _disposition(callType) {
+            $.get("@Url.Action("Disposition", "Home")?callType=" + callType, function (response) {
+                dispositionDialog = bootModal("Call Disposition", response);
+            });
+        }
+
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

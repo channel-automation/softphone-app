@@ -8,6 +8,7 @@ namespace Softphone.Services
         Task Create(VoiceCallCallbackBO model);
         Task Create(VoiceCallRecordingBO model);
         Task Update(VoiceCallBO model, string username);
+        Task<VoiceCallBO?> FindById(long id);
         Task<VoiceCallBO?> FindCallbackCallSID(string callbackCallSID);
         Task<VoiceCallBO?> FindRecordingCallSID(string recordingCallSID);
         Task<VoiceCallBO?> FindNewInbound(string identity, string to);
@@ -19,5 +20,6 @@ namespace Softphone.Services
         Task<IList<string>> Statuses(long workspaceId, string identity);
         Task<IList<VoiceSearchBO>> GetByDate(long workspaceId, string identity, DateTime dateFrom, DateTime dateTo);
         Task<Paged<VoiceSearchBO>> Paging(int skip, int take, long workspaceId, string identity);
+        Task<VoiceSearchBO?> GetLatest(string type, string identity);
     }
 }

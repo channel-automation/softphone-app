@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using Softphone.Helpers;
+using Softphone.Models;
 using Softphone.Services;
-using Twilio.TwiML.Voice;
 
 namespace Softphone.Controllers;
 
@@ -178,6 +177,28 @@ public class HomeController : Controller
 
         var result = await _voiceCallService.Paging(start, length, user.WorkspaceId, identity);
         return Json(new { draw, recordsFiltered = result.RecordsTotal, result.RecordsTotal, result.Data });
+    }
+
+    public IActionResult Disposition(string callType)
+    {
+        ViewBag.Defaults = CommonHelper.ConstantList(typeof(DefaultDisposition), true);
+        ViewBag.CallType = callType;
+        return PartialView();
+    }
+
+    public async Task<IActionResult> GetCallInfo(string callType) 
+    {
+        var info = await _voiceCallService.GetLatest(callType, User.Identity.Name);
+        string otherParty = callType == CallType.Inbound ? info.From : info.To;
+        return Json(new { otherParty, info.CreatedAt, info.Duration, info.CallStatus, info.Id });
+    }
+
+    [HttpPost]
+    public async Task SaveDisposition(VoiceCallBO model, string othersSpecify)
+    {
+        var voiceCall = await _voiceCallService.FindById(model.Id);
+        voiceCall.Disposition = !string.IsNullOrEmpty(othersSpecify) ? othersSpecify : model.Disposition;
+        await _voiceCallService.Update(voiceCall, User.Identity.Name);
     }
 
     public async Task<IActionResult> RemotePhoneNo(int? page, string term)

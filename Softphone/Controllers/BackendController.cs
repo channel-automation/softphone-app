@@ -75,6 +75,7 @@ namespace Softphone.Controllers
                 model.To = to;
                 model.CallbackCallSID = string.Empty;
                 model.RecordingCallSID = string.Empty;
+                model.Disposition = string.Empty;
                 await _voiceCallService.Create(model, user.Username);
                 return new JsonResult("");
             }
@@ -127,7 +128,8 @@ namespace Softphone.Controllers
                         From = payload.From,
                         To = payload.To,
                         CallbackCallSID = string.Empty,
-                        RecordingCallSID = string.Empty
+                        RecordingCallSID = string.Empty,
+                        Disposition = string.Empty
                     };
                     await _voiceCallService.Create(model, "endpoint");
                 }

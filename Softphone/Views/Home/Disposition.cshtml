@@ -1,0 +1,81 @@
+﻿@model Softphone.Models.VoiceCallBO
+
+<div class="card card-info">
+    <div class="card-header"><b>@ViewBag.CallType</b> (<small id="infoCreatedAt">&nbsp;</small>)</div>
+    <div class="card-body text-sm">
+        <b>Other Party : </b><span id="infoOtherParty"></span><br />
+        <b>Duration : </b><span id="infoDuration"></span><br />
+        <b>Status : </b><span id="infoCallStatus"></span><br />
+    </div>
+</div>
+<form onsubmit="return false;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" value="0" />
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Disposition</label>
+            <select asp-items="new SelectList(ViewBag.Defaults)" asp-for="Disposition" class="form-control select2-common-modal"></select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-12">
+            <label class="text-purple">Others, specify</label>
+            <input type="text" name="OthersSpecify" class="form-control" />
+        </div>
+    </div>
+</form>
+<div class="text-center mt-5 mb-1">
+    <button class="btn bg-gradient-purple mr-2" onclick="_save(this)"><i class="fas fa-save"></i> Save</button>
+    <button class="btn bg-gradient-dark" onclick="_cancel()"><i class="fas fa-times-circle"></i> Cancel</button>
+</div>
+
+<script>
+    $(function () {
+        let form = dispositionDialog.find("form");
+        initializeFormControls(form);
+        form.find("[name=OthersSpecify]").on("keyup", function () {
+            form.find("[name=Disposition]").append(new Option("", "", true, true)).trigger("change");
+        });
+        form.find("[name=Disposition]").on("select2:close", function () {
+            if (form.find("[name=Disposition]").val() != "") 
+                form.find("[name=OthersSpecify]").val("");
+        });
+        //Get Call Info
+        setTimeout(function () {
+            $.get("@Url.Action("GetCallInfo")?callType=@ViewBag.CallType", function (response) {
+                $("#infoCreatedAt").text(moment(response.createdAt).format("MMM DD, YYYY h:mm:ss A"));
+                $("#infoOtherParty").text(response.otherParty);
+                $("#infoDuration").text(numeral(response.duration).format("0,0") + " seconds");
+                $("#infoCallStatus").text(response.callStatus);
+                form.find("[name=Id]").val(response.id);
+            });
+        }, 1000);
+    });
+
+    function _cancel() {
+        dispositionDialog.modal("hide");
+    }
+
+    function _save(btn) {
+        let form = dispositionDialog.find("form");
+        //Client Validation
+        if (form.find("[name=Id]").val() == "0") {
+            toastr.error("Call info is not yet loaded.", "Error..");
+            return false;
+        }
+        if (form.find("[name=Disposition]").val() == "" && 
+            form.find("[name=OthersSpecify]").val().trim() == "") {
+            form.find("[name=Disposition]").focus();
+            toastr.error("Disposition is required.", "Error..");
+            return false;
+        }
+        //Server Processing
+        startAjaxSpinner(btn);
+        $.post("@Url.Action("SaveDisposition")", form.serialize(), function () {
+            dispositionDialog.modal("hide");
+            toastr.success("Data successfully saved.", "Success!");
+            setTimeout(updateDashboard, 1000);
+        });
+        return false;
+    }
+</script>

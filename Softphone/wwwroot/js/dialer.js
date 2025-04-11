@@ -103,6 +103,7 @@
                 divCalling.hide();
                 clearInterval(callTimerInterval);
                 refreshDashboard();
+                dispositionInbound();
             });
             call.on("cancel", () => {
                 console.log("Inbound call cancelled.");
@@ -127,6 +128,7 @@
                 divCalling.hide();
                 clearInterval(callTimerInterval);
                 refreshDashboard();
+                dispositionInbound();
             });
         });
     }
@@ -176,6 +178,7 @@
                     divCalling.hide();
                     clearInterval(callTimerInterval);
                     refreshDashboard();
+                    dispositionOutbound();
                 });
                 call.on("error", (error) => {
                     console.log(`Error during outbound call: ${error}`);
@@ -184,6 +187,7 @@
                     divCalling.hide();
                     clearInterval(callTimerInterval);
                     refreshDashboard();
+                    dispositionOutbound();
                 });
             },
             error: () => {
@@ -245,7 +249,7 @@
 
     function refreshDashboard() {
         try {
-            setTimeout(updateDashboard, 1500);
+            setTimeout(updateDashboard, 1000);
             console.log("Trying to refresh dashboard..");
         } catch (x) { }
     }

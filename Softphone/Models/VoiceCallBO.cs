@@ -44,5 +44,8 @@ namespace Softphone.Models
 
         [Column("recording_call_sid")]
         public string RecordingCallSID { get; set; }
+
+        [Column("disposition")]
+        public string Disposition { get; set; }
     }
 }

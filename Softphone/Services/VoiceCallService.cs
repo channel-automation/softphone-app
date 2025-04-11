@@ -48,6 +48,12 @@ namespace Softphone.Services
             await _client.From<VoiceCallBO>().Update(model);
         }
 
+        public async Task<VoiceCallBO?> FindById(long id)
+        {
+            var response = await _client.From<VoiceCallBO>().Where(w => w.Id == id).Get();
+            return response.Models.SingleOrDefault();
+        }
+
         public async Task<VoiceCallBO?> FindCallbackCallSID(string callbackCallSID)
         {
             var response = await _client.From<VoiceCallBO>()
@@ -187,6 +193,17 @@ namespace Softphone.Services
 
             paged.Data = response2.Models.ToList();
             return paged;
+        }
+
+        public async Task<VoiceSearchBO?> GetLatest(string type, string identity)
+        {
+            var response = await _client.From<VoiceSearchBO>()
+                .Where(w => w.Type == type)
+                .Where(w => w.Identity == identity)
+                .Order(w => w.CreatedAt, Ordering.Descending)
+                .Get();
+
+            return response.Models.FirstOrDefault();
         }
     }
 }
