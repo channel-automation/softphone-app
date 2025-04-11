@@ -16,12 +16,11 @@
         public const string NotInterested = "Not Interested";
         public const string DoNotContact = "Do Not Contact";
 
-        /** This is not suitable for call successful disposition **/
-
-        //public const string NoAnswer = "No Answer";
-        //public const string BusySignal = "Busy Signal";
-        //public const string InvalidNumber  = "Invalid Number ";
-        //public const string AbandonedInQueue = "Abandoned in Queue";
-        //public const string Disconnected = "Disconnected";
+        /** Additional dispostion suitable for outbound **/
+        public const string NoAnswer = "No Answer";
+        public const string BusySignal = "Busy Signal";
+        public const string InvalidNumber = "Invalid Number";
+        public const string AbandonedInQueue = "Abandoned in Queue";
+        public const string Disconnected = "Disconnected";
     }
 }

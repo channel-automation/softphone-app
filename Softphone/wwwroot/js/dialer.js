@@ -168,9 +168,11 @@
                 });
                 call.on("reject", () => {
                     console.log("Outbound call rejected.");
+                    dispositionOutbound();
                 });
                 call.on("cancel", () => {
                     console.log("Outbound call cancelled.");
+                    dispositionOutbound();
                 });
                 call.on("disconnect", () => {
                     console.log("Outbound call disconnected.");
